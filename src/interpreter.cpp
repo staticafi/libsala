@@ -219,7 +219,7 @@ void Interpreter::do_malloc()
         state().heap_segment().insert({ mb.start(), mb });
         operands().front()->as_ref<MemPtr>() = mb.start();
     }
-    catch(const std::exception& e)
+    catch(const std::exception&)
     {
         operands().front()->as_ref<MemPtr>() = nullptr;
     }
@@ -1377,7 +1377,7 @@ void Interpreter::do_va_start()
         MemBlock mb{ array_size };
         array = state().heap_segment().insert({ mb.start(), mb }).first->first;
     }
-    catch(const std::exception& e)
+    catch(const std::exception&)
     {
         state().set_stage(ExecState::Stage::FINISHED);
         state().set_termination(
