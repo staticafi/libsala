@@ -76,6 +76,8 @@ private:
     FlowSetHandle const& read_handle(MemPtr ptr) const;
     void write_handle(MemPtr ptr, FlowSetHandle const& handle);
 
+protected:
+
     void do_load() override;
     void do_store() override;
 
