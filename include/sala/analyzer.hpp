@@ -22,6 +22,7 @@ struct Analyzer : public InstrSwitch
     Program const& program() const { return state().program(); }
     Instruction const& instruction() const override { return state().current_instruction(); }
     std::vector<MemBlock const*> const& operands() const override { return state().current_operands(); }
+    std::vector<MemBlock> const& parameters() { return stack_top().parameters(); }
     StackRecord const& stack_top() const { return state().stack_top(); }
     InstrPointer const& ip() const { return stack_top().ip(); }
 
