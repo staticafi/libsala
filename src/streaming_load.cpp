@@ -53,6 +53,7 @@ static Instruction::Opcode instruction_opcode_from_name(std::string const& opcod
         { "GREATER_EQUAL", Instruction::Opcode::GREATER_EQUAL },
         { "EQUAL", Instruction::Opcode::EQUAL },
         { "UNEQUAL", Instruction::Opcode::UNEQUAL },
+        { "ISNAN", Instruction::Opcode::ISNAN },
         { "JUMP", Instruction::Opcode::JUMP },
         { "BRANCH", Instruction::Opcode::BRANCH },
         { "CALL", Instruction::Opcode::CALL },
@@ -72,6 +73,7 @@ static Instruction::Modifier instruction_modifier_from_name(char const modifier_
         { 's', Instruction::Modifier::SIGNED },
         { 'u', Instruction::Modifier::UNSIGNED },
         { 'f', Instruction::Modifier::FLOATING },
+        { 'w', Instruction::Modifier::FLOATING_UNORDERED },
     };
     return map.at(modifier_name);
 }

@@ -82,9 +82,10 @@ struct Instruction
         //      n - NONE
         //      s - SIGNED
         //      u - UNSIGNED
-        //      f - FLOATING
+        //      f - FLOATING (where no operand can be (quiet) NAN)
+        //      w - FLOATING_UNORDERED (where any operand can be (quiet) NAN)
         //      i - either s or u
-        //      g - either u or f
+        //      g - either u or f or w
         //      x - represents any of above, except n
         // - Instruction operand descriptors:
         //      s - static variable
@@ -489,6 +490,14 @@ struct Instruction
         //              vM.num_bytes() == nH.num_bytes().
         UNEQUAL,
 
+        // ISNAN u vN nM nH
+        // Corresponds to a C expression: vN = isnan(nM) || isnan(nH)
+        // Checks whether any of two floating point numbers stored in nM and nH
+        // is (quiet) NAN. The result (0 or 1) is then stored to vN.
+        // Assumptions: vN.num_bytes() == 1,
+        //              vM.num_bytes() == nH.num_bytes().
+        ISNAN,
+
         // JUMP n
         // The last instruction of a basic block with exactly 1 successor.
         // Transfers the execution to the first instruction of the successor basic block.
@@ -568,6 +577,7 @@ struct Instruction
         SIGNED,
         UNSIGNED,
         FLOATING,
+        FLOATING_UNORDERED,
     };
 
     enum struct Descriptor

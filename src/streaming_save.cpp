@@ -72,6 +72,7 @@ static std::string instruction_opcode_to_string(Instruction::Opcode const opcode
         case Instruction::Opcode::GREATER_EQUAL: return "GREATER_EQUAL"; break;
         case Instruction::Opcode::EQUAL: return "EQUAL"; break;
         case Instruction::Opcode::UNEQUAL: return "UNEQUAL"; break;
+        case Instruction::Opcode::ISNAN: return "ISNAN"; break;
         case Instruction::Opcode::JUMP: return "JUMP"; break;
         case Instruction::Opcode::BRANCH: return "BRANCH"; break;
         case Instruction::Opcode::CALL: return "CALL"; break;
@@ -92,6 +93,7 @@ static std::string instruction_modifier_to_string(Instruction::Modifier const mo
         case Instruction::Modifier::SIGNED: return "s"; break;
         case Instruction::Modifier::UNSIGNED: return "u"; break;
         case Instruction::Modifier::FLOATING: return "f"; break;
+        case Instruction::Modifier::FLOATING_UNORDERED: return "w"; break;
         default: UNREACHABLE(); break;
     }
 }
