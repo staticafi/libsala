@@ -255,6 +255,8 @@ protected:
     void do_less_u64() override;
     void do_less_f32() override;
     void do_less_f64() override;
+    void do_less_w32() override;
+    void do_less_w64() override;
 
     void do_less_equal_s8() override;
     void do_less_equal_s16() override;
@@ -266,6 +268,8 @@ protected:
     void do_less_equal_u64() override;
     void do_less_equal_f32() override;
     void do_less_equal_f64() override;
+    void do_less_equal_w32() override;
+    void do_less_equal_w64() override;
 
     void do_greater_s8() override;
     void do_greater_s16() override;
@@ -277,6 +281,8 @@ protected:
     void do_greater_u64() override;
     void do_greater_f32() override;
     void do_greater_f64() override;
+    void do_greater_w32() override;
+    void do_greater_w64() override;
 
     void do_greater_equal_s8() override;
     void do_greater_equal_s16() override;
@@ -288,6 +294,8 @@ protected:
     void do_greater_equal_u64() override;
     void do_greater_equal_f32() override;
     void do_greater_equal_f64() override;
+    void do_greater_equal_w32() override;
+    void do_greater_equal_w64() override;
 
     void do_equal_u8() override;
     void do_equal_u16() override;
@@ -295,6 +303,8 @@ protected:
     void do_equal_u64() override;
     void do_equal_f32() override;
     void do_equal_f64() override;
+    void do_equal_w32() override;
+    void do_equal_w64() override;
 
     void do_unequal_u8() override;
     void do_unequal_u16() override;
@@ -302,6 +312,11 @@ protected:
     void do_unequal_u64() override;
     void do_unequal_f32() override;
     void do_unequal_f64() override;
+    void do_unequal_w32() override;
+    void do_unequal_w64() override;
+
+    void do_isnan_w32() override;
+    void do_isnan_w64() override;
 
     void do_va_start() override;
     void do_va_end() override;

@@ -490,7 +490,7 @@ struct Instruction
         //              vM.num_bytes() == nH.num_bytes().
         UNEQUAL,
 
-        // ISNAN u vN nM nH
+        // ISNAN w vN nM nH
         // Corresponds to a C expression: vN = isnan(nM) || isnan(nH)
         // Checks whether any of two floating point numbers stored in nM and nH
         // is (quiet) NAN. The result (0 or 1) is then stored to vN.

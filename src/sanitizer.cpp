@@ -275,20 +275,6 @@ void Sanitizer::do_div_u64()
 }
 
 
-void Sanitizer::do_div_f32()
-{
-    if (operands().at(2)->as<float>() == 0.0f)
-        crash_interpretation_due_to_zero_division();
-}
-
-
-void Sanitizer::do_div_f64()
-{
-    if (operands().at(2)->as<double>() == 0.0)
-        crash_interpretation_due_to_zero_division();
-}
-
-
 void Sanitizer::do_rem_s8()
 {
     if (operands().at(2)->as<std::int8_t>() == 0)

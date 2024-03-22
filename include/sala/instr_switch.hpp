@@ -206,6 +206,8 @@ struct InstrSwitch
     virtual void do_less_u64() {}
     virtual void do_less_f32() {}
     virtual void do_less_f64() {}
+    virtual void do_less_w32() {}
+    virtual void do_less_w64() {}
 
     virtual void do_less_equal_s8() {}
     virtual void do_less_equal_s16() {}
@@ -217,6 +219,8 @@ struct InstrSwitch
     virtual void do_less_equal_u64() {}
     virtual void do_less_equal_f32() {}
     virtual void do_less_equal_f64() {}
+    virtual void do_less_equal_w32() {}
+    virtual void do_less_equal_w64() {}
 
     virtual void do_greater_s8() {}
     virtual void do_greater_s16() {}
@@ -228,6 +232,8 @@ struct InstrSwitch
     virtual void do_greater_u64() {}
     virtual void do_greater_f32() {}
     virtual void do_greater_f64() {}
+    virtual void do_greater_w32() {}
+    virtual void do_greater_w64() {}
 
     virtual void do_greater_equal_s8() {}
     virtual void do_greater_equal_s16() {}
@@ -239,6 +245,8 @@ struct InstrSwitch
     virtual void do_greater_equal_u64() {}
     virtual void do_greater_equal_f32() {}
     virtual void do_greater_equal_f64() {}
+    virtual void do_greater_equal_w32() {}
+    virtual void do_greater_equal_w64() {}
 
     virtual void do_equal_u8() {}
     virtual void do_equal_u16() {}
@@ -246,6 +254,8 @@ struct InstrSwitch
     virtual void do_equal_u64() {}
     virtual void do_equal_f32() {}
     virtual void do_equal_f64() {}
+    virtual void do_equal_w32() {}
+    virtual void do_equal_w64() {}
 
     virtual void do_unequal_u8() {}
     virtual void do_unequal_u16() {}
@@ -253,6 +263,11 @@ struct InstrSwitch
     virtual void do_unequal_u64() {}
     virtual void do_unequal_f32() {}
     virtual void do_unequal_f64() {}
+    virtual void do_unequal_w32() {}
+    virtual void do_unequal_w64() {}
+
+    virtual void do_isnan_w32() {}
+    virtual void do_isnan_w64() {}
 
     virtual void do_va_start() {}
     virtual void do_va_end() {}

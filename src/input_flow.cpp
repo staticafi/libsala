@@ -1140,6 +1140,18 @@ void InputFlow::do_less_f64()
 }
 
 
+void InputFlow::do_less_w32()
+{
+    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+}
+
+
+void InputFlow::do_less_w64()
+{
+    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+}
+
+
 void InputFlow::do_less_equal_s8()
 {
     join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
@@ -1195,6 +1207,18 @@ void InputFlow::do_less_equal_f32()
 
 
 void InputFlow::do_less_equal_f64()
+{
+    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+}
+
+
+void InputFlow::do_less_equal_w32()
+{
+    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+}
+
+
+void InputFlow::do_less_equal_w64()
 {
     join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
@@ -1260,6 +1284,18 @@ void InputFlow::do_greater_f64()
 }
 
 
+void InputFlow::do_greater_w32()
+{
+    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+}
+
+
+void InputFlow::do_greater_w64()
+{
+    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+}
+
+
 void InputFlow::do_greater_equal_s8()
 {
     join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
@@ -1320,6 +1356,18 @@ void InputFlow::do_greater_equal_f64()
 }
 
 
+void InputFlow::do_greater_equal_w32()
+{
+    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+}
+
+
+void InputFlow::do_greater_equal_w64()
+{
+    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+}
+
+
 void InputFlow::do_equal_u8()
 {
     join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
@@ -1351,6 +1399,18 @@ void InputFlow::do_equal_f32()
 
 
 void InputFlow::do_equal_f64()
+{
+    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+}
+
+
+void InputFlow::do_equal_w32()
+{
+    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+}
+
+
+void InputFlow::do_equal_w64()
 {
     join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
@@ -1389,6 +1449,30 @@ void InputFlow::do_unequal_f32()
 void InputFlow::do_unequal_f64()
 {
     join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+}
+
+
+void InputFlow::do_unequal_w32()
+{
+    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+}
+
+
+void InputFlow::do_unequal_w64()
+{
+    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+}
+
+
+void InputFlow::do_isnan_w32()
+{
+    join(operands().front()->start(), operands().front()->count(), operands().back()->start(), operands().back()->count());
+}
+
+
+void InputFlow::do_isnan_w64()
+{
+    join(operands().front()->start(), operands().front()->count(), operands().back()->start(), operands().back()->count());
 }
 
 

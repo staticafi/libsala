@@ -557,6 +557,13 @@ bool InstrSwitch::do_instruction_switch()
                 case 8ULL: do_less_f64(); return false;
                 default: UNREACHABLE(); return false;
                 }
+            case Instruction::Modifier::FLOATING_UNORDERED:
+                switch (operands().back()->count())
+                {
+                case 4ULL: do_less_w32(); return false;
+                case 8ULL: do_less_w64(); return false;
+                default: UNREACHABLE(); return false;
+                }
             default: UNREACHABLE(); return false;
             }
 
@@ -586,6 +593,13 @@ bool InstrSwitch::do_instruction_switch()
                 {
                 case 4ULL: do_less_equal_f32(); return false;
                 case 8ULL: do_less_equal_f64(); return false;
+                default: UNREACHABLE(); return false;
+                }
+            case Instruction::Modifier::FLOATING_UNORDERED:
+                switch (operands().back()->count())
+                {
+                case 4ULL: do_less_equal_w32(); return false;
+                case 8ULL: do_less_equal_w64(); return false;
                 default: UNREACHABLE(); return false;
                 }
             default: UNREACHABLE(); return false;
@@ -619,6 +633,13 @@ bool InstrSwitch::do_instruction_switch()
                 case 8ULL: do_greater_f64(); return false;
                 default: UNREACHABLE(); return false;
                 }
+            case Instruction::Modifier::FLOATING_UNORDERED:
+                switch (operands().back()->count())
+                {
+                case 4ULL: do_greater_w32(); return false;
+                case 8ULL: do_greater_w64(); return false;
+                default: UNREACHABLE(); return false;
+                }
             default: UNREACHABLE(); return false;
             }
 
@@ -650,6 +671,13 @@ bool InstrSwitch::do_instruction_switch()
                 case 8ULL: do_greater_equal_f64(); return false;
                 default: UNREACHABLE(); return false;
                 }
+            case Instruction::Modifier::FLOATING_UNORDERED:
+                switch (operands().back()->count())
+                {
+                case 4ULL: do_greater_equal_w32(); return false;
+                case 8ULL: do_greater_equal_w64(); return false;
+                default: UNREACHABLE(); return false;
+                }
             default: UNREACHABLE(); return false;
             }
 
@@ -670,6 +698,13 @@ bool InstrSwitch::do_instruction_switch()
                 {
                 case 4ULL: do_equal_f32(); return false;
                 case 8ULL: do_equal_f64(); return false;
+                default: UNREACHABLE(); return false;
+                }
+            case Instruction::Modifier::FLOATING_UNORDERED:
+                switch (operands().back()->count())
+                {
+                case 4ULL: do_equal_w32(); return false;
+                case 8ULL: do_equal_w64(); return false;
                 default: UNREACHABLE(); return false;
                 }
             default: UNREACHABLE(); return false;
@@ -694,6 +729,21 @@ bool InstrSwitch::do_instruction_switch()
                 case 8ULL: do_unequal_f64(); return false;
                 default: UNREACHABLE(); return false;
                 }
+            case Instruction::Modifier::FLOATING_UNORDERED:
+                switch (operands().back()->count())
+                {
+                case 4ULL: do_unequal_w32(); return false;
+                case 8ULL: do_unequal_w64(); return false;
+                default: UNREACHABLE(); return false;
+                }
+            default: UNREACHABLE(); return false;
+            }
+
+        case Instruction::Opcode::ISNAN:
+            switch (operands().back()->count())
+            {
+            case 4ULL: do_isnan_w32(); return false;
+            case 8ULL: do_isnan_w64(); return false;
             default: UNREACHABLE(); return false;
             }
 

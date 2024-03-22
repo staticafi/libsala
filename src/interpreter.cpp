@@ -4,6 +4,7 @@
 #include <utility/invariants.hpp>
 #include <utility/development.hpp>
 #include <cstring>
+#include <cmath>
 
 namespace sala {
 
@@ -1096,6 +1097,24 @@ void Interpreter::do_less_f64()
 }
 
 
+void Interpreter::do_less_w32()
+{
+    auto const f{ operands().at(1)->as<float>() };
+    auto const g{ operands().at(2)->as<float>() };
+    bool const cond{ std::isnan(f) || std::isnan(g) || f < g };
+    operands().front()->as_ref<std::uint8_t>() = (std::uint8_t)cond;
+}
+
+
+void Interpreter::do_less_w64()
+{
+    auto const f{ operands().at(1)->as<double>() };
+    auto const g{ operands().at(2)->as<double>() };
+    bool const cond{ std::isnan(f) || std::isnan(g) || f < g };
+    operands().front()->as_ref<std::uint8_t>() = (std::uint8_t)cond;
+}
+
+
 void Interpreter::do_less_equal_s8()
 {
     operands().front()->as_ref<std::uint8_t>() = (std::uint8_t)(operands().at(1)->as<std::int8_t>() <= operands().at(2)->as<std::int8_t>());
@@ -1153,6 +1172,24 @@ void Interpreter::do_less_equal_f32()
 void Interpreter::do_less_equal_f64()
 {
     operands().front()->as_ref<std::uint8_t>() = (std::uint8_t)(operands().at(1)->as<double>() <= operands().at(2)->as<double>());
+}
+
+
+void Interpreter::do_less_equal_w32()
+{
+    auto const f{ operands().at(1)->as<float>() };
+    auto const g{ operands().at(2)->as<float>() };
+    bool const cond{ std::isnan(f) || std::isnan(g) || f <= g };
+    operands().front()->as_ref<std::uint8_t>() = (std::uint8_t)cond;
+}
+
+
+void Interpreter::do_less_equal_w64()
+{
+    auto const f{ operands().at(1)->as<double>() };
+    auto const g{ operands().at(2)->as<double>() };
+    bool const cond{ std::isnan(f) || std::isnan(g) || f <= g };
+    operands().front()->as_ref<std::uint8_t>() = (std::uint8_t)cond;
 }
 
 
@@ -1216,6 +1253,24 @@ void Interpreter::do_greater_f64()
 }
 
 
+void Interpreter::do_greater_w32()
+{
+    auto const f{ operands().at(1)->as<float>() };
+    auto const g{ operands().at(2)->as<float>() };
+    bool const cond{ std::isnan(f) || std::isnan(g) || f > g };
+    operands().front()->as_ref<std::uint8_t>() = (std::uint8_t)cond;
+}
+
+
+void Interpreter::do_greater_w64()
+{
+    auto const f{ operands().at(1)->as<double>() };
+    auto const g{ operands().at(2)->as<double>() };
+    bool const cond{ std::isnan(f) || std::isnan(g) || f > g };
+    operands().front()->as_ref<std::uint8_t>() = (std::uint8_t)cond;
+}
+
+
 void Interpreter::do_greater_equal_s8()
 {
     operands().front()->as_ref<std::uint8_t>() = (std::uint8_t)(operands().at(1)->as<std::int8_t>() >= operands().at(2)->as<std::int8_t>());
@@ -1276,6 +1331,24 @@ void Interpreter::do_greater_equal_f64()
 }
 
 
+void Interpreter::do_greater_equal_w32()
+{
+    auto const f{ operands().at(1)->as<float>() };
+    auto const g{ operands().at(2)->as<float>() };
+    bool const cond{ std::isnan(f) || std::isnan(g) || f >= g };
+    operands().front()->as_ref<std::uint8_t>() = (std::uint8_t)cond;
+}
+
+
+void Interpreter::do_greater_equal_w64()
+{
+    auto const f{ operands().at(1)->as<double>() };
+    auto const g{ operands().at(2)->as<double>() };
+    bool const cond{ std::isnan(f) || std::isnan(g) || f >= g };
+    operands().front()->as_ref<std::uint8_t>() = (std::uint8_t)cond;
+}
+
+
 void Interpreter::do_equal_u8()
 {
     operands().front()->as_ref<std::uint8_t>() = (std::uint8_t)(operands().at(1)->as<std::uint8_t>() == operands().at(2)->as<std::uint8_t>());
@@ -1312,6 +1385,24 @@ void Interpreter::do_equal_f64()
 }
 
 
+void Interpreter::do_equal_w32()
+{
+    auto const f{ operands().at(1)->as<float>() };
+    auto const g{ operands().at(2)->as<float>() };
+    bool const cond{ std::isnan(f) || std::isnan(g) || f == g };
+    operands().front()->as_ref<std::uint8_t>() = (std::uint8_t)cond;
+}
+
+
+void Interpreter::do_equal_w64()
+{
+    auto const f{ operands().at(1)->as<double>() };
+    auto const g{ operands().at(2)->as<double>() };
+    bool const cond{ std::isnan(f) || std::isnan(g) || f == g };
+    operands().front()->as_ref<std::uint8_t>() = (std::uint8_t)cond;
+}
+
+
 void Interpreter::do_unequal_u8()
 {
     operands().front()->as_ref<std::uint8_t>() = (std::uint8_t)(operands().at(1)->as<std::uint8_t>() != operands().at(2)->as<std::uint8_t>());
@@ -1345,6 +1436,36 @@ void Interpreter::do_unequal_f32()
 void Interpreter::do_unequal_f64()
 {
     operands().front()->as_ref<std::uint8_t>() = (std::uint8_t)(operands().at(1)->as<double>() != operands().at(2)->as<double>());
+}
+
+
+void Interpreter::do_unequal_w32()
+{
+    auto const f{ operands().at(1)->as<float>() };
+    auto const g{ operands().at(2)->as<float>() };
+    bool const cond{ std::isnan(f) || std::isnan(g) || f != g };
+    operands().front()->as_ref<std::uint8_t>() = (std::uint8_t)cond;
+}
+
+
+void Interpreter::do_unequal_w64()
+{
+    auto const f{ operands().at(1)->as<double>() };
+    auto const g{ operands().at(2)->as<double>() };
+    bool const cond{ std::isnan(f) || std::isnan(g) || f != g };
+    operands().front()->as_ref<std::uint8_t>() = (std::uint8_t)cond;
+}
+
+
+void Interpreter::do_isnan_w32()
+{
+    operands().front()->as_ref<std::uint8_t>() = (std::uint8_t)std::isnan(operands().back()->as<float>());
+}
+
+
+void Interpreter::do_isnan_w64()
+{
+    operands().front()->as_ref<std::uint8_t>() = (std::uint8_t)std::isnan(operands().back()->as<double>());
 }
 
 

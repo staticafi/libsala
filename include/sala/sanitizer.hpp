@@ -50,8 +50,6 @@ private:
     void do_div_u16() override;
     void do_div_u32() override;
     void do_div_u64() override;
-    void do_div_f32() override;
-    void do_div_f64() override;
     void do_rem_s8() override;
     void do_rem_s16() override;
     void do_rem_s32() override;
