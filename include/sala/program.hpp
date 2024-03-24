@@ -55,6 +55,7 @@ struct Variable
     std::uint32_t index() const { return index_; }
     Region region() const { return region_; }
     std::size_t num_bytes() const { return num_bytes_; }
+    bool is_external() const { return is_external_; }
     SourceBackMapping const& source_back_mapping() const { return back_mapping_; }
 
     void set_program(Program* const program) { program_ = program; }
@@ -62,6 +63,7 @@ struct Variable
     void set_index(std::uint32_t const index) { index_ = index; }
     void set_region(Region region) { region_ = region; }
     void set_num_bytes(std::size_t const num_bytes) { num_bytes_ = num_bytes; }
+    void set_external(bool const state) { is_external_ = state; }
     SourceBackMapping& source_back_mapping() { return back_mapping_; }
 private:
     Program* program_{ nullptr };
@@ -69,6 +71,7 @@ private:
     std::uint32_t index_{};
     Region region_{ Region::STATIC };
     std::size_t num_bytes_{ 0U };
+    bool is_external_{ false };
     SourceBackMapping back_mapping_{};
 };
 
@@ -648,11 +651,13 @@ struct Function
     std::vector<BasicBlock> const& basic_blocks() const { return blocks_; }
     std::vector<Variable> const& parameters() const { return parameters_; }
     std::vector<Variable> const& local_variables() const { return locals_; }
+    bool is_external() const { return is_external_; }
     SourceBackMapping const& source_back_mapping() const { return back_mapping_; }
 
     void set_program(Program* const program) { program_ = program; }
     void set_name(std::string const& name) { name_ = name; }
     void set_index(std::uint32_t const index) { index_ = index; }
+    void set_external(bool const state) { is_external_ = state; }
     BasicBlock& basic_block_ref(std::uint32_t const idx) { return blocks_.at(idx); }
     BasicBlock& push_back_basic_block();
     BasicBlock& last_basic_block_ref() { return blocks_.back(); }
@@ -667,6 +672,7 @@ private:
     std::vector<BasicBlock> blocks_{};
     std::vector<Variable> parameters_{};
     std::vector<Variable> locals_{};
+    bool is_external_{ false };
     SourceBackMapping back_mapping_{};
 };
 
@@ -699,8 +705,8 @@ struct Program
     Variable& push_back_static_variable();
     Constant& push_back_constant();
     Constant& constant_ref(std::uint32_t const index) { return constants_.at(index); }
-    void push_back_external_variable(std::uint32_t const index, std::string const& name) { external_variables_.push_back({ index, name }); }
-    void push_back_external_function(std::uint32_t const index) { external_functions_.push_back(index); }
+    void push_back_external_variable(std::uint32_t const index, std::string const& name);
+    void push_back_external_function(std::uint32_t const index);
 
 private:
     std::string version_;

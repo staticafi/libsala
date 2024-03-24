@@ -122,4 +122,18 @@ Constant& Program::push_back_constant()
 }
 
 
+void Program::push_back_external_variable(std::uint32_t const index, std::string const& name)
+{
+    external_variables_.push_back({ index, name });
+    variables_.at(index).set_external(true);
+}
+
+
+void Program::push_back_external_function(std::uint32_t const index)
+{
+    external_functions_.push_back(index);
+    functions_.at(index).set_external(true);
+}
+
+
 }
