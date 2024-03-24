@@ -7,6 +7,9 @@
 #   include <functional>
 #   include <string>
 
+#   define REGISTER_EXTERN_CODE(FN_NAME, IMPL) register_code(#FN_NAME, [this]() { IMPL; })
+
+
 namespace sala {
 
 
@@ -22,9 +25,9 @@ struct ExternCode
     ExecState const& state() const { return *state_; }
     ExecState& state() { return *state_; }
 
-    bool register_code(std::string const& name, std::function<void()> const& code);
+    void register_code(std::string const& function_name, std::function<void()> const& code);
 
-    void execute();
+    void call_code_of_current_function_if_registered_external();
 
 private:
     void std_exit();
@@ -37,8 +40,7 @@ private:
     void __llvm_intrinsic_ctlz_64();
 
     ExecState* state_;
-    std::unordered_map<std::string, std::uint32_t> names2indices_;
-    std::unordered_map<std::uint32_t, std::function<void()> > code_;
+    std::unordered_map<std::string, std::function<void()> > code_;
 };
 
 

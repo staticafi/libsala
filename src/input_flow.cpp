@@ -1551,84 +1551,74 @@ void InputFlow::register_external_functions()
 
 void InputFlow::register_external_llvm_intrinsics()
 {
-#   define REGISTER_FUNC(FN_NAME, IMPL) \
-        register_extern_function_processor(#FN_NAME, [this]() { IMPL; })
-
-    REGISTER_FUNC(__llvm_intrinsic_bswap_8, this->__llvm_intrinsic_bswap(8ULL));
-    REGISTER_FUNC(__llvm_intrinsic_bswap_16, this->__llvm_intrinsic_bswap(16ULL));
-    REGISTER_FUNC(__llvm_intrinsic_bswap_32, this->__llvm_intrinsic_bswap(32ULL));
-    REGISTER_FUNC(__llvm_intrinsic_bswap_64, this->__llvm_intrinsic_bswap(64ULL));
-    REGISTER_FUNC(__llvm_intrinsic_ctlz_8, this->__llvm_intrinsic_ctlz(8ULL));
-    REGISTER_FUNC(__llvm_intrinsic_ctlz_16, this->__llvm_intrinsic_ctlz(16ULL));
-    REGISTER_FUNC(__llvm_intrinsic_ctlz_32, this->__llvm_intrinsic_ctlz(32ULL));
-    REGISTER_FUNC(__llvm_intrinsic_ctlz_64, this->__llvm_intrinsic_ctlz(64ULL));
-
-#   undef REGISTER_FUNC
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic_bswap_8, this->__llvm_intrinsic_bswap(8ULL));
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic_bswap_16, this->__llvm_intrinsic_bswap(16ULL));
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic_bswap_32, this->__llvm_intrinsic_bswap(32ULL));
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic_bswap_64, this->__llvm_intrinsic_bswap(64ULL));
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic_ctlz_8, this->__llvm_intrinsic_ctlz(8ULL));
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic_ctlz_16, this->__llvm_intrinsic_ctlz(16ULL));
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic_ctlz_32, this->__llvm_intrinsic_ctlz(32ULL));
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic_ctlz_64, this->__llvm_intrinsic_ctlz(64ULL));
 }
 
 
 void InputFlow::register_external_math_functions()
 {
-#   define REGISTER_FUNC(FN_NAME, TYPE) \
-        register_extern_function_processor(#FN_NAME, [this]() { this->pass_input_flow_from_parameters_to_return_value(sizeof(TYPE)); })
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(acos, this->pass_input_flow_from_parameters_to_return_value(sizeof(double)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(acosf, this->pass_input_flow_from_parameters_to_return_value(sizeof(float)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(acosh, this->pass_input_flow_from_parameters_to_return_value(sizeof(double)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(acoshf, this->pass_input_flow_from_parameters_to_return_value(sizeof(float)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(asin, this->pass_input_flow_from_parameters_to_return_value(sizeof(double)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(asinf, this->pass_input_flow_from_parameters_to_return_value(sizeof(float)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(asinh, this->pass_input_flow_from_parameters_to_return_value(sizeof(double)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(asinhf, this->pass_input_flow_from_parameters_to_return_value(sizeof(float)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(atan, this->pass_input_flow_from_parameters_to_return_value(sizeof(double)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(atanf, this->pass_input_flow_from_parameters_to_return_value(sizeof(float)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(atanh, this->pass_input_flow_from_parameters_to_return_value(sizeof(double)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(atanhf, this->pass_input_flow_from_parameters_to_return_value(sizeof(float)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(ceil, this->pass_input_flow_from_parameters_to_return_value(sizeof(double)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(ceilf, this->pass_input_flow_from_parameters_to_return_value(sizeof(float)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(cos, this->pass_input_flow_from_parameters_to_return_value(sizeof(double)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(cosf, this->pass_input_flow_from_parameters_to_return_value(sizeof(float)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(cosh, this->pass_input_flow_from_parameters_to_return_value(sizeof(double)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(coshf, this->pass_input_flow_from_parameters_to_return_value(sizeof(float)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(exp, this->pass_input_flow_from_parameters_to_return_value(sizeof(double)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(expf, this->pass_input_flow_from_parameters_to_return_value(sizeof(float)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(exp2, this->pass_input_flow_from_parameters_to_return_value(sizeof(double)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(exp2f, this->pass_input_flow_from_parameters_to_return_value(sizeof(float)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(fabs, this->pass_input_flow_from_parameters_to_return_value(sizeof(double)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(fabsf, this->pass_input_flow_from_parameters_to_return_value(sizeof(float)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(floor, this->pass_input_flow_from_parameters_to_return_value(sizeof(double)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(floorf, this->pass_input_flow_from_parameters_to_return_value(sizeof(float)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(log, this->pass_input_flow_from_parameters_to_return_value(sizeof(double)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(logf, this->pass_input_flow_from_parameters_to_return_value(sizeof(float)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(log2, this->pass_input_flow_from_parameters_to_return_value(sizeof(double)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(log2f, this->pass_input_flow_from_parameters_to_return_value(sizeof(float)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(log10, this->pass_input_flow_from_parameters_to_return_value(sizeof(double)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(log10f, this->pass_input_flow_from_parameters_to_return_value(sizeof(float)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(round, this->pass_input_flow_from_parameters_to_return_value(sizeof(double)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(roundf, this->pass_input_flow_from_parameters_to_return_value(sizeof(float)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(sin, this->pass_input_flow_from_parameters_to_return_value(sizeof(double)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(sinf, this->pass_input_flow_from_parameters_to_return_value(sizeof(float)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(sinh, this->pass_input_flow_from_parameters_to_return_value(sizeof(double)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(sinhf, this->pass_input_flow_from_parameters_to_return_value(sizeof(float)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(sqrt, this->pass_input_flow_from_parameters_to_return_value(sizeof(double)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(sqrtf, this->pass_input_flow_from_parameters_to_return_value(sizeof(float)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(tan, this->pass_input_flow_from_parameters_to_return_value(sizeof(double)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(tanf, this->pass_input_flow_from_parameters_to_return_value(sizeof(float)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(tanh, this->pass_input_flow_from_parameters_to_return_value(sizeof(double)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(tanhf, this->pass_input_flow_from_parameters_to_return_value(sizeof(float)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(trunc, this->pass_input_flow_from_parameters_to_return_value(sizeof(double)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(truncf, this->pass_input_flow_from_parameters_to_return_value(sizeof(float)) );
 
-    REGISTER_FUNC(acos, double);
-    REGISTER_FUNC(acosf, float);
-    REGISTER_FUNC(acosh, double);
-    REGISTER_FUNC(acoshf, float);
-    REGISTER_FUNC(asin, double);
-    REGISTER_FUNC(asinf, float);
-    REGISTER_FUNC(asinh, double);
-    REGISTER_FUNC(asinhf, float);
-    REGISTER_FUNC(atan, double);
-    REGISTER_FUNC(atanf, float);
-    REGISTER_FUNC(atanh, double);
-    REGISTER_FUNC(atanhf, float);
-    REGISTER_FUNC(ceil, double);
-    REGISTER_FUNC(ceilf, float);
-    REGISTER_FUNC(cos, double);
-    REGISTER_FUNC(cosf, float);
-    REGISTER_FUNC(cosh, double);
-    REGISTER_FUNC(coshf, float);
-    REGISTER_FUNC(exp, double);
-    REGISTER_FUNC(expf, float);
-    REGISTER_FUNC(exp2, double);
-    REGISTER_FUNC(exp2f, float);
-    REGISTER_FUNC(fabs, double);
-    REGISTER_FUNC(fabsf, float);
-    REGISTER_FUNC(floor, double);
-    REGISTER_FUNC(floorf, float);
-    REGISTER_FUNC(log, double);
-    REGISTER_FUNC(logf, float);
-    REGISTER_FUNC(log2, double);
-    REGISTER_FUNC(log2f, float);
-    REGISTER_FUNC(log10, double);
-    REGISTER_FUNC(log10f, float);
-    REGISTER_FUNC(round, double);
-    REGISTER_FUNC(roundf, float);
-    REGISTER_FUNC(sin, double);
-    REGISTER_FUNC(sinf, float);
-    REGISTER_FUNC(sinh, double);
-    REGISTER_FUNC(sinhf, float);
-    REGISTER_FUNC(sqrt, double);
-    REGISTER_FUNC(sqrtf, float);
-    REGISTER_FUNC(tan, double);
-    REGISTER_FUNC(tanf, float);
-    REGISTER_FUNC(tanh, double);
-    REGISTER_FUNC(tanhf, float);
-    REGISTER_FUNC(trunc, double);
-    REGISTER_FUNC(truncf, float);
-
-    REGISTER_FUNC(atan2, double);
-    REGISTER_FUNC(atan2f, float);
-    REGISTER_FUNC(copysign, double);
-    REGISTER_FUNC(copysignf, float);
-    REGISTER_FUNC(fmod, double);
-    REGISTER_FUNC(fmodf, float);
-    REGISTER_FUNC(remainder, double);
-    REGISTER_FUNC(remainderf, float);
-
-#   undef REGISTER_FUNC
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(atan2, this->pass_input_flow_from_parameters_to_return_value(sizeof(double)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(atan2f, this->pass_input_flow_from_parameters_to_return_value(sizeof(float)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(copysign, this->pass_input_flow_from_parameters_to_return_value(sizeof(double)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(copysignf, this->pass_input_flow_from_parameters_to_return_value(sizeof(float)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(fmod, this->pass_input_flow_from_parameters_to_return_value(sizeof(double)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(fmodf, this->pass_input_flow_from_parameters_to_return_value(sizeof(float)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(remainder, this->pass_input_flow_from_parameters_to_return_value(sizeof(double)) );
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(remainderf, this->pass_input_flow_from_parameters_to_return_value(sizeof(float)) );
 }
 
 

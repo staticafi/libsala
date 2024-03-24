@@ -84,7 +84,7 @@ void Interpreter::step()
             state().stack_segment().push_back(StackRecord(program().functions().at(state().pop_atexit_function())));
             state().stack_top().ip().jump(0U);
             state().update_current_values();
-            extern_code_->execute();
+            extern_code_->call_code_of_current_function_if_registered_external();
         }
         else
         {
@@ -1590,7 +1590,7 @@ void Interpreter::do_call()
 
     state().update_current_values();
 
-    extern_code_->execute();
+    extern_code_->call_code_of_current_function_if_registered_external();
 }
 
 

@@ -4,6 +4,12 @@
 #include <cstring>
 #include <cmath>
 
+#define REGISTER_UNARY_FUNC(FN_NAME, TYPE) \
+    REGISTER_EXTERN_CODE(FN_NAME, *parameters().front().as<TYPE*>() = FN_NAME(parameters().back().as<TYPE>()) )
+#define REGISTER_BINARY_FUNC(FN_NAME, TYPE) \
+    REGISTER_EXTERN_CODE(FN_NAME, *parameters().front().as<TYPE*>() = FN_NAME(parameters().at(1).as<TYPE>(), \
+                                                                              parameters().back().as<TYPE>()) )
+
 namespace sala {
 
 
@@ -16,10 +22,6 @@ ExternCodeCStd::ExternCodeCStd(ExecState* const state)
 
 void ExternCodeCStd::register_math_functions()
 {
-#   define REGISTER_UNARY_FUNX(FN_NAME, TYPE, FN_TO_CALL) \
-        register_code(#FN_NAME, [this]() { *parameters().front().as<TYPE*>() = FN_TO_CALL(parameters().back().as<TYPE>()); });
-#   define REGISTER_UNARY_FUNC(FN_NAME, TYPE) REGISTER_UNARY_FUNX(FN_NAME, TYPE, FN_NAME)
-
     REGISTER_UNARY_FUNC(acos, double);
     REGISTER_UNARY_FUNC(acosf, float);
     REGISTER_UNARY_FUNC(acosh, double);
@@ -67,12 +69,6 @@ void ExternCodeCStd::register_math_functions()
     REGISTER_UNARY_FUNC(trunc, double);
     REGISTER_UNARY_FUNC(truncf, float);
 
-#   undef REGISTER_UNARY_FUNC
-#   undef REGISTER_UNARY_FUNX
-#   define REGISTER_BINARY_FUNX(FN_NAME, TYPE, FN_TO_CALL) \
-        register_code(#FN_NAME, [this]() { *parameters().front().as<TYPE*>() = FN_TO_CALL(parameters().at(1).as<TYPE>(), parameters().back().as<TYPE>()); });
-#   define REGISTER_BINARY_FUNC(FN_NAME, TYPE) REGISTER_BINARY_FUNX(FN_NAME, TYPE, FN_NAME)
-
     REGISTER_BINARY_FUNC(atan2, double);
     REGISTER_BINARY_FUNC(atan2f, float);
     REGISTER_BINARY_FUNC(copysign, double);
@@ -81,9 +77,6 @@ void ExternCodeCStd::register_math_functions()
     REGISTER_BINARY_FUNC(fmodf, float);
     REGISTER_BINARY_FUNC(remainder, double);
     REGISTER_BINARY_FUNC(remainderf, float);
-
-#   undef REGISTER_BINARY_FUNC
-#   undef REGISTER_BINARY_FUNX
 }
 
 

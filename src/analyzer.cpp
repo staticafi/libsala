@@ -10,9 +10,9 @@ Analyzer::Analyzer(ExecState* const state)
 {}
 
 
-bool Analyzer::register_extern_function_processor(std::string const& function_name, std::function<void()> const& code)
+void Analyzer::register_extern_function_processor(std::string const& function_name, std::function<void()> const& code)
 {
-    return extern_function_processors_.insert({ function_name, code }).second;
+    extern_function_processors_.insert_or_assign(function_name, code);
 }
 
 

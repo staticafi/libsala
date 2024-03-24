@@ -7,6 +7,9 @@
 #   include <vector>
 #   include <functional>
 
+#   define REGISTER_EXTERN_FUNCTION_PROCESSOR(FN_NAME, IMPL) register_extern_function_processor(#FN_NAME, [this]() { IMPL; })
+
+
 namespace sala {
 
 
@@ -34,7 +37,7 @@ struct Analyzer : public InstrSwitch
     void pre() { post_operation_ = nullptr; do_instruction_switch(); }
     void post() { if (post_operation_) post_operation_(); }
 
-    bool register_extern_function_processor(std::string const& function_name, std::function<void()> const& code);
+    void register_extern_function_processor(std::string const& function_name, std::function<void()> const& code);
     void call_processor_of_current_function_if_registered_extern();
 
 private:

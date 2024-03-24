@@ -23,42 +23,38 @@ static T __llvm_intrinsic_ctlz_impl(T const value)
 
 ExternCode::ExternCode(ExecState* const state)
     : state_{ state }
-    , names2indices_{}
     , code_{}
 {
-    for (auto idx : program().external_functions())
-        names2indices_.insert({ program().functions().at(idx).name(), idx });
-
-    register_code("exit", [this](){ this->std_exit(); });
-    register_code("atexit", [this](){ this->std_atexit(); });
-    register_code("abort", [this](){ this->std_abort("abort"); });
-    register_code("__llvm_intrinsic_bswap_8", [this](){ this->__llvm_intrinsic_bswap(8ULL); });
-    register_code("__llvm_intrinsic_bswap_16", [this](){ this->__llvm_intrinsic_bswap(16ULL); });
-    register_code("__llvm_intrinsic_bswap_32", [this](){ this->__llvm_intrinsic_bswap(32ULL); });
-    register_code("__llvm_intrinsic_bswap_64", [this](){ this->__llvm_intrinsic_bswap(64ULL); });
-    register_code("__llvm_intrinsic_ctlz_8", [this](){ this->__llvm_intrinsic_ctlz_8(); });
-    register_code("__llvm_intrinsic_ctlz_16", [this](){ this->__llvm_intrinsic_ctlz_16(); });
-    register_code("__llvm_intrinsic_ctlz_32", [this](){ this->__llvm_intrinsic_ctlz_32(); });
-    register_code("__llvm_intrinsic_ctlz_64", [this](){ this->__llvm_intrinsic_ctlz_64(); });
+    REGISTER_EXTERN_CODE(exit, this->std_exit() );
+    REGISTER_EXTERN_CODE(atexit, this->std_atexit() );
+    REGISTER_EXTERN_CODE(abort, this->std_abort("abort") );
+    REGISTER_EXTERN_CODE(__llvm_intrinsic_bswap_8, this->__llvm_intrinsic_bswap(8ULL) );
+    REGISTER_EXTERN_CODE(__llvm_intrinsic_bswap_16, this->__llvm_intrinsic_bswap(16ULL) );
+    REGISTER_EXTERN_CODE(__llvm_intrinsic_bswap_32, this->__llvm_intrinsic_bswap(32ULL) );
+    REGISTER_EXTERN_CODE(__llvm_intrinsic_bswap_64, this->__llvm_intrinsic_bswap(64ULL) );
+    REGISTER_EXTERN_CODE(__llvm_intrinsic_ctlz_8, this->__llvm_intrinsic_ctlz_8() );
+    REGISTER_EXTERN_CODE(__llvm_intrinsic_ctlz_16, this->__llvm_intrinsic_ctlz_16() );
+    REGISTER_EXTERN_CODE(__llvm_intrinsic_ctlz_32, this->__llvm_intrinsic_ctlz_32() );
+    REGISTER_EXTERN_CODE(__llvm_intrinsic_ctlz_64, this->__llvm_intrinsic_ctlz_64() );
     // POSIX:
-    register_code("__assert_fail", [this](){ this->std_abort("__assert_fail"); });
+    REGISTER_EXTERN_CODE(__assert_fail, this->std_abort("__assert_fail") );
 }
 
 
-bool ExternCode::register_code(std::string const& name, std::function<void()> const& code)
+void ExternCode::register_code(std::string const& function_name, std::function<void()> const& code)
 {
-    auto it = names2indices_.find(name);
-    if (it == names2indices_.end())
-        return false;
-    return code_.insert({ it->second, code }).second;
+    code_.insert_or_assign(function_name, code);
 }
 
 
-void ExternCode::execute()
+void ExternCode::call_code_of_current_function_if_registered_external()
 {
-    auto it = code_.find(function().index());
-    if (it != code_.end())
-        it->second();
+    if (function().is_external())
+    {
+        auto it = code_.find(function().name());
+        if (it != code_.end())
+            it->second();
+    }
 }
 
 
