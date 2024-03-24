@@ -6,6 +6,21 @@
 namespace sala {
 
 
+template<typename T>
+static T __llvm_intrinsic_ctlz_impl(T const value)
+{
+    T constexpr n = (T)(8U * sizeof(T));
+    T i = (T)0;
+    T bit_check{ (T)(1 << (sizeof(T) - 1)) };
+    while ((value & bit_check) == 0 && i != n)
+    {
+        ++i;
+        bit_check >>= 1;
+    }
+    return i;
+}
+
+
 ExternCode::ExternCode(ExecState* const state)
     : state_{ state }
     , names2indices_{}
@@ -17,6 +32,14 @@ ExternCode::ExternCode(ExecState* const state)
     register_code("exit", [this](){ this->std_exit(); });
     register_code("atexit", [this](){ this->std_atexit(); });
     register_code("abort", [this](){ this->std_abort("abort"); });
+    register_code("__llvm_intrinsic_bswap_8", [this](){ this->__llvm_intrinsic_bswap(8ULL); });
+    register_code("__llvm_intrinsic_bswap_16", [this](){ this->__llvm_intrinsic_bswap(16ULL); });
+    register_code("__llvm_intrinsic_bswap_32", [this](){ this->__llvm_intrinsic_bswap(32ULL); });
+    register_code("__llvm_intrinsic_bswap_64", [this](){ this->__llvm_intrinsic_bswap(64ULL); });
+    register_code("__llvm_intrinsic_ctlz_8", [this](){ this->__llvm_intrinsic_ctlz_8(); });
+    register_code("__llvm_intrinsic_ctlz_16", [this](){ this->__llvm_intrinsic_ctlz_16(); });
+    register_code("__llvm_intrinsic_ctlz_32", [this](){ this->__llvm_intrinsic_ctlz_32(); });
+    register_code("__llvm_intrinsic_ctlz_64", [this](){ this->__llvm_intrinsic_ctlz_64(); });
     // POSIX:
     register_code("__assert_fail", [this](){ this->std_abort("__assert_fail"); });
 }
@@ -78,6 +101,39 @@ void ExternCode::std_abort(std::string const& func_name)
         "test_interpreter[extern_code]",
         "Called " + func_name + "().");
     state().set_exit_code(0);
+}
+
+
+void ExternCode::__llvm_intrinsic_bswap(std::size_t const num_bytes)
+{
+    auto const dst_ptr{ parameters().front().as<MemPtr>() };
+    auto const src_ptr{ parameters().back().start() };
+    for (std::size_t i = 0ULL; i != num_bytes; ++i)
+        *(dst_ptr + num_bytes - (i + 1ULL)) = *(src_ptr + i);
+}
+
+
+void ExternCode::__llvm_intrinsic_ctlz_8()
+{
+    parameters().front().as_ref<std::uint8_t>() = __llvm_intrinsic_ctlz_impl(parameters().at(1).as<std::uint8_t>());
+}
+
+
+void ExternCode::__llvm_intrinsic_ctlz_16()
+{
+    parameters().front().as_ref<std::uint16_t>() = __llvm_intrinsic_ctlz_impl(parameters().at(1).as<std::uint16_t>());
+}
+
+
+void ExternCode::__llvm_intrinsic_ctlz_32()
+{
+    parameters().front().as_ref<std::uint32_t>() = __llvm_intrinsic_ctlz_impl(parameters().at(1).as<std::uint32_t>());
+}
+
+
+void ExternCode::__llvm_intrinsic_ctlz_64()
+{
+    parameters().front().as_ref<std::uint64_t>() = __llvm_intrinsic_ctlz_impl(parameters().at(1).as<std::uint64_t>());
 }
 
 

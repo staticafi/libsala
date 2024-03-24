@@ -30,6 +30,11 @@ private:
     void std_exit();
     void std_atexit();
     void std_abort(std::string const& func_name);
+    void __llvm_intrinsic_bswap(std::size_t num_bytes);
+    void __llvm_intrinsic_ctlz_8();
+    void __llvm_intrinsic_ctlz_16();
+    void __llvm_intrinsic_ctlz_32();
+    void __llvm_intrinsic_ctlz_64();
 
     ExecState* state_;
     std::unordered_map<std::string, std::uint32_t> names2indices_;
