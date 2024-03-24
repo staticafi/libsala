@@ -3,8 +3,12 @@
 #include <utility/hash_combine.hpp>
 #include <utility/assumptions.hpp>
 #include <utility/invariants.hpp>
+#include <unordered_map>
+#include <functional>
 #include <algorithm>
 #include <sstream>
+#include <cstring>
+#include <cmath>
 
 namespace sala {
 
@@ -91,7 +95,9 @@ InputFlow::InputFlow(ExecState* const exec_state)
     , no_flow_{ FlowSet::create() }
     , handles_{ no_flow_ }
     , flow_{}
+    , extern_function_processors_{}
 {
+    register_external_functions();
 }
 
 
@@ -1523,12 +1529,133 @@ void InputFlow::do_call()
 
 void InputFlow::do_ret()
 {
+    auto const it{ extern_function_processors_.find(state().current_function().name()) };
+    if (it != extern_function_processors_.end())
+        it->second();
+
     for (auto const& block : stack_top().parameters())
         clear(block.start(), block.count());
     for (auto const& block : stack_top().locals())
         clear(block.start(), block.count());
     for (auto const& block : stack_top().variadic_parameters())
         clear(block.start(), block.count());
+}
+
+
+// External functions:
+
+
+void InputFlow::register_external_functions()
+{
+    register_external_llvm_intrinsics();
+    register_external_math_functions();
+}
+
+
+void InputFlow::register_external_llvm_intrinsics()
+{
+#   define REGISTER_FUNC(FN_NAME, IMPL) \
+        extern_function_processors_.insert({ #FN_NAME, [this]() { IMPL; } })
+
+    REGISTER_FUNC(__llvm_intrinsic_bswap_8, this->__llvm_intrinsic_bswap(8ULL));
+    REGISTER_FUNC(__llvm_intrinsic_bswap_16, this->__llvm_intrinsic_bswap(16ULL));
+    REGISTER_FUNC(__llvm_intrinsic_bswap_32, this->__llvm_intrinsic_bswap(32ULL));
+    REGISTER_FUNC(__llvm_intrinsic_bswap_64, this->__llvm_intrinsic_bswap(64ULL));
+    REGISTER_FUNC(__llvm_intrinsic_ctlz_8, this->__llvm_intrinsic_ctlz(8ULL));
+    REGISTER_FUNC(__llvm_intrinsic_ctlz_16, this->__llvm_intrinsic_ctlz(16ULL));
+    REGISTER_FUNC(__llvm_intrinsic_ctlz_32, this->__llvm_intrinsic_ctlz(32ULL));
+    REGISTER_FUNC(__llvm_intrinsic_ctlz_64, this->__llvm_intrinsic_ctlz(64ULL));
+
+#   undef REGISTER_FUNC
+}
+
+
+void InputFlow::register_external_math_functions()
+{
+#   define REGISTER_FUNC(FN_NAME, TYPE) \
+        extern_function_processors_.insert({ #FN_NAME, [this]() { this->pass_input_flow_from_parameters_to_return_value(sizeof(TYPE)); } })
+
+    REGISTER_FUNC(acos, double);
+    REGISTER_FUNC(acosf, float);
+    REGISTER_FUNC(acosh, double);
+    REGISTER_FUNC(acoshf, float);
+    REGISTER_FUNC(asin, double);
+    REGISTER_FUNC(asinf, float);
+    REGISTER_FUNC(asinh, double);
+    REGISTER_FUNC(asinhf, float);
+    REGISTER_FUNC(atan, double);
+    REGISTER_FUNC(atanf, float);
+    REGISTER_FUNC(atanh, double);
+    REGISTER_FUNC(atanhf, float);
+    REGISTER_FUNC(ceil, double);
+    REGISTER_FUNC(ceilf, float);
+    REGISTER_FUNC(cos, double);
+    REGISTER_FUNC(cosf, float);
+    REGISTER_FUNC(cosh, double);
+    REGISTER_FUNC(coshf, float);
+    REGISTER_FUNC(exp, double);
+    REGISTER_FUNC(expf, float);
+    REGISTER_FUNC(exp2, double);
+    REGISTER_FUNC(exp2f, float);
+    REGISTER_FUNC(fabs, double);
+    REGISTER_FUNC(fabsf, float);
+    REGISTER_FUNC(floor, double);
+    REGISTER_FUNC(floorf, float);
+    REGISTER_FUNC(log, double);
+    REGISTER_FUNC(logf, float);
+    REGISTER_FUNC(log2, double);
+    REGISTER_FUNC(log2f, float);
+    REGISTER_FUNC(log10, double);
+    REGISTER_FUNC(log10f, float);
+    REGISTER_FUNC(round, double);
+    REGISTER_FUNC(roundf, float);
+    REGISTER_FUNC(sin, double);
+    REGISTER_FUNC(sinf, float);
+    REGISTER_FUNC(sinh, double);
+    REGISTER_FUNC(sinhf, float);
+    REGISTER_FUNC(sqrt, double);
+    REGISTER_FUNC(sqrtf, float);
+    REGISTER_FUNC(tan, double);
+    REGISTER_FUNC(tanf, float);
+    REGISTER_FUNC(tanh, double);
+    REGISTER_FUNC(tanhf, float);
+    REGISTER_FUNC(trunc, double);
+    REGISTER_FUNC(truncf, float);
+
+    REGISTER_FUNC(atan2, double);
+    REGISTER_FUNC(atan2f, float);
+    REGISTER_FUNC(copysign, double);
+    REGISTER_FUNC(copysignf, float);
+    REGISTER_FUNC(fmod, double);
+    REGISTER_FUNC(fmodf, float);
+    REGISTER_FUNC(remainder, double);
+    REGISTER_FUNC(remainderf, float);
+
+#   undef REGISTER_FUNC
+}
+
+
+void InputFlow::pass_input_flow_from_parameters_to_return_value(std::size_t const num_return_value_bytes)
+{
+    std::vector<std::pair<MemPtr, std::size_t> > param_memory_regions;
+    for (std::size_t i = 1ULL; i < operands().size(); ++i)
+        param_memory_regions.push_back({ operands().at(i)->start(), operands().at(i)->count() });
+    join(operands().front()->start(), num_return_value_bytes, param_memory_regions);
+}
+
+
+void InputFlow::__llvm_intrinsic_bswap(std::size_t const num_bytes)
+{
+    auto const dst_ptr{ parameters().front().as<MemPtr>() };
+    auto const src_ptr{ parameters().back().start() };
+    for (std::size_t i = 0ULL; i != num_bytes; ++i)
+        copy(dst_ptr + num_bytes - (i + 1ULL), src_ptr + i, 1ULL);
+}
+
+
+void InputFlow::__llvm_intrinsic_ctlz(std::size_t const num_bytes)
+{
+    join(operands().front()->start(), num_bytes, operands().at(1)->start(), num_bytes);
 }
 
 

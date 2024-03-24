@@ -72,9 +72,14 @@ private:
     FlowSetHandle no_flow_;
     std::unordered_set<FlowSetHandle, FlowSetHandleHasher> handles_;
     std::unordered_map<MemPtr, FlowSetHandle> flow_;
+    std::unordered_map<std::string, std::function<void()> > extern_function_processors_;
 
     FlowSetHandle const& read_handle(MemPtr ptr) const;
     void write_handle(MemPtr ptr, FlowSetHandle const& handle);
+
+    void register_external_functions();
+    void register_external_llvm_intrinsics();
+    void register_external_math_functions();
 
 protected:
 
@@ -323,6 +328,12 @@ protected:
 
     void do_call() override;
     void do_ret() override;
+
+    // External functions:
+
+    virtual void pass_input_flow_from_parameters_to_return_value(std::size_t num_return_value_bytes);
+    virtual void __llvm_intrinsic_bswap(std::size_t num_bytes);
+    virtual void __llvm_intrinsic_ctlz(std::size_t num_bytes);
 };
 
 
