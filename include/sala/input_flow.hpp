@@ -72,7 +72,6 @@ private:
     FlowSetHandle no_flow_;
     std::unordered_set<FlowSetHandle, FlowSetHandleHasher> handles_;
     std::unordered_map<MemPtr, FlowSetHandle> flow_;
-    std::unordered_map<std::string, std::function<void()> > extern_function_processors_;
 
     FlowSetHandle const& read_handle(MemPtr ptr) const;
     void write_handle(MemPtr ptr, FlowSetHandle const& handle);

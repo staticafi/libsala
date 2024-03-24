@@ -3,8 +3,9 @@
 
 #   include <sala/exec_state.hpp>
 #   include <sala/instr_switch.hpp>
+#   include <unordered_map>
+#   include <vector>
 #   include <functional>
-
 
 namespace sala {
 
@@ -33,9 +34,13 @@ struct Analyzer : public InstrSwitch
     void pre() { post_operation_ = nullptr; do_instruction_switch(); }
     void post() { if (post_operation_) post_operation_(); }
 
+    bool register_extern_function_processor(std::string const& function_name, std::function<void()> const& code);
+    void call_processor_of_current_function_if_registered_extern();
+
 private:
     ExecState* state_;
     PostOperation post_operation_;
+    std::unordered_map<std::string, std::function<void()> > extern_function_processors_;
 };
 
 

@@ -95,7 +95,6 @@ InputFlow::InputFlow(ExecState* const exec_state)
     , no_flow_{ FlowSet::create() }
     , handles_{ no_flow_ }
     , flow_{}
-    , extern_function_processors_{}
 {
     register_external_functions();
 }
@@ -1529,9 +1528,7 @@ void InputFlow::do_call()
 
 void InputFlow::do_ret()
 {
-    auto const it{ extern_function_processors_.find(state().current_function().name()) };
-    if (it != extern_function_processors_.end())
-        it->second();
+    call_processor_of_current_function_if_registered_extern();
 
     for (auto const& block : stack_top().parameters())
         clear(block.start(), block.count());
@@ -1555,7 +1552,7 @@ void InputFlow::register_external_functions()
 void InputFlow::register_external_llvm_intrinsics()
 {
 #   define REGISTER_FUNC(FN_NAME, IMPL) \
-        extern_function_processors_.insert({ #FN_NAME, [this]() { IMPL; } })
+        register_extern_function_processor(#FN_NAME, [this]() { IMPL; })
 
     REGISTER_FUNC(__llvm_intrinsic_bswap_8, this->__llvm_intrinsic_bswap(8ULL));
     REGISTER_FUNC(__llvm_intrinsic_bswap_16, this->__llvm_intrinsic_bswap(16ULL));
@@ -1573,7 +1570,7 @@ void InputFlow::register_external_llvm_intrinsics()
 void InputFlow::register_external_math_functions()
 {
 #   define REGISTER_FUNC(FN_NAME, TYPE) \
-        extern_function_processors_.insert({ #FN_NAME, [this]() { this->pass_input_flow_from_parameters_to_return_value(sizeof(TYPE)); } })
+        register_extern_function_processor(#FN_NAME, [this]() { this->pass_input_flow_from_parameters_to_return_value(sizeof(TYPE)); })
 
     REGISTER_FUNC(acos, double);
     REGISTER_FUNC(acosf, float);
