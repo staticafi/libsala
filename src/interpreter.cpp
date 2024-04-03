@@ -13,16 +13,7 @@ Interpreter::Interpreter(ExecState* const state, ExternCode* const extern_code, 
     : state_{ state }
     , extern_code_{ extern_code }
     , analyzers_{ analyzers }
-{
-    ASSUMPTION(program().num_cpu_bits() == 64U);
-    // Support for 32-bit programs requires:
-    //  (1) To introduce a translation between native 64-bit addresses and 32-bit
-    //      handle identifying the addresses.
-    //      There is a catch: How to recognize some handle is no longer valid (and
-    //      so the corresponding mapping can be forgotten)?
-    //  (2) Dedicated interpretation of instructions where the translation (1)
-    //      is taken into account.
-}
+{}
 
 
 void Interpreter::step()
