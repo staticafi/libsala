@@ -32,12 +32,6 @@ bool Sanitizer::inside(MemRegion const* const region, MemPtr const ptr, std::siz
 
 bool Sanitizer::is_memory_valid(MemPtr const ptr, std::size_t const count) const
 {
-if (!inside(locate(ptr), ptr, count))
-{
-    auto ppp = locate(ptr);
-    int iii = 1;
-}
-
     return inside(locate(ptr), ptr, count);
 }
 
