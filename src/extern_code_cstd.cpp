@@ -5,10 +5,10 @@
 #include <cmath>
 
 #define REGISTER_UNARY_FUNC(FN_NAME, TYPE) \
-    REGISTER_EXTERN_CODE(FN_NAME, *parameters().front().as<TYPE*>() = FN_NAME(parameters().back().as<TYPE>()) )
+    REGISTER_EXTERN_CODE(FN_NAME, *parameters().front().read<TYPE*>() = FN_NAME(parameters().back().read<TYPE>()) )
 #define REGISTER_BINARY_FUNC(FN_NAME, TYPE) \
-    REGISTER_EXTERN_CODE(FN_NAME, *parameters().front().as<TYPE*>() = FN_NAME(parameters().at(1).as<TYPE>(), \
-                                                                              parameters().back().as<TYPE>()) )
+    REGISTER_EXTERN_CODE(FN_NAME, *parameters().front().read<TYPE*>() = FN_NAME(parameters().at(1).read<TYPE>(), \
+                                                                                parameters().back().read<TYPE>()) )
 
 namespace sala {
 

@@ -2,37 +2,14 @@
 #   define SALA_EXEC_STATE_HPP_INCLUDED
 
 #   include <sala/program.hpp>
+#   include <sala/memblock.hpp>
+#   include <sala/pointer_model.hpp>
 #   include <vector>
 #   include <unordered_map>
 #   include <memory>
 #   include <cstdint>
 
 namespace sala {
-
-
-using MemPtr = std::uint8_t*;
-
-
-struct MemBlock final
-{
-    MemBlock();
-    explicit MemBlock(std::size_t num_bytes, std::uint8_t init_value = 0xcd);
-
-    MemPtr start() const { return start_.get(); }
-    std::size_t count() const { return count_; }
-
-    std::size_t as_size() const;
-
-    template<typename T>
-    T as() const { return *(T*)start(); }
-
-    template<typename T>
-    T& as_ref() const { return *(T*)start(); }
-
-private:
-    std::shared_ptr<std::uint8_t[]> start_;
-    std::size_t count_;
-};
 
 
 struct InstrPointer final
@@ -54,7 +31,7 @@ private:
 struct StackRecord final
 {
     StackRecord();
-    explicit StackRecord(Function const& F);
+    explicit StackRecord(PointerModel* pointer_model, Function const& F);
 
     std::uint32_t function_index() const { return function_index_; }
     InstrPointer const& ip() const { return ip_; }
@@ -70,6 +47,7 @@ struct StackRecord final
     void pop_back_local_variable();
 
 private:
+    PointerModel* pointer_model_;
     std::uint32_t function_index_;
     InstrPointer ip_;
     std::vector<MemBlock> parameters_;
@@ -97,14 +75,16 @@ struct ExecState final
     };
 
     explicit ExecState(Program const* P);
+    ~ExecState();
 
     Program const& program() const { return *program_; }
+    PointerModel* pointer_model() { return pointer_model_; }
 
     Stage stage() const { return stage_; }
     Termination termination() const { return termination_; }
     std::string const& terminator() const { return terminator_; }
     std::string const& error_message() const { return error_message_; }
-    int exit_code() const { return exit_code_.as<int>(); }
+    int exit_code() const { return exit_code_.read<int>(); }
     MemBlock const& exit_code_memory_block() const { return exit_code_; }
 
     std::vector<MemBlock> const& constant_segment() const { return constant_segment_; }
@@ -134,7 +114,7 @@ struct ExecState final
 
     bool set_stage(Stage type);
     bool set_termination(Termination type, std::string const& terminator, std::string const& message);
-    void set_exit_code(std::int32_t const c) { exit_code_.as_ref<std::int32_t>() = c; }
+    void set_exit_code(std::int32_t const c) { exit_code_.write(c); }
 
     void update_current_values();
 
@@ -144,6 +124,7 @@ struct ExecState final
 private:
 
     Program const* program_;
+    PointerModel* pointer_model_;
 
     Stage stage_;
     Termination termination_;

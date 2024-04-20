@@ -1,7 +1,7 @@
 set(THIS_TARGET_NAME sala)
 
-file(GLOB "${THIS_TARGET_NAME}_HPP" "./include/${THIS_TARGET_NAME}/*.hpp")
-file(GLOB "${THIS_TARGET_NAME}_CPP" "./src/*.cpp")
+file(GLOB_RECURSE "${THIS_TARGET_NAME}_HPP" "./include/${THIS_TARGET_NAME}/*.hpp")
+file(GLOB_RECURSE "${THIS_TARGET_NAME}_CPP" "./src/*.cpp")
 
 add_library(${THIS_TARGET_NAME}
     "${${THIS_TARGET_NAME}_HPP}"
@@ -17,4 +17,3 @@ set_target_properties(${THIS_TARGET_NAME} PROPERTIES
 if(DEFINED LIBSALA_INSTALL_DIR)
     install(TARGETS ${THIS_TARGET_NAME} DESTINATION "${LIBSALA_INSTALL_DIR}")
 endif(DEFINED LIBSALA_INSTALL_DIR)
-

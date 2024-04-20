@@ -205,13 +205,13 @@ void InputFlow::write_handle(MemPtr const ptr, FlowSetHandle const& handle)
 
 void InputFlow::do_load()
 {
-    copy(operands().front()->start(), operands().back()->as<MemPtr>(), operands().front()->count());
+    copy(operands().front()->start(), operands().back()->read<MemPtr>(), operands().front()->count());
 }
 
 
 void InputFlow::do_store()
 {
-    copy(operands().front()->as<MemPtr>(), operands().back()->start(), operands().back()->count());
+    copy(operands().front()->read<MemPtr>(), operands().back()->start(), operands().back()->count());
 }
 
 
@@ -247,19 +247,19 @@ void InputFlow::do_copy()
 
 void InputFlow::do_memcpy()
 {
-    copy(operands().front()->as<MemPtr>(), operands().at(1)->as<MemPtr>(), operands().back()->as_size());
+    copy(operands().front()->read<MemPtr>(), operands().at(1)->read<MemPtr>(), operands().back()->as_size());
 }
 
 
 void InputFlow::do_memmove()
 {
-    move(operands().front()->as<MemPtr>(), operands().at(1)->as<MemPtr>(), operands().back()->as_size());
+    move(operands().front()->read<MemPtr>(), operands().at(1)->read<MemPtr>(), operands().back()->as_size());
 }
 
 
 void InputFlow::do_memset()
 {
-    set(operands().front()->as<MemPtr>(), operands().at(1)->start(), operands().back()->as_size());
+    set(operands().front()->read<MemPtr>(), operands().at(1)->start(), operands().back()->as_size());
 }
 
 
@@ -276,7 +276,7 @@ void InputFlow::do_moveptr()
 
 void InputFlow::do_free()
 {
-    MemPtr ptr{ operands().front()->as<MemPtr>() };
+    MemPtr ptr{ operands().front()->read<MemPtr>() };
     clear(ptr, state().heap_segment().at(ptr).count());
 }
 
@@ -1487,7 +1487,7 @@ void InputFlow::do_va_start()
     // IMPORTANT: This implementation is valid only for programs targeted to Linux 64-bit platform.
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    platform_linux_64_bit::va_list* const va_list_ptr{ operands().front()->as_ref<platform_linux_64_bit::va_list*>() };
+    platform_linux_64_bit::va_list* const va_list_ptr{ (platform_linux_64_bit::va_list*)operands().front()->read<MemPtr>() };
     set_post_operation([this, va_list_ptr]() {
         MemPtr array = (MemPtr)va_list_ptr->reg_save_area;
         for (auto const& param : stack_top().variadic_parameters())
@@ -1506,7 +1506,7 @@ void InputFlow::do_va_end()
     // IMPORTANT: This implementation is valid only for programs targeted to Linux 64-bit platform.
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    platform_linux_64_bit::va_list* const va_list_ptr{ operands().front()->as_ref<platform_linux_64_bit::va_list*>() };
+    platform_linux_64_bit::va_list* const va_list_ptr{ (platform_linux_64_bit::va_list*)operands().front()->read<MemPtr>() };
     clear((MemPtr)va_list_ptr->reg_save_area, va_list_ptr->gp_offset - 256U);
 }
 
@@ -1633,7 +1633,7 @@ void InputFlow::pass_input_flow_from_parameters_to_return_value(std::size_t cons
 
 void InputFlow::__llvm_intrinsic_bswap(std::size_t const num_bytes)
 {
-    auto const dst_ptr{ parameters().front().as<MemPtr>() };
+    auto const dst_ptr{ parameters().front().read<MemPtr>() };
     auto const src_ptr{ parameters().back().start() };
     for (std::size_t i = 0ULL; i != num_bytes; ++i)
         copy(dst_ptr + num_bytes - (i + 1ULL), src_ptr + i, 1ULL);

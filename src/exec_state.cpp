@@ -1,37 +1,12 @@
 #include <sala/exec_state.hpp>
+#include <sala/pointer_model_default.hpp>
+#include <sala/pointer_model_m32.hpp>
 #include <utility/assumptions.hpp>
 #include <utility/invariants.hpp>
 #include <cstring>
 #include <sstream>
 
 namespace sala {
-
-
-MemBlock::MemBlock()
-    : start_{ nullptr }
-    , count_{ 0ULL }
-{}
-
-
-MemBlock::MemBlock(std::size_t const num_bytes, std::uint8_t init_value)
-    : start_{ new std::uint8_t[num_bytes] }
-    , count_{ num_bytes }
-{
-    std::memset(start(), init_value, count());
-}
-
-
-std::size_t MemBlock::as_size() const
-{
-    switch (count())
-    {
-    case 1ULL: return (std::size_t)*start();
-    case 2ULL: return (std::size_t)*(std::uint16_t*)start();
-    case 4ULL: return (std::size_t)*(std::uint32_t*)start();
-    case 8ULL: return (std::size_t)*(std::uint64_t*)start();
-    default: UNREACHABLE(); return 0ULL;
-    }
-}
 
 
 InstrPointer::InstrPointer()
@@ -62,29 +37,30 @@ StackRecord::StackRecord()
 {}
 
 
-StackRecord::StackRecord(Function const& F)
-    : function_index_{ F.index() }
+StackRecord::StackRecord(PointerModel* const pointer_model, Function const& F)
+    : pointer_model_{ pointer_model }
+    , function_index_{ F.index() }
     , ip_{}
     , parameters_{}
     , locals_{}
     , variadic_parameters_{}
 {
     for (auto const& param : F.parameters())
-        parameters_.push_back(MemBlock{ param.num_bytes() });
+        parameters_.push_back(MemBlock{ pointer_model_, param.num_bytes() });
     for (auto const& local : F.local_variables())
-        locals_.push_back(MemBlock{ local.num_bytes() });
+        locals_.push_back(MemBlock{ pointer_model_, local.num_bytes() });
 }
 
 
 void StackRecord::push_back_variadic_parameter(std::size_t const num_bytes)
 {
-    variadic_parameters_.push_back(MemBlock{ num_bytes });
+    variadic_parameters_.push_back(MemBlock{ pointer_model_, num_bytes });
 }
 
 
 void StackRecord::push_back_local_variable(std::size_t num_bytes)
 {
-    locals_.push_back(MemBlock{ num_bytes });
+    locals_.push_back(MemBlock{ pointer_model_, num_bytes });
 }
 
 
@@ -96,12 +72,13 @@ void StackRecord::pop_back_local_variable()
 
 ExecState::ExecState(Program const* const P)
     : program_{ P }
+    , pointer_model_{ program_->num_cpu_bits() == 32U ? (PointerModel*)new PointerModelM32() : (PointerModel*)new PointerModelDefault() }
 
     , stage_{ Stage::INITIALIZING }
     , termination_{ Termination::UNKNOWN }
     , terminator_{}
     , error_message_{}
-    , exit_code_{ sizeof(std::uint64_t) }
+    , exit_code_{ pointer_model_, sizeof(std::uint64_t) }
 
     , constant_segment_{}
     , static_segment_{}
@@ -121,23 +98,40 @@ ExecState::ExecState(Program const* const P)
 {
     for (auto const& constant : program().constants())
     {
-        constant_segment_.push_back(MemBlock{ constant.num_bytes() });
+        constant_segment_.push_back(MemBlock{ pointer_model(), constant.num_bytes() });
         std::memcpy(constant_segment_.back().start(), constant.bytes().data(), constant.num_bytes());
     }
 
     for (auto const& var : program().static_variables())
-        static_segment_.push_back(MemBlock{ var.num_bytes(), 0 });
+        static_segment_.push_back(MemBlock{ pointer_model(), var.num_bytes(), 0 });
 
     for (auto const& func : program().functions())
     {
         ASSUMPTION((std::uint32_t)function_segment_.size() == func.index());
-        function_segment_.push_back(MemBlock{ 1ULL });
+        function_segment_.push_back(MemBlock{ pointer_model(), 1ULL });
         functions_at_addresses_.insert({ function_segment_.back().start(), func.index() });
     }
 
-    stack_segment_.push_back(StackRecord(program().functions().at(Program::static_initializer())));
+    stack_segment_.push_back(StackRecord(pointer_model(), program().functions().at(Program::static_initializer())));
 
     update_current_values();
+}
+
+
+ExecState::~ExecState()
+{
+    exit_code_ = {};
+
+    constant_segment_.clear();
+    static_segment_.clear();
+    function_segment_.clear();
+    functions_at_addresses_.clear();
+    stack_segment_.clear();
+    heap_segment_.clear();
+
+    current_operands_.clear();
+
+    delete pointer_model_;
 }
 
 

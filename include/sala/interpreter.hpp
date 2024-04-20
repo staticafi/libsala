@@ -25,6 +25,8 @@ struct Interpreter : public InstrSwitch
     InstrPointer const& ip() const { return state().stack_top().ip(); }
     InstrPointer& ip() { return state().stack_top().ip(); }
 
+    ExternCode const& extern_code() const { return *extern_code_; }
+    ExternCode& extern_code() { return *extern_code_; }
     std::vector<Analyzer*> const& analyzers() const { return analyzers_; }
 
     bool done() const { return state().stage() == ExecState::Stage::FINISHED; }

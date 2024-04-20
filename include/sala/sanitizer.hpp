@@ -28,8 +28,8 @@ private:
     MemRegion* locate(MemPtr ptr) const;
 
     void crash_interpretation(std::string const& text);
-    void crash_interpretation_due_to_memory_access() { crash_interpretation("Access outside program's memory."); }
-    void crash_interpretation_due_to_zero_division() { crash_interpretation("Division by zero."); }
+    void crash_interpretation_due_to_memory_access();
+    void crash_interpretation_due_to_zero_division();
 
     void on_stack_initialized() override;
 

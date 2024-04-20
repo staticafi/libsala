@@ -60,7 +60,7 @@ void ExternCode::call_code_of_current_function_if_registered_external()
 
 void ExternCode::std_exit()
 {
-    int const exit_code{ parameters().front().as<int>() };
+    int const exit_code{ parameters().front().read<int>() };
 
     state().set_stage(ExecState::Stage::TERMINATING);
     state().set_termination(
@@ -76,7 +76,7 @@ void ExternCode::std_exit()
 
 void ExternCode::std_atexit()
 {
-    MemPtr const func_ptr{ parameters().back().as<MemPtr>() };
+    MemPtr const func_ptr{ parameters().back().read<MemPtr>() };
     auto const it = state().functions_at_addresses().find(func_ptr);
     if (it == state().functions_at_addresses().end())
         state().set_termination(
@@ -102,7 +102,7 @@ void ExternCode::std_abort(std::string const& func_name)
 
 void ExternCode::__llvm_intrinsic_bswap(std::size_t const num_bytes)
 {
-    auto const dst_ptr{ parameters().front().as<MemPtr>() };
+    auto const dst_ptr{ parameters().front().read<MemPtr>() };
     auto const src_ptr{ parameters().back().start() };
     for (std::size_t i = 0ULL; i != num_bytes; ++i)
         *(dst_ptr + num_bytes - (i + 1ULL)) = *(src_ptr + i);
@@ -111,25 +111,25 @@ void ExternCode::__llvm_intrinsic_bswap(std::size_t const num_bytes)
 
 void ExternCode::__llvm_intrinsic_ctlz_8()
 {
-    parameters().front().as_ref<std::uint8_t>() = __llvm_intrinsic_ctlz_impl(parameters().at(1).as<std::uint8_t>());
+    parameters().front().write<std::uint8_t>(__llvm_intrinsic_ctlz_impl(parameters().at(1).read<std::uint8_t>()));
 }
 
 
 void ExternCode::__llvm_intrinsic_ctlz_16()
 {
-    parameters().front().as_ref<std::uint16_t>() = __llvm_intrinsic_ctlz_impl(parameters().at(1).as<std::uint16_t>());
+    parameters().front().write<std::uint16_t>(__llvm_intrinsic_ctlz_impl(parameters().at(1).read<std::uint16_t>()));
 }
 
 
 void ExternCode::__llvm_intrinsic_ctlz_32()
 {
-    parameters().front().as_ref<std::uint32_t>() = __llvm_intrinsic_ctlz_impl(parameters().at(1).as<std::uint32_t>());
+    parameters().front().write<std::uint32_t>(__llvm_intrinsic_ctlz_impl(parameters().at(1).read<std::uint32_t>()));
 }
 
 
 void ExternCode::__llvm_intrinsic_ctlz_64()
 {
-    parameters().front().as_ref<std::uint64_t>() = __llvm_intrinsic_ctlz_impl(parameters().at(1).as<std::uint64_t>());
+    parameters().front().write<std::uint64_t>(__llvm_intrinsic_ctlz_impl(parameters().at(1).read<std::uint64_t>()));
 }
 
 
