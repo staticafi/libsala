@@ -84,6 +84,7 @@ struct ExecState final
     Termination termination() const { return termination_; }
     std::string const& terminator() const { return terminator_; }
     std::string const& error_message() const { return error_message_; }
+    Instruction const* termination_instruction() const { return termination_instruction_; }
     int exit_code() const { return exit_code_.read<int>(); }
     MemBlock const& exit_code_memory_block() const { return exit_code_; }
 
@@ -113,7 +114,7 @@ struct ExecState final
     void set_stack_exit_depth(std::size_t const size) { stack_exit_depth_ = size; }
 
     bool set_stage(Stage type);
-    bool set_termination(Termination type, std::string const& terminator, std::string const& message);
+    bool set_termination(Termination type, std::string const& terminator, std::string const& message, Instruction const* instruction = nullptr);
     void set_exit_code(std::int32_t const c) { exit_code_.write(c); }
 
     void update_current_values();
@@ -130,6 +131,7 @@ private:
     Termination termination_;
     std::string terminator_;
     std::string error_message_;
+    Instruction const* termination_instruction_;
     MemBlock exit_code_;
 
     std::vector<MemBlock> constant_segment_;

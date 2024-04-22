@@ -78,6 +78,7 @@ ExecState::ExecState(Program const* const P)
     , termination_{ Termination::UNKNOWN }
     , terminator_{}
     , error_message_{}
+    , termination_instruction_{ nullptr }
     , exit_code_{ pointer_model_, sizeof(std::uint64_t) }
 
     , constant_segment_{}
@@ -144,13 +145,19 @@ bool ExecState::set_stage(Stage const type)
 }
 
 
-bool ExecState::set_termination(Termination const type, std::string const& terminator, std::string const& message)
+bool ExecState::set_termination(
+    Termination const type,
+    std::string const& terminator,
+    std::string const& message,
+    Instruction const* const instruction
+    )
 {
     if (type <= termination_)
         return false;
     termination_ = type;
     terminator_ = terminator;
     error_message_ = message;
+    termination_instruction_ = instruction != nullptr ? instruction : current_instruction_;
     return true;
 }
 
