@@ -51,7 +51,7 @@ struct Variable
     };
 
     Program* program() const { return program_; }
-    Function* function() const { return function_; }
+    std::uint32_t function_index() const { return function_index_; }
     std::uint32_t index() const { return index_; }
     Region region() const { return region_; }
     std::size_t num_bytes() const { return num_bytes_; }
@@ -59,7 +59,7 @@ struct Variable
     SourceBackMapping const& source_back_mapping() const { return back_mapping_; }
 
     void set_program(Program* const program) { program_ = program; }
-    void set_function(Function* const function) { function_ = function; }
+    void set_function_index(std::uint32_t const index) { function_index_ = index; }
     void set_index(std::uint32_t const index) { index_ = index; }
     void set_region(Region region) { region_ = region; }
     void set_num_bytes(std::size_t const num_bytes) { num_bytes_ = num_bytes; }
@@ -67,7 +67,7 @@ struct Variable
     SourceBackMapping& source_back_mapping() { return back_mapping_; }
 private:
     Program* program_{ nullptr };
-    Function* function_{ nullptr };
+    std::uint32_t function_index_{ 0U };
     std::uint32_t index_{};
     Region region_{ Region::STATIC };
     std::size_t num_bytes_{ 0U };
@@ -592,7 +592,7 @@ struct Instruction
         FUNCTION,
     };
 
-    BasicBlock* basic_block() const { return basic_block_; }
+    std::uint32_t basic_block_index() const { return basic_block_index_; }
     std::uint32_t index() const { return index_; }
     Opcode opcode() const { return opcode_; }
     Modifier modifier() const { return modifier_; }
@@ -600,7 +600,7 @@ struct Instruction
     std::vector<Descriptor> const& descriptors() const { return descriptors_; }
     SourceBackMapping const& source_back_mapping() const { return back_mapping_; }
 
-    void set_basic_block(BasicBlock* const block) { basic_block_ = block; }
+    void set_basic_block_index(std::uint32_t const index) { basic_block_index_ = index; }
     void set_index(std::uint32_t const index) { index_ = index; }
     void set_opcode(Opcode const op) { opcode_ = op; }
     void set_modifier(Modifier const modifier) { modifier_ = modifier; }
@@ -608,7 +608,7 @@ struct Instruction
     void assign(Instruction const& other);
     SourceBackMapping& source_back_mapping() { return back_mapping_; }
 private:
-    BasicBlock* basic_block_{ nullptr };
+    std::uint32_t basic_block_index_{ 0U };
     std::uint32_t index_{ 0U };
     Opcode opcode_{ Opcode::__INVALID__ };
     Modifier modifier_{ Modifier::NONE };
@@ -620,12 +620,12 @@ private:
 
 struct BasicBlock
 {
-    Function* function() const { return function_; }
+    std::uint32_t function_index() const { return function_index_; }
     std::uint32_t index() const { return index_; }
     std::vector<Instruction> const& instructions() const { return instructions_; }
     std::vector<std::uint32_t> const& successors() const { return successors_; }
 
-    void set_function(Function* const function) { function_ = function; }
+    void set_function_index(std::uint32_t const index) { function_index_ = index; }
     void set_index(std::uint32_t const index) { index_ = index; }
     Instruction& push_back_instruction();
     void push_back_successor(std::uint32_t const succ_index) { successors_.push_back(succ_index); }
@@ -636,7 +636,7 @@ struct BasicBlock
     std::uint32_t& successor_ref(std::uint32_t const idx) { return successors_.at(idx); }
 
 private:
-    Function* function_{ nullptr };
+    std::uint32_t function_index_{ 0U };
     std::uint32_t index_{ 0U };
     std::vector<Instruction> instructions_{};
     std::vector<std::uint32_t> successors_{};
