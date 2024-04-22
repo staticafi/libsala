@@ -5,10 +5,13 @@
 #include <cmath>
 
 #define REGISTER_UNARY_FUNC(FN_NAME, TYPE) \
-    REGISTER_EXTERN_CODE(FN_NAME, *parameters().front().read<TYPE*>() = FN_NAME(parameters().back().read<TYPE>()) )
+    REGISTER_EXTERN_CODE(FN_NAME, \
+        TYPE const result{ FN_NAME(parameters().back().read<TYPE>()) }; \
+        std::memcpy(parameters().front().read<sala::MemPtr>(), &result, sizeof(TYPE)))
 #define REGISTER_BINARY_FUNC(FN_NAME, TYPE) \
-    REGISTER_EXTERN_CODE(FN_NAME, *parameters().front().read<TYPE*>() = FN_NAME(parameters().at(1).read<TYPE>(), \
-                                                                                parameters().back().read<TYPE>()) )
+    REGISTER_EXTERN_CODE(FN_NAME, \
+        TYPE const result{ FN_NAME(parameters().at(1).read<TYPE>(), parameters().back().read<TYPE>()) }; \
+        std::memcpy(parameters().front().read<sala::MemPtr>(), &result, sizeof(TYPE)))
 
 namespace sala {
 
