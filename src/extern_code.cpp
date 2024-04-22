@@ -58,6 +58,17 @@ void ExternCode::call_code_of_current_function_if_registered_external()
 }
 
 
+Instruction const* ExternCode::get_call_instruction() const
+{
+    if (state().stack_segment().size() < 2ULL)
+        return nullptr;
+    auto const& callee_stack_record{ state().stack_segment().at(state().stack_segment().size() - 2ULL) };
+    return &program().functions().at(callee_stack_record.function_index())
+                     .basic_blocks().at(callee_stack_record.ip().block())
+                     .instructions().at(callee_stack_record.ip().instr());
+}
+
+
 void ExternCode::std_exit()
 {
     int const exit_code{ parameters().front().read<int>() };
@@ -66,7 +77,8 @@ void ExternCode::std_exit()
     state().set_termination(
         ExecState::Termination::NORMAL,
         "test_interpreter[extern_code]",
-        "Called exit(" + std::to_string(exit_code) + ")."
+        "Called exit(" + std::to_string(exit_code) + ").",
+        get_call_instruction()
         );
     state().set_exit_code(exit_code);
 
@@ -82,7 +94,8 @@ void ExternCode::std_atexit()
         state().set_termination(
             ExecState::Termination::ERROR,
             "test_interpreter[extern_code]",
-            "Called atexit() with an invalid pointer. No function was pushed."
+            "Called atexit() with an invalid pointer. No function was pushed.",
+            get_call_instruction()
             );
     else
         state().push_atexit_function(it->second);
@@ -95,7 +108,8 @@ void ExternCode::std_abort(std::string const& func_name)
     state().set_termination(
         ExecState::Termination::ERROR,
         "test_interpreter[extern_code]",
-        "Called " + func_name + "().");
+        "Called " + func_name + "().",
+        get_call_instruction());
     state().set_exit_code(0);
 }
 

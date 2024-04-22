@@ -29,6 +29,8 @@ struct ExternCode
 
     void call_code_of_current_function_if_registered_external();
 
+    Instruction const* get_call_instruction() const;
+
 private:
     void std_exit();
     void std_atexit();
