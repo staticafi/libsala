@@ -36,6 +36,8 @@ private:
         using Map64to32 = std::unordered_map<MemPtr, MemPtr32bit>;
         using MemBlockMap = std::unordered_map<MemPtr, std::vector<MemPtr> >;
 
+        PtrMap32bit();
+
         MemPtr32bit insert(MemPtr ptr, MemPtr block_ptr);
         void erase(MemPtr ptr);
         void erase_block(MemPtr block_ptr);
@@ -46,9 +48,9 @@ private:
         PointerAndBlock const& find(MemPtr32bit ptr32) const { return lo2hi_.at(ptr32); }
 
     private:
-        Map32to64 lo2hi_{};
-        Map64to32 hi2lo_{};
-        MemBlockMap blocks_{};
+        Map32to64 lo2hi_;
+        Map64to32 hi2lo_;
+        MemBlockMap blocks_;
     };
 
     PtrMap32bit ptr_map_{};

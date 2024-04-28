@@ -50,6 +50,13 @@ PointerModelM32::MemPtr32bit PointerModelM32::hash_ptr64(MemPtr const ptr)
 }
 
 
+PointerModelM32::PtrMap32bit::PtrMap32bit()
+    : lo2hi_{ { (MemPtr32bit)0, { nullptr, nullptr } } }
+    , hi2lo_{ { nullptr, (MemPtr32bit)0 } }
+    , blocks_{ { (MemPtr)nullptr, {} } }
+{}
+
+
 PointerModelM32::MemPtr32bit PointerModelM32::PtrMap32bit::insert(MemPtr const ptr, MemPtr const block_ptr)
 {
     auto const it = hi2lo_.find(ptr);
