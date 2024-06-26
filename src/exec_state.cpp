@@ -136,6 +136,25 @@ ExecState::~ExecState()
 }
 
 
+std::string  ExecState::report(std::string const&  error_message_suffix) const
+{
+    std::stringstream  sstr;
+    sstr << "{ "
+         << "\"stage\": \"" << to_string(stage()) << "\""
+         << ", "
+         << "\"exit_code\": " << exit_code()
+         << ", "
+         << "\"termination\": \"" << to_string(termination()) << "\""
+         << ", "
+         << "\"terminator\": \"" << terminator() << "\""
+         << ", "
+         << "\"error_message\": \"" << error_message() << error_message_suffix << "\""
+         << " }"
+         ;
+    return sstr.str();
+}
+
+
 bool ExecState::set_stage(Stage const type)
 {
     if (type <= stage_)
@@ -219,6 +238,32 @@ std::string ExecState::make_error_message(std::string const& text) const
     std::stringstream sstr;
     sstr << "In " << current_location_message() << ": " << text;
     return sstr.str();
+}
+
+
+std::string  to_string(ExecState::Stage  stage)
+{
+    switch (stage)
+    {
+        case ExecState::Stage::INITIALIZING: return "INITIALIZING";
+        case ExecState::Stage::EXECUTING: return "EXECUTING";
+        case ExecState::Stage::TERMINATING: return "TERMINATING";
+        case ExecState::Stage::FINISHED: return "FINISHED";
+        default: return "UNDEFINED";
+    }
+}
+
+
+std::string  to_string(ExecState::Termination  termination)
+{
+    switch (termination)
+    {
+        case ExecState::Termination::UNKNOWN: return "UNKNOWN";
+        case ExecState::Termination::NORMAL: return "NORMAL";
+        case ExecState::Termination::ERROR: return "ERROR";
+        case ExecState::Termination::CRASH: return "CRASH";
+        default: return "UNDEFINED";
+    }
 }
 
 

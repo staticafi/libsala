@@ -88,6 +88,8 @@ struct ExecState final
     int exit_code() const { return exit_code_.read<int>(); }
     MemBlock const& exit_code_memory_block() const { return exit_code_; }
 
+    std::string  report(std::string const&  error_message_suffix = "") const;
+
     std::vector<MemBlock> const& constant_segment() const { return constant_segment_; }
     std::vector<MemBlock> const& static_segment() const { return static_segment_; }
     std::vector<MemBlock> const& function_segment() const { return function_segment_; }
@@ -150,6 +152,10 @@ private:
     Instruction const* current_instruction_;
     std::vector<MemBlock const*> current_operands_;
 }; 
+
+
+std::string  to_string(ExecState::Stage  stage);
+std::string  to_string(ExecState::Termination  termination);
 
 
 }
