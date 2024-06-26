@@ -80,6 +80,7 @@ ExecState::ExecState(Program const* const P)
     , error_message_{}
     , termination_instruction_{ nullptr }
     , exit_code_{ pointer_model_, sizeof(std::uint64_t) }
+    , warnings_{}
 
     , constant_segment_{}
     , static_segment_{}

@@ -54,6 +54,10 @@ void ExternCode::call_code_of_current_function_if_registered_external()
         auto it = code_.find(function().name());
         if (it != code_.end())
             it->second();
+        else if (!function().name().starts_with("__sbt_fizzer_"))
+            state().insert_warning(
+                    state().current_location_message() + ": Called unregistered external function '" + function().name() + "'."
+                    );
     }
 }
 

@@ -6,6 +6,7 @@
 #   include <sala/pointer_model.hpp>
 #   include <vector>
 #   include <unordered_map>
+#   include <unordered_set>
 #   include <memory>
 #   include <cstdint>
 
@@ -87,6 +88,7 @@ struct ExecState final
     Instruction const* termination_instruction() const { return termination_instruction_; }
     int exit_code() const { return exit_code_.read<int>(); }
     MemBlock const& exit_code_memory_block() const { return exit_code_; }
+    std::unordered_set<std::string> const& warnings() const { return warnings_; }
 
     std::string  report(std::string const&  error_message_suffix = "") const;
 
@@ -118,6 +120,7 @@ struct ExecState final
     bool set_stage(Stage type);
     bool set_termination(Termination type, std::string const& terminator, std::string const& message, Instruction const* instruction = nullptr);
     void set_exit_code(std::int32_t const c) { exit_code_.write(c); }
+    void insert_warning(std::string const&  text) { warnings_.insert(text); }
 
     void update_current_values();
 
@@ -135,6 +138,7 @@ private:
     std::string error_message_;
     Instruction const* termination_instruction_;
     MemBlock exit_code_;
+    std::unordered_set<std::string> warnings_;
 
     std::vector<MemBlock> constant_segment_;
     std::vector<MemBlock> static_segment_;
