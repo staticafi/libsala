@@ -39,13 +39,13 @@ MemBlock::Data::Data(PointerModel* const pointer_model, std::size_t const num_by
     , bytes{ new std::uint8_t[num_bytes] }
     , count_{ num_bytes }
 {
-    pointer_model_->on_memblock_allocated(bytes);
+    pointer_model_->on_memblock_allocated(bytes, count_);
 }
 
 
 MemBlock::Data::~Data()
 {
-    pointer_model_->on_memblock_released(bytes);
+    pointer_model_->on_memblock_released(bytes, count_);
 }
 
 

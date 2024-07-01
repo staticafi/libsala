@@ -75,11 +75,14 @@ struct ExecState final
         CRASH   = 2
     };
 
-    explicit ExecState(Program const* P);
+    explicit ExecState(Program const* P, std::size_t memory_size_in_bytes = 0ULL);
     ~ExecState();
 
     Program const& program() const { return *program_; }
-    PointerModel* pointer_model() { return pointer_model_; }
+    PointerModel* pointer_model() const { return pointer_model_; }
+    std::size_t memory_size_in_bytes() const { return memory_size_in_bytes_; }
+    bool can_allocate(std::size_t const num_bytes) const
+    { return memory_size_in_bytes() == 0ULL ? true : pointer_model()->num_allocated_bytes() + num_bytes <= memory_size_in_bytes(); }
 
     Stage stage() const { return stage_; }
     Termination termination() const { return termination_; }
@@ -131,6 +134,7 @@ private:
 
     Program const* program_;
     PointerModel* pointer_model_;
+    std::size_t memory_size_in_bytes_;
 
     Stage stage_;
     Termination termination_;

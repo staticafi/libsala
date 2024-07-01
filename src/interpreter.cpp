@@ -98,6 +98,35 @@ void Interpreter::step()
 }
 
 
+void Interpreter::run()
+{
+    while (!done())
+        step();
+}
+
+
+void Interpreter::run(double const max_seconds)
+{
+    std::chrono::system_clock::time_point const  start_time = std::chrono::system_clock::now();
+    while (!done())
+    {
+        double const num_seconds = std::chrono::duration<double>(std::chrono::system_clock::now() - start_time).count();
+        if (num_seconds >= max_seconds)
+        {
+            state().set_stage(ExecState::Stage::FINISHED);
+            state().set_termination(
+                ExecState::Termination::ERROR,
+                "sala::Interpreter",
+                state().make_error_message("[TIME OUT] The time budget " + std::to_string(max_seconds) + "s for the execution was exhausted.")
+                );
+            return;
+        }
+
+        step();
+    }
+}
+
+
 void Interpreter::do_halt()
 {
     state().set_stage(ExecState::Stage::FINISHED);
@@ -184,7 +213,18 @@ void Interpreter::do_moveptr()
 
 void Interpreter::do_alloca()
 {
-    state().stack_top().push_back_local_variable(operands().at(1)->as_size() * operands().at(2)->as_size());
+    auto const num_bytes{ operands().at(1)->as_size() * operands().at(2)->as_size() };
+    if (!state().can_allocate(num_bytes))
+    {
+        state().set_stage(ExecState::Stage::FINISHED);
+        state().set_termination(
+            ExecState::Termination::ERROR,
+            "sala::Interpreter",
+            state().make_error_message("[OUT OF MEMORY] Cannot allocate memory on stack for a variable.")
+            );
+        return;
+    }
+    state().stack_top().push_back_local_variable(num_bytes);
     operands().front()->write<MemPtr>(state().stack_top().locals().back().start());
 }
 
@@ -205,6 +245,16 @@ void Interpreter::do_stackrestore()
 
 void Interpreter::do_malloc()
 {
+    if (!state().can_allocate(operands().back()->as_size()))
+    {
+        state().set_stage(ExecState::Stage::FINISHED);
+        state().set_termination(
+            ExecState::Termination::ERROR,
+            "sala::Interpreter",
+            state().make_error_message("[OUT OF MEMORY] Cannot allocate memory on heap.")
+            );
+        return;
+    }
     try
     {
         MemBlock mb{ state().pointer_model(), operands().back()->as_size() };
@@ -1561,9 +1611,20 @@ void Interpreter::do_call()
     else
         func_idx = state().functions_at_addresses().at(operands().front()->read<MemPtr>());
 
-    state().stack_top().ip().next();
-
     Function const& func = program().functions().at(func_idx);
+
+    if (!state().can_allocate(func.initial_stack_bytes()))
+    {
+        state().set_stage(ExecState::Stage::FINISHED);
+        state().set_termination(
+            ExecState::Termination::ERROR,
+            "sala::Interpreter",
+            state().make_error_message("[OUT OF MEMORY] Cannot allocate memory on stack for called function.")
+            );
+        return;
+    }
+
+    state().stack_top().ip().next();
 
     state().stack_segment().push_back(StackRecord(state().pointer_model(), func));
 

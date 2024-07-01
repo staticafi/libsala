@@ -44,6 +44,20 @@ void BasicBlock::assign_instruction(std::size_t const index, Instruction const& 
 }
 
 
+std::size_t Function::initial_stack_bytes() const
+{
+    if (initial_stack_bytes_ == std::numeric_limits<std::size_t>::max())
+    {
+        initial_stack_bytes_ = 0ULL;
+        for (auto const& param : parameters())
+            initial_stack_bytes_ += param.num_bytes();
+        for (auto const& local : local_variables())
+            initial_stack_bytes_ += local.num_bytes();
+    }
+    return initial_stack_bytes_;
+}
+
+
 BasicBlock& Function::push_back_basic_block()
 {
     blocks_.push_back({});
@@ -60,6 +74,7 @@ Variable& Function::push_back_parameter()
     parameters_.back().set_function_index(index());
     parameters_.back().set_index((std::uint32_t)parameters_.size() - 1U);
     parameters_.back().set_region(Variable::Region::STACK);
+    initial_stack_bytes_ = std::numeric_limits<std::size_t>::max();
     return parameters_.back();    
 }
 
@@ -71,6 +86,7 @@ Variable& Function::push_back_local_variable()
     locals_.back().set_function_index(index());
     locals_.back().set_index((std::uint32_t)locals_.size() - 1U);
     locals_.back().set_region(Variable::Region::STACK);
+    initial_stack_bytes_ = std::numeric_limits<std::size_t>::max();
     return locals_.back();    
 }
 

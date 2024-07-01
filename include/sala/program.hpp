@@ -5,6 +5,7 @@
 #   include <string>
 #   include <vector>
 #   include <unordered_map>
+#   include <limits>
 
 namespace sala {
 
@@ -652,6 +653,7 @@ struct Function
     std::vector<Variable> const& parameters() const { return parameters_; }
     std::vector<Variable> const& local_variables() const { return locals_; }
     bool is_external() const { return is_external_; }
+    std::size_t initial_stack_bytes() const;
     SourceBackMapping const& source_back_mapping() const { return back_mapping_; }
 
     void set_program(Program* const program) { program_ = program; }
@@ -673,6 +675,7 @@ private:
     std::vector<Variable> parameters_{};
     std::vector<Variable> locals_{};
     bool is_external_{ false };
+    mutable std::size_t initial_stack_bytes_{ std::numeric_limits<std::size_t>::max() };
     SourceBackMapping back_mapping_{};
 };
 

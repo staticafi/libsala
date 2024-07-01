@@ -32,6 +32,9 @@ struct Interpreter : public InstrSwitch
     bool done() const { return state().stage() == ExecState::Stage::FINISHED; }
     void step();
 
+    void run();
+    void run(double max_seconds);
+
 private:
 
     void do_halt() override;
