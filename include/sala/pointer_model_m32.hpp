@@ -45,7 +45,10 @@ private:
         MemPtr32bit at(MemPtr const ptr) const { return hi2lo_.at(ptr); }
         MemPtr at(MemPtr32bit const ptr32) const { return find(ptr32).pointer; }
 
-        PointerAndBlock const& find(MemPtr32bit ptr32) const { return lo2hi_.at(ptr32); }
+        PointerAndBlock const& find(MemPtr32bit const ptr32) const {
+            auto const it = lo2hi_.find(ptr32);
+            return it == lo2hi_.end() ? lo2hi_.at(0U) : it->second; 
+        }
 
     private:
         Map32to64 lo2hi_;
