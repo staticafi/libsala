@@ -3,15 +3,22 @@
 #include <utility/invariants.hpp>
 #include <cstring>
 #include <cmath>
+#include <cfenv>
 
-#define REGISTER_UNARY_FUNC(FN_NAME, TYPE) \
+#define REGISTER_CONST_FUNC(FN_NAME, TYPE) \
     REGISTER_EXTERN_CODE(FN_NAME, \
-        TYPE const result{ FN_NAME(parameters().back().read<TYPE>()) }; \
+        TYPE const result{ FN_NAME() }; \
         std::memcpy(parameters().front().read<sala::MemPtr>(), &result, sizeof(TYPE)))
-#define REGISTER_BINARY_FUNC(FN_NAME, TYPE) \
-    REGISTER_EXTERN_CODE(FN_NAME, \
-        TYPE const result{ FN_NAME(parameters().at(1).read<TYPE>(), parameters().back().read<TYPE>()) }; \
-        std::memcpy(parameters().front().read<sala::MemPtr>(), &result, sizeof(TYPE)))
+#define REGISTER_UNARY_FUNC_IMPL(LL_FN_NAME, FN_NAME, PARAM_TYPE, RET_TYPE) \
+    REGISTER_EXTERN_CODE(LL_FN_NAME, \
+        RET_TYPE const result{ FN_NAME(parameters().back().read<PARAM_TYPE>()) }; \
+        std::memcpy(parameters().front().read<sala::MemPtr>(), &result, sizeof(RET_TYPE)))
+#define REGISTER_UNARY_FUNC(FN_NAME, TYPE) REGISTER_UNARY_FUNC_IMPL(FN_NAME, FN_NAME, TYPE, TYPE)
+#define REGISTER_BINARY_FUNC_IMPL(LL_FN_NAME, FN_NAME, PARAM1_TYPE, PARAM2_TYPE, RET_TYPE) \
+    REGISTER_EXTERN_CODE(LL_FN_NAME, \
+        RET_TYPE const result{ FN_NAME(parameters().at(1).read<PARAM1_TYPE>(), parameters().back().read<PARAM2_TYPE>()) }; \
+        std::memcpy(parameters().front().read<sala::MemPtr>(), &result, sizeof(RET_TYPE)))
+#define REGISTER_BINARY_FUNC(FN_NAME, TYPE) REGISTER_BINARY_FUNC_IMPL(FN_NAME, FN_NAME, TYPE, TYPE, TYPE)
 
 namespace sala {
 
@@ -20,6 +27,7 @@ ExternCodeCStd::ExternCodeCStd(ExecState* const state)
     : ExternCode{ state }
 {
     register_math_functions();
+    register_fenv_functions();
 }
 
 
@@ -72,6 +80,13 @@ void ExternCodeCStd::register_math_functions()
     REGISTER_UNARY_FUNC(trunc, double);
     REGISTER_UNARY_FUNC(truncf, float);
 
+    REGISTER_UNARY_FUNC_IMPL(__isinf, __isinf, double, int);
+    REGISTER_UNARY_FUNC_IMPL(__isnan, __isnan, double, int);
+    REGISTER_UNARY_FUNC_IMPL(__finite, __finite, double, int);
+    REGISTER_UNARY_FUNC_IMPL(__signbit, __signbit, double, int);
+    REGISTER_UNARY_FUNC_IMPL(__fpclassify, __fpclassify, double, int);
+    REGISTER_UNARY_FUNC_IMPL(__issignaling, __issignaling, double, int);
+
     REGISTER_BINARY_FUNC(atan2, double);
     REGISTER_BINARY_FUNC(atan2f, float);
     REGISTER_BINARY_FUNC(copysign, double);
@@ -80,6 +95,15 @@ void ExternCodeCStd::register_math_functions()
     REGISTER_BINARY_FUNC(fmodf, float);
     REGISTER_BINARY_FUNC(remainder, double);
     REGISTER_BINARY_FUNC(remainderf, float);
+
+    REGISTER_BINARY_FUNC_IMPL(__iseqsig, __iseqsig, double, double, int);
+}
+
+
+void ExternCodeCStd::register_fenv_functions()
+{
+    REGISTER_CONST_FUNC(fegetround, int);
+    REGISTER_UNARY_FUNC(fesetround, int);
 }
 
 

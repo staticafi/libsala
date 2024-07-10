@@ -12,6 +12,7 @@ struct ExternCodeCStd : public ExternCode
 
 private:
     void register_math_functions();
+    void register_fenv_functions();
 };
 
 
