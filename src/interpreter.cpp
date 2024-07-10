@@ -225,6 +225,7 @@ void Interpreter::do_alloca()
         return;
     }
     state().stack_top().push_back_local_variable(num_bytes);
+    state().update_current_values();
     operands().front()->write<MemPtr>(state().stack_top().locals().back().start());
 }
 
