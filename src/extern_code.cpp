@@ -21,6 +21,35 @@ static T __llvm_intrinsic__ctlz_impl(T const value)
     return i;
 }
 
+template<typename T>
+static bool __llvm_intrinsic__is_fpclass(T const value, std::int32_t const op)
+{
+    switch (op)
+    {
+        case 0:
+        case 1:
+            return std::isnan(value);
+        case 2:
+            return !std::isnan(value) && value == -std::numeric_limits<T>::infinity();
+        case 3:
+            return !std::isnan(value) && std::isnormal(value) && value < (T)0;
+        case 4:
+            return !std::isnan(value) && !std::isnormal(value) && value < (T)0;
+        case 5:
+            return !std::isnan(value) && value == (T)0 && std::signbit(value);
+        case 6:
+            return !std::isnan(value) && value == (T)0 && !std::signbit(value);
+        case 7:
+            return !std::isnan(value) && !std::isnormal(value) && value > (T)0;
+        case 8:
+            return !std::isnan(value) && std::isnormal(value) && value > (T)0;
+        case 9:
+            return !std::isnan(value) && value == std::numeric_limits<T>::infinity();
+        default:
+            UNREACHABLE();
+            return false;
+    }
+}
 
 ExternCode::ExternCode(ExecState* const state)
     : state_{ state }
@@ -41,6 +70,8 @@ ExternCode::ExternCode(ExecState* const state)
     REGISTER_EXTERN_CODE(__llvm_intrinsic__trunc_64, this->__llvm_intrinsic__trunc_64() );
     REGISTER_EXTERN_CODE(__llvm_intrinsic__rint_32, this->__llvm_intrinsic__rint_32() );
     REGISTER_EXTERN_CODE(__llvm_intrinsic__rint_64, this->__llvm_intrinsic__rint_64() );
+    REGISTER_EXTERN_CODE(__llvm_intrinsic__is_fpclass_32, this->__llvm_intrinsic__is_fpclass_32() );
+    REGISTER_EXTERN_CODE(__llvm_intrinsic__is_fpclass_64, this->__llvm_intrinsic__is_fpclass_64() );
     // POSIX:
     REGISTER_EXTERN_CODE(__assert_fail, this->std_abort("__assert_fail") );
 }
@@ -177,6 +208,20 @@ void ExternCode::__llvm_intrinsic__rint_32()
 void ExternCode::__llvm_intrinsic__rint_64()
 {
     parameters().front().write<double>(std::rint(parameters().at(1).read<double>()));
+}
+
+
+void ExternCode::__llvm_intrinsic__is_fpclass_32()
+{
+    bool const result{ __llvm_intrinsic__is_fpclass(parameters().at(1).read<float>(), parameters().at(2).read<std::int32_t>()) };
+    parameters().front().write<char>(result ? 1 : 0);
+}
+
+
+void ExternCode::__llvm_intrinsic__is_fpclass_64()
+{
+    bool const result{ __llvm_intrinsic__is_fpclass(parameters().at(1).read<double>(), parameters().at(2).read<std::int32_t>()) };
+    parameters().front().write<char>(result ? 1 : 0);
 }
 
 

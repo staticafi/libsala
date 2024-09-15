@@ -44,6 +44,8 @@ private:
     void __llvm_intrinsic__trunc_64();
     void __llvm_intrinsic__rint_32();
     void __llvm_intrinsic__rint_64();
+    void __llvm_intrinsic__is_fpclass_32();
+    void __llvm_intrinsic__is_fpclass_64();
 
     ExecState* state_;
     std::unordered_map<std::string, std::function<void()> > code_;
