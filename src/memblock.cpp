@@ -6,6 +6,26 @@
 #include <memory>
 #include <cstdint>
 
+namespace sala::detail {
+
+
+MemBlockData::MemBlockData(PointerModel* const pointer_model, std::size_t const num_bytes, std::uint8_t const init_value)
+    : pointer_model_{ pointer_model }
+    , bytes{ new std::uint8_t[num_bytes] }
+    , count_{ num_bytes }
+{
+    pointer_model_->on_memblock_allocated(bytes, count_);
+}
+
+
+MemBlockData::~MemBlockData()
+{
+    pointer_model_->on_memblock_released(bytes, count_);
+}
+
+
+}
+
 namespace sala {
 
 
@@ -15,7 +35,7 @@ MemBlock::MemBlock()
 
 
 MemBlock::MemBlock(PointerModel* const pointer_model, std::size_t const num_bytes, std::uint8_t const init_value)
-    : data_{ std::make_shared<Data>(pointer_model, num_bytes, init_value) }
+    : data_{ std::make_shared<detail::MemBlockData>(pointer_model, num_bytes, init_value) }
 {
     std::memset(start(), init_value, count());
 }
@@ -31,21 +51,6 @@ std::size_t MemBlock::as_size() const
     case 8ULL: return (std::size_t)*(std::uint64_t*)start();
     default: UNREACHABLE(); return 0ULL;
     }
-}
-
-
-MemBlock::Data::Data(PointerModel* const pointer_model, std::size_t const num_bytes, std::uint8_t const init_value)
-    : pointer_model_{ pointer_model }
-    , bytes{ new std::uint8_t[num_bytes] }
-    , count_{ num_bytes }
-{
-    pointer_model_->on_memblock_allocated(bytes, count_);
-}
-
-
-MemBlock::Data::~Data()
-{
-    pointer_model_->on_memblock_released(bytes, count_);
 }
 
 
