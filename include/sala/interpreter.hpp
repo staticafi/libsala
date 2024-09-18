@@ -29,6 +29,8 @@ struct Interpreter : public InstrSwitch
     ExternCode& extern_code() { return *extern_code_; }
     std::vector<Analyzer*> const& analyzers() const { return analyzers_; }
 
+    std::uint64_t  num_steps() const { return num_steps_; }
+
     bool done() const { return state().stage() == ExecState::Stage::FINISHED; }
     void step();
 
@@ -296,6 +298,7 @@ private:
     ExecState* state_;
     ExternCode* extern_code_;
     std::vector<Analyzer*> analyzers_;
+    std::uint64_t  num_steps_;
 };
 
 

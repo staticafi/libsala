@@ -13,6 +13,7 @@ Interpreter::Interpreter(ExecState* const state, ExternCode* const extern_code, 
     : state_{ state }
     , extern_code_{ extern_code }
     , analyzers_{ analyzers }
+    , num_steps_{ 0ULL }
 {}
 
 
@@ -41,6 +42,7 @@ void Interpreter::step()
 
     if (!do_instruction_switch())
         state().stack_top().ip().next();
+    ++num_steps_;
 
     if (done())
         return;
@@ -117,7 +119,8 @@ void Interpreter::run(double const max_seconds)
             state().set_termination(
                 ExecState::Termination::ERROR,
                 "sala::Interpreter",
-                state().make_error_message("[TIME OUT] The time budget " + std::to_string(max_seconds) + "s for the execution was exhausted.")
+                state().make_error_message("[TIME OUT] The time budget " + std::to_string(max_seconds) + "s for the execution was exhausted."
+                                           " [Processed instructions: " + std::to_string(num_steps()) + "]")
                 );
             return;
         }
