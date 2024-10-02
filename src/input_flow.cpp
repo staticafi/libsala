@@ -1649,9 +1649,10 @@ void InputFlow::register_external_fenv_functions()
 void InputFlow::pass_input_flow_from_parameters_to_return_value(std::size_t const num_return_value_bytes)
 {
     std::vector<std::pair<MemPtr, std::size_t> > param_memory_regions;
-    for (std::size_t i = 1ULL; i < operands().size(); ++i)
-        param_memory_regions.push_back({ operands().at(i)->start(), operands().at(i)->count() });
-    join(operands().front()->start(), num_return_value_bytes, param_memory_regions);
+    for (std::size_t i = 1ULL; i < parameters().size(); ++i)
+        param_memory_regions.push_back({ parameters().at(i).start(), parameters().at(i).count() });
+    auto const dst_ptr{ parameters().front().read<MemPtr>() };
+    join(dst_ptr, num_return_value_bytes, param_memory_regions);
 }
 
 
