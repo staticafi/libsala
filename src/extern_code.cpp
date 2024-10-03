@@ -165,63 +165,73 @@ void ExternCode::__llvm_intrinsic__bswap(std::size_t const num_bytes)
 
 void ExternCode::__llvm_intrinsic__ctlz_8()
 {
-    parameters().front().write<std::uint8_t>(__llvm_intrinsic__ctlz_impl(parameters().at(1).read<std::uint8_t>()));
+    auto const dst_ptr{ parameters().front().read<MemPtr>() };
+    *(std::uint8_t*)dst_ptr = __llvm_intrinsic__ctlz_impl(parameters().at(1).read<std::uint8_t>());
 }
 
 
 void ExternCode::__llvm_intrinsic__ctlz_16()
 {
-    parameters().front().write<std::uint16_t>(__llvm_intrinsic__ctlz_impl(parameters().at(1).read<std::uint16_t>()));
+    auto const dst_ptr{ parameters().front().read<MemPtr>() };
+    *(std::uint16_t*)dst_ptr = __llvm_intrinsic__ctlz_impl(parameters().at(1).read<std::uint16_t>());
 }
 
 
 void ExternCode::__llvm_intrinsic__ctlz_32()
 {
-    parameters().front().write<std::uint32_t>(__llvm_intrinsic__ctlz_impl(parameters().at(1).read<std::uint32_t>()));
+    auto const dst_ptr{ parameters().front().read<MemPtr>() };
+    *(std::uint32_t*)dst_ptr = __llvm_intrinsic__ctlz_impl(parameters().at(1).read<std::uint32_t>());
 }
 
 
 void ExternCode::__llvm_intrinsic__ctlz_64()
 {
-    parameters().front().write<std::uint64_t>(__llvm_intrinsic__ctlz_impl(parameters().at(1).read<std::uint64_t>()));
+    auto const dst_ptr{ parameters().front().read<MemPtr>() };
+    *(std::uint64_t*)dst_ptr = __llvm_intrinsic__ctlz_impl(parameters().at(1).read<std::uint64_t>());
 }
 
 
 void ExternCode::__llvm_intrinsic__trunc_32()
 {
-    parameters().front().write<float>(std::trunc(parameters().at(1).read<float>()));
+    auto const dst_ptr{ parameters().front().read<MemPtr>() };
+    *(float*)dst_ptr = std::trunc(parameters().at(1).read<float>());
 }
 
 
 void ExternCode::__llvm_intrinsic__trunc_64()
 {
-    parameters().front().write<double>(std::trunc(parameters().at(1).read<double>()));
+    auto const dst_ptr{ parameters().front().read<MemPtr>() };
+    *(double*)dst_ptr = std::trunc(parameters().at(1).read<double>());
 }
 
 
 void ExternCode::__llvm_intrinsic__rint_32()
 {
-    parameters().front().write<float>(std::rint(parameters().at(1).read<float>()));
+    auto const dst_ptr{ parameters().front().read<MemPtr>() };
+    *(float*)dst_ptr = std::rint(parameters().at(1).read<float>());
 }
 
 
 void ExternCode::__llvm_intrinsic__rint_64()
 {
-    parameters().front().write<double>(std::rint(parameters().at(1).read<double>()));
+    auto const dst_ptr{ parameters().front().read<MemPtr>() };
+    *(double*)dst_ptr = std::rint(parameters().at(1).read<double>());
 }
 
 
 void ExternCode::__llvm_intrinsic__is_fpclass_32()
 {
     bool const result{ __llvm_intrinsic__is_fpclass(parameters().at(1).read<float>(), parameters().at(2).read<std::int32_t>()) };
-    parameters().front().write<char>(result ? 1 : 0);
+    auto const dst_ptr{ parameters().front().read<MemPtr>() };
+    *(std::uint8_t*)dst_ptr = result ? 1 : 0;
 }
 
 
 void ExternCode::__llvm_intrinsic__is_fpclass_64()
 {
     bool const result{ __llvm_intrinsic__is_fpclass(parameters().at(1).read<double>(), parameters().at(2).read<std::int32_t>()) };
-    parameters().front().write<char>(result ? 1 : 0);
+    auto const dst_ptr{ parameters().front().read<MemPtr>() };
+    *(std::uint8_t*)dst_ptr = result ? 1 : 0;
 }
 
 
