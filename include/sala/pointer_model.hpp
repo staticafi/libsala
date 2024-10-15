@@ -1,6 +1,7 @@
 #ifndef SALA_POINTER_MODEL_HPP_INCLUDED
 #   define SALA_POINTER_MODEL_HPP_INCLUDED
 
+#   include <utility>
 #   include <cstdint>
 
 namespace sala {
