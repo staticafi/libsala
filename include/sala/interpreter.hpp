@@ -289,6 +289,7 @@ private:
     void do_va_start() override;
     void do_va_end() override;
     void do_va_arg() override;
+    void do_va_copy() override;
 
     void do_jump() override;
     void do_branch() override;

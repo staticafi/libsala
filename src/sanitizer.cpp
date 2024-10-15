@@ -2,6 +2,7 @@
 #include <sala/platform_specifics.hpp>
 #include <utility/assumptions.hpp>
 #include <utility/invariants.hpp>
+#include <utility/development.hpp>
 #include <algorithm>
 #include <sstream>
 
@@ -413,6 +414,16 @@ void Sanitizer::do_va_end()
 
     platform_linux_64_bit::va_list* const va_list_ptr{ (platform_linux_64_bit::va_list*)operands().front()->read<MemPtr>() };
     erase( (MemPtr)va_list_ptr->reg_save_area, (std::size_t)(va_list_ptr->gp_offset - 256U));
+}
+
+
+void Sanitizer::do_va_copy()
+{
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // IMPORTANT: This implementation is valid only for programs targeted to Linux 64-bit platform.
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+    NOT_IMPLEMENTED_YET();
 }
 
 

@@ -573,6 +573,15 @@ struct Instruction
         //              The address 'p' must be equal to one returned either be the corresponding VA_START
         //              instruction or a preceding VA_ARG instruction.
         VA_ARG,
+
+        // VA_COPY n vN, vM
+        // Let 'p' be the address (pointer) stored in bytes of vM.
+        // Copies the list of variable function parameters (packed into the '...' C parameter)
+        // at address 'p' and stores the address (pointer) of the list copy to the bytes of vN.
+        // Assumptions: vN.num_bytes() == vM.num_bytes() == sizeof(void*).
+        //              There must be a preceding execution of the corresponding VA_START instruction.
+        //              There must follow an execution of the corresponding VA_END instruction.
+        VA_COPY,
     };
 
     enum struct Modifier

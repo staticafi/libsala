@@ -80,6 +80,7 @@ static std::string instruction_opcode_to_string(Instruction::Opcode const opcode
         case Instruction::Opcode::VA_START: return "VA_START"; break;
         case Instruction::Opcode::VA_END: return "VA_END"; break;
         case Instruction::Opcode::VA_ARG: return "VA_ARG"; break;
+        case Instruction::Opcode::VA_COPY: return "VA_COPY"; break;
         default: UNREACHABLE(); break;
     }
 }

@@ -62,6 +62,7 @@ private:
     void do_ret() override;
     void do_va_start() override;
     void do_va_end() override;
+    void do_va_copy() override;
 };
 
 

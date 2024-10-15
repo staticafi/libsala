@@ -61,6 +61,7 @@ static Instruction::Opcode instruction_opcode_from_name(std::string const& opcod
         { "VA_START", Instruction::Opcode::VA_START },
         { "VA_END", Instruction::Opcode::VA_END },
         { "VA_ARG", Instruction::Opcode::VA_ARG },
+        { "VA_COPY", Instruction::Opcode::VA_COPY },
     };
     return map.at(opcode_name);
 }

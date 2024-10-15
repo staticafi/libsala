@@ -3,6 +3,7 @@
 #include <utility/hash_combine.hpp>
 #include <utility/assumptions.hpp>
 #include <utility/invariants.hpp>
+#include <utility/development.hpp>
 #include <unordered_map>
 #include <functional>
 #include <algorithm>
@@ -1509,6 +1510,16 @@ void InputFlow::do_va_end()
 
     platform_linux_64_bit::va_list* const va_list_ptr{ (platform_linux_64_bit::va_list*)operands().front()->read<MemPtr>() };
     clear((MemPtr)va_list_ptr->reg_save_area, va_list_ptr->gp_offset - 256U);
+}
+
+
+void InputFlow::do_va_copy()
+{
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // IMPORTANT: This implementation is valid only for programs targeted to Linux 64-bit platform.
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+    NOT_IMPLEMENTED_YET();
 }
 
 

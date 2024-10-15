@@ -750,6 +750,7 @@ bool InstrSwitch::do_instruction_switch()
         case Instruction::Opcode::VA_START: do_va_start(); return false;
         case Instruction::Opcode::VA_END: do_va_end(); return false;
         case Instruction::Opcode::VA_ARG: do_va_arg(); return false;
+        case Instruction::Opcode::VA_COPY: do_va_copy(); return false;
 
         case Instruction::Opcode::JUMP: do_jump(); return true;
         case Instruction::Opcode::BRANCH: do_branch(); return true;

@@ -272,6 +272,7 @@ struct InstrSwitch
     virtual void do_va_start() {}
     virtual void do_va_end() {}
     virtual void do_va_arg() {}
+    virtual void do_va_copy() {}
 
     virtual void do_jump() {}
     virtual void do_branch() {}

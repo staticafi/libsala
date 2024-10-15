@@ -325,6 +325,7 @@ protected:
 
     void do_va_start() override;
     void do_va_end() override;
+    void do_va_copy() override;
 
     void do_call() override;
     void do_ret() override;

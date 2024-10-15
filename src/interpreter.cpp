@@ -1591,6 +1591,16 @@ void Interpreter::do_va_arg()
 }
 
 
+void Interpreter::do_va_copy()
+{
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // IMPORTANT: This implementation is valid only for programs targeted to Linux 64-bit platform.
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+    NOT_IMPLEMENTED_YET();
+}
+
+
 void Interpreter::do_jump()
 {
     ip().jump( block().successors().front() );
