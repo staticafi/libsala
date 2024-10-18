@@ -51,6 +51,37 @@ static bool __llvm_intrinsic__is_fpclass(T const value, std::int32_t const op)
     }
 }
 
+
+enum OP_WITH_OVERFLOW { OWO_ADD, OWO_SUB, OWO_MUL };
+template<typename T>
+void __llvm_intrinsic__operation_with_overflow(std::vector<MemBlock> const& parameters, OP_WITH_OVERFLOW const owo)
+{
+    T const a{ parameters.at(1).read<T>() };
+    T const b{ parameters.at(2).read<T>() };
+    T  result;
+    bool  flag;
+    switch (owo)
+    {
+        case OWO_ADD:
+            flag = __builtin_add_overflow(a,b,&result);
+            break;
+        case OWO_SUB:
+            flag = __builtin_sub_overflow(a,b,&result);
+            break;
+        case OWO_MUL:
+            flag = __builtin_mul_overflow(a,b,&result);
+            break;
+        default:
+            UNREACHABLE();
+            break;
+    }
+    flag = __builtin_add_overflow(a,b,&result);
+    auto const dst_ptr{ parameters.front().read<MemPtr>() };
+    *(T*)dst_ptr = result;
+    ((std::uint8_t*)dst_ptr)[sizeof(T)] = flag ? 1 : 0;
+}
+
+
 ExternCode::ExternCode(ExecState* const state)
     : state_{ state }
     , code_{}
@@ -72,6 +103,24 @@ ExternCode::ExternCode(ExecState* const state)
     REGISTER_EXTERN_CODE(__llvm_intrinsic__rint_64, this->__llvm_intrinsic__rint_64() );
     REGISTER_EXTERN_CODE(__llvm_intrinsic__is_fpclass_32, this->__llvm_intrinsic__is_fpclass_32() );
     REGISTER_EXTERN_CODE(__llvm_intrinsic__is_fpclass_64, this->__llvm_intrinsic__is_fpclass_64() );
+    REGISTER_EXTERN_CODE(__llvm_intrinsic__sadd_with_overflow_16, __llvm_intrinsic__operation_with_overflow<std::int16_t>(this->parameters(), OWO_ADD));
+    REGISTER_EXTERN_CODE(__llvm_intrinsic__sadd_with_overflow_32, __llvm_intrinsic__operation_with_overflow<std::int32_t>(this->parameters(), OWO_ADD));
+    REGISTER_EXTERN_CODE(__llvm_intrinsic__sadd_with_overflow_64, __llvm_intrinsic__operation_with_overflow<std::int64_t>(this->parameters(), OWO_ADD));
+    REGISTER_EXTERN_CODE(__llvm_intrinsic__uadd_with_overflow_16, __llvm_intrinsic__operation_with_overflow<std::uint16_t>(this->parameters(), OWO_ADD));
+    REGISTER_EXTERN_CODE(__llvm_intrinsic__uadd_with_overflow_32, __llvm_intrinsic__operation_with_overflow<std::uint32_t>(this->parameters(), OWO_ADD));
+    REGISTER_EXTERN_CODE(__llvm_intrinsic__uadd_with_overflow_64, __llvm_intrinsic__operation_with_overflow<std::uint64_t>(this->parameters(), OWO_ADD));
+    REGISTER_EXTERN_CODE(__llvm_intrinsic__ssub_with_overflow_16, __llvm_intrinsic__operation_with_overflow<std::int16_t>(this->parameters(), OWO_SUB));
+    REGISTER_EXTERN_CODE(__llvm_intrinsic__ssub_with_overflow_32, __llvm_intrinsic__operation_with_overflow<std::int32_t>(this->parameters(), OWO_SUB));
+    REGISTER_EXTERN_CODE(__llvm_intrinsic__ssub_with_overflow_64, __llvm_intrinsic__operation_with_overflow<std::int64_t>(this->parameters(), OWO_SUB));
+    REGISTER_EXTERN_CODE(__llvm_intrinsic__usub_with_overflow_16, __llvm_intrinsic__operation_with_overflow<std::uint16_t>(this->parameters(), OWO_SUB));
+    REGISTER_EXTERN_CODE(__llvm_intrinsic__usub_with_overflow_32, __llvm_intrinsic__operation_with_overflow<std::uint32_t>(this->parameters(), OWO_SUB));
+    REGISTER_EXTERN_CODE(__llvm_intrinsic__usub_with_overflow_64, __llvm_intrinsic__operation_with_overflow<std::uint64_t>(this->parameters(), OWO_SUB));
+    REGISTER_EXTERN_CODE(__llvm_intrinsic__smul_with_overflow_16, __llvm_intrinsic__operation_with_overflow<std::int16_t>(this->parameters(), OWO_MUL));
+    REGISTER_EXTERN_CODE(__llvm_intrinsic__smul_with_overflow_32, __llvm_intrinsic__operation_with_overflow<std::int32_t>(this->parameters(), OWO_MUL));
+    REGISTER_EXTERN_CODE(__llvm_intrinsic__smul_with_overflow_64, __llvm_intrinsic__operation_with_overflow<std::int64_t>(this->parameters(), OWO_MUL));
+    REGISTER_EXTERN_CODE(__llvm_intrinsic__umul_with_overflow_16, __llvm_intrinsic__operation_with_overflow<std::uint16_t>(this->parameters(), OWO_MUL));
+    REGISTER_EXTERN_CODE(__llvm_intrinsic__umul_with_overflow_32, __llvm_intrinsic__operation_with_overflow<std::uint32_t>(this->parameters(), OWO_MUL));
+    REGISTER_EXTERN_CODE(__llvm_intrinsic__umul_with_overflow_64, __llvm_intrinsic__operation_with_overflow<std::uint64_t>(this->parameters(), OWO_MUL));
     // POSIX:
     REGISTER_EXTERN_CODE(__assert_fail, this->std_abort("__assert_fail") );
 }
