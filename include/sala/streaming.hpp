@@ -9,6 +9,7 @@ namespace sala {
 
 
 struct Program;
+struct Instruction;
 
 
 template<typename ElementType, typename Traits>
@@ -22,6 +23,8 @@ std::basic_ostream<ElementType, Traits>& disable_json_comments(std::basic_ostrea
 
 std::ostream& operator<<(std::ostream& ostr, Program const& program);
 std::istream& operator>>(std::istream& istr, Program& program);
+
+std::ostream& operator<<(std::ostream& ostr, Instruction const& instruction);
 
 
 }

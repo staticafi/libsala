@@ -157,6 +157,27 @@ static bool save_variables(std::ostream& ostr, std::vector<Variable> const& vari
 }
 
 
+std::ostream& operator<<(std::ostream& ostr, Instruction const& instruction)
+{
+    ostr << "[ "
+            << "\"" << instruction_opcode_to_string(instruction.opcode()) << "\", "
+            << "\"" << instruction_modifier_to_string(instruction.modifier()) << "\"";
+    if (!instruction.descriptors().empty())
+    {
+        ostr << ", \"";
+        for (auto descriptor : instruction.descriptors())
+            ostr << instruction_descriptor_to_string(descriptor);
+        ostr << "\"";
+    }
+    for (auto operand : instruction.operands())
+        ostr << ", " << operand;
+    ostr << ", [" << instruction.source_back_mapping().line << ","
+                    << instruction.source_back_mapping().column << "]";
+    ostr << " ]";
+    return ostr;
+}
+
+
 static bool save_instructions(std::ostream& ostr, std::vector<Instruction> const& instructions, std::string const& shift)
 {
     for (std::size_t i = 0U; i < instructions.size(); ++i)
@@ -164,21 +185,7 @@ static bool save_instructions(std::ostream& ostr, std::vector<Instruction> const
         if (i != 0U)
             ostr << ',' << DbgLine{i - 1ULL} << '\n';
         auto const& instruction = instructions.at(i);
-        ostr << shift << "[ "
-             << "\"" << instruction_opcode_to_string(instruction.opcode()) << "\", "
-             << "\"" << instruction_modifier_to_string(instruction.modifier()) << "\"";
-        if (!instruction.descriptors().empty())
-        {
-            ostr << ", \"";
-            for (auto descriptor : instruction.descriptors())
-                ostr << instruction_descriptor_to_string(descriptor);
-            ostr << "\"";
-        }
-        for (auto operand : instruction.operands())
-            ostr << ", " << operand;
-        ostr << ", [" << instruction.source_back_mapping().line << ","
-                      << instruction.source_back_mapping().column << "]";
-        ostr << " ]";
+        ostr << shift << instruction;
     }
     if (!instructions.empty())
         ostr << DbgLine{instructions.size() - 1ULL};
