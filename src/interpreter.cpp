@@ -110,17 +110,31 @@ void Interpreter::run()
 void Interpreter::run(double const max_seconds)
 {
     std::chrono::system_clock::time_point const  start_time = std::chrono::system_clock::now();
-    while (!done())
-    {
+    run([start_time, max_seconds](std::string& error_message) {
         double const num_seconds = std::chrono::duration<double>(std::chrono::system_clock::now() - start_time).count();
         if (num_seconds >= max_seconds)
+        {
+            error_message = "[TIME OUT] The time budget " + std::to_string(max_seconds) + "s for the execution was exhausted.";
+            return true;
+        }
+        return false;
+    });
+}
+
+
+void Interpreter::run(std::function<bool(std::string&)> const&  terminator)
+{
+    std::string  error_message;
+    while (!done())
+    {
+        error_message.clear();
+        if (terminator(error_message))
         {
             state().set_stage(ExecState::Stage::FINISHED);
             state().set_termination(
                 ExecState::Termination::ERROR,
                 "sala::Interpreter",
-                state().make_error_message("[TIME OUT] The time budget " + std::to_string(max_seconds) + "s for the execution was exhausted."
-                                           " [Processed instructions: " + std::to_string(num_steps()) + "]")
+                state().make_error_message(error_message + " [Processed instructions: " + std::to_string(num_steps()) + "]")
                 );
             return;
         }

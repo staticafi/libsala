@@ -6,6 +6,7 @@
 #   include <sala/extern_code.hpp>
 #   include <sala/analyzer.hpp>
 #   include <vector>
+#   include <functional>
 
 namespace sala {
 
@@ -36,6 +37,7 @@ struct Interpreter : public InstrSwitch
 
     void run();
     void run(double max_seconds);
+    void run(std::function<bool(std::string&)> const&  terminator);
 
 private:
 
