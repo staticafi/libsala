@@ -2,13 +2,15 @@
 #   define SALA_SANITIZER_HPP_INCLUDED
 
 #   include <sala/analyzer.hpp>
+#   include <map>
 
 namespace sala {
 
 
 struct Sanitizer : public Analyzer
 {
-    using MemRegion = std::pair<MemPtr, std::size_t>;
+    using MemRegionsMap = std::map<MemPtr, std::size_t>;
+    using MemRegion = MemRegionsMap::value_type;
 
     explicit Sanitizer(ExecState* exec_state);
 
@@ -16,8 +18,7 @@ struct Sanitizer : public Analyzer
     bool is_memory_valid(MemPtr ptr, std::size_t count) const;
 
 private:
-    mutable std::vector<MemRegion > regions_;
-    mutable bool changed_;
+    mutable MemRegionsMap regions_;
 
     void insert(MemPtr ptr, std::size_t count);
     void erase(MemPtr const ptr, std::size_t count);
@@ -26,6 +27,7 @@ private:
     void erase(MemBlock const* block);
 
     MemRegion* locate(MemPtr ptr) const;
+    MemRegionsMap::iterator find(MemPtr ptr) const;
 
     void crash_interpretation(std::string const& text);
     void crash_interpretation_due_to_memory_access();

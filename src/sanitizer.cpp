@@ -12,7 +12,6 @@ namespace sala {
 Sanitizer::Sanitizer(ExecState* const exec_state)
     : Analyzer{ exec_state }
     , regions_{}
-    , changed_{ false }
 {
     insert(&state().exit_code_memory_block());
     for (auto const& constant : state().constant_segment())
@@ -39,57 +38,49 @@ bool Sanitizer::is_memory_valid(MemPtr const ptr, std::size_t const count) const
 
 void Sanitizer::insert(MemPtr const ptr, std::size_t const count)
 {
-    regions_.push_back({ ptr, count });
-    changed_ = true;
+    regions_.insert({ ptr, count });
 }
 
 
 void Sanitizer::erase(MemPtr const ptr, std::size_t const count)
 {
-    auto const reg = locate(ptr);
-    INVARIANT(reg != nullptr && reg->first == ptr && reg->second == count);
-    std::swap(*reg, regions_.back());
-    regions_.pop_back();
-    changed_ = true;
+    auto const it = find(ptr);
+    INVARIANT(it != regions_.end() && it->first == ptr && it->second == count);
+    regions_.erase(it);
 }
 
 
 void Sanitizer::insert(MemBlock const* const block)
 {
-    regions_.push_back({ block->start(), block->count() });
-    changed_ = true;
+    regions_.insert({ block->start(), block->count() });
 }
 
 
 void Sanitizer::erase(MemBlock const* block)
 {
-    auto const reg = locate(block->start());
-    INVARIANT(reg != nullptr && block->start() == reg->first);
-    std::swap(*reg, regions_.back());
-    regions_.pop_back();
-    changed_ = true;
+    auto const it = find(block->start());
+    INVARIANT(it != regions_.end() && block->start() == it->first);
+    regions_.erase(it);
 }
 
 
 Sanitizer::MemRegion* Sanitizer::locate(MemPtr const ptr) const
 {
-    struct local { static inline bool less(MemRegion const& a, MemRegion const& b) { return a.first < b.first; } };
+    auto const it = find(ptr);
+    return it == regions_.end() ? nullptr : &*it;
+}
 
+
+Sanitizer::MemRegionsMap::iterator Sanitizer::find(MemPtr const ptr) const
+{
     if (regions_.empty())
-        return nullptr;
-
-    if (changed_)
-    {
-        std::sort(regions_.begin(), regions_.end(), &local::less);
-        changed_ = false;
-    }
-
-    auto const it = std::upper_bound(regions_.begin(), regions_.end(), MemRegion{ ptr, 0ULL }, &local::less);
+        return regions_.end();
+    auto const it = regions_.upper_bound(ptr);
     if (it == regions_.end())
-        return &regions_.back();
+        return std::prev(regions_.end());
     if (it == regions_.begin())
-        return &regions_.front();
-    return &*std::prev(it);
+        return regions_.begin();
+    return std::prev(it);
 }
 
 
