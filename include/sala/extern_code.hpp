@@ -42,6 +42,10 @@ private:
     void __llvm_intrinsic__ctlz_64();
     void __llvm_intrinsic__trunc_32();
     void __llvm_intrinsic__trunc_64();
+    void __llvm_intrinsic__ceil_32();
+    void __llvm_intrinsic__ceil_64();
+    void __llvm_intrinsic__floor_32();
+    void __llvm_intrinsic__floor_64();
     void __llvm_intrinsic__rint_32();
     void __llvm_intrinsic__rint_64();
     void __llvm_intrinsic__is_fpclass_32();

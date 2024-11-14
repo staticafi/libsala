@@ -99,6 +99,10 @@ ExternCode::ExternCode(ExecState* const state)
     REGISTER_EXTERN_CODE(__llvm_intrinsic__ctlz_64, this->__llvm_intrinsic__ctlz_64() );
     REGISTER_EXTERN_CODE(__llvm_intrinsic__trunc_32, this->__llvm_intrinsic__trunc_32() );
     REGISTER_EXTERN_CODE(__llvm_intrinsic__trunc_64, this->__llvm_intrinsic__trunc_64() );
+    REGISTER_EXTERN_CODE(__llvm_intrinsic__ceil_32, this->__llvm_intrinsic__ceil_32() );
+    REGISTER_EXTERN_CODE(__llvm_intrinsic__ceil_64, this->__llvm_intrinsic__ceil_64() );
+    REGISTER_EXTERN_CODE(__llvm_intrinsic__floor_32, this->__llvm_intrinsic__floor_32() );
+    REGISTER_EXTERN_CODE(__llvm_intrinsic__floor_64, this->__llvm_intrinsic__floor_64() );
     REGISTER_EXTERN_CODE(__llvm_intrinsic__rint_32, this->__llvm_intrinsic__rint_32() );
     REGISTER_EXTERN_CODE(__llvm_intrinsic__rint_64, this->__llvm_intrinsic__rint_64() );
     REGISTER_EXTERN_CODE(__llvm_intrinsic__is_fpclass_32, this->__llvm_intrinsic__is_fpclass_32() );
@@ -251,6 +255,34 @@ void ExternCode::__llvm_intrinsic__trunc_64()
 {
     auto const dst_ptr{ parameters().front().read<MemPtr>() };
     *(double*)dst_ptr = std::trunc(parameters().at(1).read<double>());
+}
+
+
+void ExternCode::__llvm_intrinsic__ceil_32()
+{
+    auto const dst_ptr{ parameters().front().read<MemPtr>() };
+    *(float*)dst_ptr = std::ceil(parameters().at(1).read<float>());
+}
+
+
+void ExternCode::__llvm_intrinsic__ceil_64()
+{
+    auto const dst_ptr{ parameters().front().read<MemPtr>() };
+    *(double*)dst_ptr = std::ceil(parameters().at(1).read<double>());
+}
+
+
+void ExternCode::__llvm_intrinsic__floor_32()
+{
+    auto const dst_ptr{ parameters().front().read<MemPtr>() };
+    *(float*)dst_ptr = std::floor(parameters().at(1).read<float>());
+}
+
+
+void ExternCode::__llvm_intrinsic__floor_64()
+{
+    auto const dst_ptr{ parameters().front().read<MemPtr>() };
+    *(double*)dst_ptr = std::floor(parameters().at(1).read<double>());
 }
 
 
