@@ -103,10 +103,16 @@ ExternCode::ExternCode(ExecState* const state)
     REGISTER_EXTERN_CODE(__llvm_intrinsic__ceil_64, this->__llvm_intrinsic__ceil_64() );
     REGISTER_EXTERN_CODE(__llvm_intrinsic__floor_32, this->__llvm_intrinsic__floor_32() );
     REGISTER_EXTERN_CODE(__llvm_intrinsic__floor_64, this->__llvm_intrinsic__floor_64() );
+    REGISTER_EXTERN_CODE(__llvm_intrinsic__round_32, this->__llvm_intrinsic__round_32() );
+    REGISTER_EXTERN_CODE(__llvm_intrinsic__round_64, this->__llvm_intrinsic__round_64() );
     REGISTER_EXTERN_CODE(__llvm_intrinsic__rint_32, this->__llvm_intrinsic__rint_32() );
     REGISTER_EXTERN_CODE(__llvm_intrinsic__rint_64, this->__llvm_intrinsic__rint_64() );
     REGISTER_EXTERN_CODE(__llvm_intrinsic__maxnum_32, this->__llvm_intrinsic__maxnum_32() );
     REGISTER_EXTERN_CODE(__llvm_intrinsic__maxnum_64, this->__llvm_intrinsic__maxnum_64() );
+    REGISTER_EXTERN_CODE(__llvm_intrinsic__minnum_32, this->__llvm_intrinsic__minnum_32() );
+    REGISTER_EXTERN_CODE(__llvm_intrinsic__minnum_64, this->__llvm_intrinsic__minnum_64() );
+    REGISTER_EXTERN_CODE(__llvm_intrinsic__copysign_32, this->__llvm_intrinsic__copysign_32() );
+    REGISTER_EXTERN_CODE(__llvm_intrinsic__copysign_64, this->__llvm_intrinsic__copysign_64() );
     REGISTER_EXTERN_CODE(__llvm_intrinsic__is_fpclass_32, this->__llvm_intrinsic__is_fpclass_32() );
     REGISTER_EXTERN_CODE(__llvm_intrinsic__is_fpclass_64, this->__llvm_intrinsic__is_fpclass_64() );
     REGISTER_EXTERN_CODE(__llvm_intrinsic__sadd_with_overflow_16, __llvm_intrinsic__operation_with_overflow<std::int16_t>(this->parameters(), OWO_ADD));
@@ -288,6 +294,20 @@ void ExternCode::__llvm_intrinsic__floor_64()
 }
 
 
+void ExternCode::__llvm_intrinsic__round_32()
+{
+    auto const dst_ptr{ parameters().front().read<MemPtr>() };
+    *(float*)dst_ptr = std::round(parameters().at(1).read<float>());
+}
+
+
+void ExternCode::__llvm_intrinsic__round_64()
+{
+    auto const dst_ptr{ parameters().front().read<MemPtr>() };
+    *(double*)dst_ptr = std::round(parameters().at(1).read<double>());
+}
+
+
 void ExternCode::__llvm_intrinsic__rint_32()
 {
     auto const dst_ptr{ parameters().front().read<MemPtr>() };
@@ -313,6 +333,34 @@ void ExternCode::__llvm_intrinsic__maxnum_64()
 {
     auto const dst_ptr{ parameters().front().read<MemPtr>() };
     *(double*)dst_ptr = std::fmax(parameters().at(1).read<double>(), parameters().at(2).read<double>());
+}
+
+
+void ExternCode::__llvm_intrinsic__minnum_32()
+{
+    auto const dst_ptr{ parameters().front().read<MemPtr>() };
+    *(float*)dst_ptr = std::fminf(parameters().at(1).read<float>(),parameters().at(2).read<float>());
+}
+
+
+void ExternCode::__llvm_intrinsic__minnum_64()
+{
+    auto const dst_ptr{ parameters().front().read<MemPtr>() };
+    *(double*)dst_ptr = std::fmin(parameters().at(1).read<double>(), parameters().at(2).read<double>());
+}
+
+
+void ExternCode::__llvm_intrinsic__copysign_32()
+{
+    auto const dst_ptr{ parameters().front().read<MemPtr>() };
+    *(float*)dst_ptr = std::copysignf(parameters().at(1).read<float>(),parameters().at(2).read<float>());
+}
+
+
+void ExternCode::__llvm_intrinsic__copysign_64()
+{
+    auto const dst_ptr{ parameters().front().read<MemPtr>() };
+    *(double*)dst_ptr = std::copysign(parameters().at(1).read<double>(), parameters().at(2).read<double>());
 }
 
 
