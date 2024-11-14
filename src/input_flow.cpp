@@ -1580,6 +1580,8 @@ void InputFlow::register_external_llvm_intrinsics()
     REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__floor_64, this->pass_input_flow_from_parameters_to_return_value(sizeof(double)));
     REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__rint_32, this->pass_input_flow_from_parameters_to_return_value(sizeof(float)));
     REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__rint_64, this->pass_input_flow_from_parameters_to_return_value(sizeof(double)));
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__maxnum_32, this->pass_input_flow_from_parameters_to_return_value(sizeof(float)));
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__maxnum_64, this->pass_input_flow_from_parameters_to_return_value(sizeof(double)));
     REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__is_fpclass_32, this->pass_input_flow_from_parameters_to_return_value(1ULL));
     REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__is_fpclass_64, this->pass_input_flow_from_parameters_to_return_value(1ULL));
     REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__sadd_with_overflow_16(), this->pass_input_flow_from_parameters_to_return_value(16UL+1UL));

@@ -48,6 +48,8 @@ private:
     void __llvm_intrinsic__floor_64();
     void __llvm_intrinsic__rint_32();
     void __llvm_intrinsic__rint_64();
+    void __llvm_intrinsic__maxnum_32();
+    void __llvm_intrinsic__maxnum_64();
     void __llvm_intrinsic__is_fpclass_32();
     void __llvm_intrinsic__is_fpclass_64();
 
