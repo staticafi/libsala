@@ -84,6 +84,8 @@ void ExternCodeCStd::register_math_functions()
     REGISTER_UNARY_FUNC_IMPL(__isnan, __isnan, double, int);
     REGISTER_UNARY_FUNC_IMPL(__finite, __finite, double, int);
     REGISTER_UNARY_FUNC_IMPL(__signbit, __signbit, double, int);
+    REGISTER_UNARY_FUNC_IMPL(__fpclassifyf, __fpclassifyf, float, int);
+    REGISTER_UNARY_FUNC_IMPL(__fpclassifyl, __fpclassifyl, long double, int);
     REGISTER_UNARY_FUNC_IMPL(__fpclassify, __fpclassify, double, int);
     REGISTER_UNARY_FUNC_IMPL(__issignaling, __issignaling, double, int);
 
