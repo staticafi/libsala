@@ -335,6 +335,7 @@ protected:
     virtual void pass_input_flow_from_parameters_to_return_value(std::size_t num_return_value_bytes);
     virtual void __llvm_intrinsic__bswap(std::size_t num_bytes);
     virtual void __llvm_intrinsic__ctlz(std::size_t num_bytes);
+    virtual void __llvm_intrinsic__ctpop(std::size_t num_bytes);
 };
 
 

@@ -1572,6 +1572,10 @@ void InputFlow::register_external_llvm_intrinsics()
     REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__ctlz_16, this->__llvm_intrinsic__ctlz(16ULL));
     REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__ctlz_32, this->__llvm_intrinsic__ctlz(32ULL));
     REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__ctlz_64, this->__llvm_intrinsic__ctlz(64ULL));
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__ctpop_8, this->__llvm_intrinsic__ctpop(8ULL));
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__ctpop_16, this->__llvm_intrinsic__ctpop(16ULL));
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__ctpop_32, this->__llvm_intrinsic__ctpop(32ULL));
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__ctpop_64, this->__llvm_intrinsic__ctpop(64ULL));
     REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__trunc_32, this->pass_input_flow_from_parameters_to_return_value(sizeof(float)));
     REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__trunc_64, this->pass_input_flow_from_parameters_to_return_value(sizeof(double)));
     REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__ceil_32, this->pass_input_flow_from_parameters_to_return_value(sizeof(float)));
@@ -1707,6 +1711,12 @@ void InputFlow::__llvm_intrinsic__bswap(std::size_t const num_bytes)
 
 
 void InputFlow::__llvm_intrinsic__ctlz(std::size_t const num_bytes)
+{
+    join(operands().front()->start(), num_bytes, operands().at(1)->start(), num_bytes);
+}
+
+
+void InputFlow::__llvm_intrinsic__ctpop(std::size_t const num_bytes)
 {
     join(operands().front()->start(), num_bytes, operands().at(1)->start(), num_bytes);
 }

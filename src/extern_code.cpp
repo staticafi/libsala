@@ -22,6 +22,16 @@ static T __llvm_intrinsic__ctlz_impl(T const value)
 }
 
 template<typename T>
+static T __llvm_intrinsic__ctpop_impl(T const value)
+{
+    T sum{ (T)0 };
+    for (T i = (T)0; i != (T)(8U * sizeof(T)); ++i)
+        if ((value & (1 << i)) != 0)
+            ++sum;
+    return sum;
+}
+
+template<typename T>
 static bool __llvm_intrinsic__is_fpclass(T const value, std::int32_t const bit_mask)
 {
     for (std::int32_t  bit = 0U; bit != 10U; ++bit)
@@ -118,6 +128,10 @@ ExternCode::ExternCode(ExecState* const state)
     REGISTER_EXTERN_CODE(__llvm_intrinsic__ctlz_16, this->__llvm_intrinsic__ctlz_16() );
     REGISTER_EXTERN_CODE(__llvm_intrinsic__ctlz_32, this->__llvm_intrinsic__ctlz_32() );
     REGISTER_EXTERN_CODE(__llvm_intrinsic__ctlz_64, this->__llvm_intrinsic__ctlz_64() );
+    REGISTER_EXTERN_CODE(__llvm_intrinsic__ctpop_8, this->__llvm_intrinsic__ctpop_8() );
+    REGISTER_EXTERN_CODE(__llvm_intrinsic__ctpop_16, this->__llvm_intrinsic__ctpop_16() );
+    REGISTER_EXTERN_CODE(__llvm_intrinsic__ctpop_32, this->__llvm_intrinsic__ctpop_32() );
+    REGISTER_EXTERN_CODE(__llvm_intrinsic__ctpop_64, this->__llvm_intrinsic__ctpop_64() );
     REGISTER_EXTERN_CODE(__llvm_intrinsic__trunc_32, this->__llvm_intrinsic__trunc_32() );
     REGISTER_EXTERN_CODE(__llvm_intrinsic__trunc_64, this->__llvm_intrinsic__trunc_64() );
     REGISTER_EXTERN_CODE(__llvm_intrinsic__ceil_32, this->__llvm_intrinsic__ceil_32() );
@@ -270,6 +284,34 @@ void ExternCode::__llvm_intrinsic__ctlz_64()
 {
     auto const dst_ptr{ parameters().front().read<MemPtr>() };
     *(std::uint64_t*)dst_ptr = __llvm_intrinsic__ctlz_impl(parameters().at(1).read<std::uint64_t>());
+}
+
+
+void ExternCode::__llvm_intrinsic__ctpop_8()
+{
+    auto const dst_ptr{ parameters().front().read<MemPtr>() };
+    *(std::uint8_t*)dst_ptr = __llvm_intrinsic__ctpop_impl(parameters().at(1).read<std::uint8_t>());
+}
+
+
+void ExternCode::__llvm_intrinsic__ctpop_16()
+{
+    auto const dst_ptr{ parameters().front().read<MemPtr>() };
+    *(std::uint16_t*)dst_ptr = __llvm_intrinsic__ctpop_impl(parameters().at(1).read<std::uint16_t>());
+}
+
+
+void ExternCode::__llvm_intrinsic__ctpop_32()
+{
+    auto const dst_ptr{ parameters().front().read<MemPtr>() };
+    *(std::uint32_t*)dst_ptr = __llvm_intrinsic__ctpop_impl(parameters().at(1).read<std::uint32_t>());
+}
+
+
+void ExternCode::__llvm_intrinsic__ctpop_64()
+{
+    auto const dst_ptr{ parameters().front().read<MemPtr>() };
+    *(std::uint64_t*)dst_ptr = __llvm_intrinsic__ctpop_impl(parameters().at(1).read<std::uint64_t>());
 }
 
 

@@ -40,6 +40,10 @@ private:
     void __llvm_intrinsic__ctlz_16();
     void __llvm_intrinsic__ctlz_32();
     void __llvm_intrinsic__ctlz_64();
+    void __llvm_intrinsic__ctpop_8();
+    void __llvm_intrinsic__ctpop_16();
+    void __llvm_intrinsic__ctpop_32();
+    void __llvm_intrinsic__ctpop_64();
     void __llvm_intrinsic__trunc_32();
     void __llvm_intrinsic__trunc_64();
     void __llvm_intrinsic__ceil_32();
