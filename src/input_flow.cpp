@@ -1564,18 +1564,18 @@ void InputFlow::register_external_functions()
 
 void InputFlow::register_external_llvm_intrinsics()
 {
-    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__bswap_8, this->__llvm_intrinsic__bswap(8ULL));
-    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__bswap_16, this->__llvm_intrinsic__bswap(16ULL));
-    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__bswap_32, this->__llvm_intrinsic__bswap(32ULL));
-    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__bswap_64, this->__llvm_intrinsic__bswap(64ULL));
-    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__ctlz_8, this->__llvm_intrinsic__ctlz(8ULL));
-    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__ctlz_16, this->__llvm_intrinsic__ctlz(16ULL));
-    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__ctlz_32, this->__llvm_intrinsic__ctlz(32ULL));
-    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__ctlz_64, this->__llvm_intrinsic__ctlz(64ULL));
-    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__ctpop_8, this->__llvm_intrinsic__ctpop(8ULL));
-    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__ctpop_16, this->__llvm_intrinsic__ctpop(16ULL));
-    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__ctpop_32, this->__llvm_intrinsic__ctpop(32ULL));
-    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__ctpop_64, this->__llvm_intrinsic__ctpop(64ULL));
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__bswap_8, this->__llvm_intrinsic__bswap(1ULL));
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__bswap_16, this->__llvm_intrinsic__bswap(2ULL));
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__bswap_32, this->__llvm_intrinsic__bswap(4ULL));
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__bswap_64, this->__llvm_intrinsic__bswap(8ULL));
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__ctlz_8, this->__llvm_intrinsic__ctlz(1ULL));
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__ctlz_16, this->__llvm_intrinsic__ctlz(2ULL));
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__ctlz_32, this->__llvm_intrinsic__ctlz(4ULL));
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__ctlz_64, this->__llvm_intrinsic__ctlz(8ULL));
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__ctpop_8, this->__llvm_intrinsic__ctpop(1ULL));
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__ctpop_16, this->__llvm_intrinsic__ctpop(2ULL));
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__ctpop_32, this->__llvm_intrinsic__ctpop(4ULL));
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__ctpop_64, this->__llvm_intrinsic__ctpop(8ULL));
     REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__trunc_32, this->pass_input_flow_from_parameters_to_return_value(sizeof(float)));
     REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__trunc_64, this->pass_input_flow_from_parameters_to_return_value(sizeof(double)));
     REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__ceil_32, this->pass_input_flow_from_parameters_to_return_value(sizeof(float)));
@@ -1594,24 +1594,24 @@ void InputFlow::register_external_llvm_intrinsics()
     REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__copysign_64, this->pass_input_flow_from_parameters_to_return_value(sizeof(double)));
     REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__is_fpclass_32, this->pass_input_flow_from_parameters_to_return_value(1ULL));
     REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__is_fpclass_64, this->pass_input_flow_from_parameters_to_return_value(1ULL));
-    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__sadd_with_overflow_16(), this->pass_input_flow_from_parameters_to_return_value(16UL+1UL));
-    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__sadd_with_overflow_32(), this->pass_input_flow_from_parameters_to_return_value(32UL+1UL));
-    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__sadd_with_overflow_64(), this->pass_input_flow_from_parameters_to_return_value(64UL+1UL));
-    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__uadd_with_overflow_16(), this->pass_input_flow_from_parameters_to_return_value(16UL+1UL));
-    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__uadd_with_overflow_32(), this->pass_input_flow_from_parameters_to_return_value(32UL+1UL));
-    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__uadd_with_overflow_64(), this->pass_input_flow_from_parameters_to_return_value(64UL+1UL));
-    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__ssub_with_overflow_16(), this->pass_input_flow_from_parameters_to_return_value(16UL+1UL));
-    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__ssub_with_overflow_32(), this->pass_input_flow_from_parameters_to_return_value(32UL+1UL));
-    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__ssub_with_overflow_64(), this->pass_input_flow_from_parameters_to_return_value(64UL+1UL));
-    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__usub_with_overflow_16(), this->pass_input_flow_from_parameters_to_return_value(16UL+1UL));
-    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__usub_with_overflow_32(), this->pass_input_flow_from_parameters_to_return_value(32UL+1UL));
-    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__usub_with_overflow_64(), this->pass_input_flow_from_parameters_to_return_value(64UL+1UL));
-    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__smul_with_overflow_16(), this->pass_input_flow_from_parameters_to_return_value(16UL+1UL));
-    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__smul_with_overflow_32(), this->pass_input_flow_from_parameters_to_return_value(32UL+1UL));
-    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__smul_with_overflow_64(), this->pass_input_flow_from_parameters_to_return_value(64UL+1UL));
-    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__umul_with_overflow_16(), this->pass_input_flow_from_parameters_to_return_value(16UL+1UL));
-    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__umul_with_overflow_32(), this->pass_input_flow_from_parameters_to_return_value(32UL+1UL));
-    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__umul_with_overflow_64(), this->pass_input_flow_from_parameters_to_return_value(64UL+1UL));
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__sadd_with_overflow_16(), this->pass_input_flow_from_parameters_to_return_value(2UL+1UL));
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__sadd_with_overflow_32(), this->pass_input_flow_from_parameters_to_return_value(4UL+1UL));
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__sadd_with_overflow_64(), this->pass_input_flow_from_parameters_to_return_value(8UL+1UL));
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__uadd_with_overflow_16(), this->pass_input_flow_from_parameters_to_return_value(2UL+1UL));
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__uadd_with_overflow_32(), this->pass_input_flow_from_parameters_to_return_value(4UL+1UL));
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__uadd_with_overflow_64(), this->pass_input_flow_from_parameters_to_return_value(8UL+1UL));
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__ssub_with_overflow_16(), this->pass_input_flow_from_parameters_to_return_value(2UL+1UL));
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__ssub_with_overflow_32(), this->pass_input_flow_from_parameters_to_return_value(4UL+1UL));
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__ssub_with_overflow_64(), this->pass_input_flow_from_parameters_to_return_value(8UL+1UL));
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__usub_with_overflow_16(), this->pass_input_flow_from_parameters_to_return_value(2UL+1UL));
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__usub_with_overflow_32(), this->pass_input_flow_from_parameters_to_return_value(4UL+1UL));
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__usub_with_overflow_64(), this->pass_input_flow_from_parameters_to_return_value(8UL+1UL));
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__smul_with_overflow_16(), this->pass_input_flow_from_parameters_to_return_value(2UL+1UL));
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__smul_with_overflow_32(), this->pass_input_flow_from_parameters_to_return_value(4UL+1UL));
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__smul_with_overflow_64(), this->pass_input_flow_from_parameters_to_return_value(8UL+1UL));
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__umul_with_overflow_16(), this->pass_input_flow_from_parameters_to_return_value(2UL+1UL));
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__umul_with_overflow_32(), this->pass_input_flow_from_parameters_to_return_value(4UL+1UL));
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__umul_with_overflow_64(), this->pass_input_flow_from_parameters_to_return_value(8UL+1UL));
 }
 
 
