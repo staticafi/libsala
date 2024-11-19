@@ -22,33 +22,54 @@ static T __llvm_intrinsic__ctlz_impl(T const value)
 }
 
 template<typename T>
-static bool __llvm_intrinsic__is_fpclass(T const value, std::int32_t const op)
+static bool __llvm_intrinsic__is_fpclass(T const value, std::int32_t const bit_mask)
 {
-    switch (op)
-    {
-        case 0:
-        case 1:
-            return std::isnan(value);
-        case 2:
-            return !std::isnan(value) && value == -std::numeric_limits<T>::infinity();
-        case 3:
-            return !std::isnan(value) && std::isnormal(value) && value < (T)0;
-        case 4:
-            return !std::isnan(value) && !std::isnormal(value) && value < (T)0;
-        case 5:
-            return !std::isnan(value) && value == (T)0 && std::signbit(value);
-        case 6:
-            return !std::isnan(value) && value == (T)0 && !std::signbit(value);
-        case 7:
-            return !std::isnan(value) && !std::isnormal(value) && value > (T)0;
-        case 8:
-            return !std::isnan(value) && std::isnormal(value) && value > (T)0;
-        case 9:
-            return !std::isnan(value) && value == std::numeric_limits<T>::infinity();
-        default:
-            UNREACHABLE();
-            return false;
-    }
+    for (std::int32_t  bit = 0U; bit != 10U; ++bit)
+        if ((bit_mask & (1U << bit)) != 0U)
+            switch (bit)
+            {
+                case 0:
+                case 1:
+                    if (std::isnan(value))
+                        return true;
+                    break;
+                case 2:
+                    if (!std::isnan(value) && value == -std::numeric_limits<T>::infinity())
+                        return true;
+                    break;
+                case 3:
+                    if (!std::isnan(value) && std::isnormal(value) && value < (T)0)
+                        return true;
+                    break;
+                case 4:
+                    if (!std::isnan(value) && !std::isnormal(value) && value < (T)0)
+                        return true;
+                    break;
+                case 5:
+                    if (!std::isnan(value) && value == (T)0 && std::signbit(value))
+                        return true;
+                    break;
+                case 6:
+                    if (!std::isnan(value) && value == (T)0 && !std::signbit(value))
+                        return true;
+                    break;
+                case 7:
+                    if (!std::isnan(value) && !std::isnormal(value) && value > (T)0)
+                        return true;
+                    break;
+                case 8:
+                    if (!std::isnan(value) && std::isnormal(value) && value > (T)0)
+                        return true;
+                    break;
+                case 9:
+                    return !std::isnan(value) && value == std::numeric_limits<T>::infinity();
+                        return true;
+                    break;
+                default:
+                    UNREACHABLE();
+                    return false;
+            }
+    return false;
 }
 
 
