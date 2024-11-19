@@ -1712,13 +1712,13 @@ void InputFlow::__llvm_intrinsic__bswap(std::size_t const num_bytes)
 
 void InputFlow::__llvm_intrinsic__ctlz(std::size_t const num_bytes)
 {
-    join(operands().front()->start(), num_bytes, operands().at(1)->start(), num_bytes);
+    join(parameters().front().read<MemPtr>(), num_bytes, parameters().front().start(), num_bytes);
 }
 
 
 void InputFlow::__llvm_intrinsic__ctpop(std::size_t const num_bytes)
 {
-    join(operands().front()->start(), num_bytes, operands().at(1)->start(), num_bytes);
+    join(parameters().front().read<MemPtr>(), num_bytes, parameters().front().start(), num_bytes);
 }
 
 
