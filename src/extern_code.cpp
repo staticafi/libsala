@@ -83,9 +83,32 @@ static bool __llvm_intrinsic__is_fpclass(T const value, std::int32_t const bit_m
 }
 
 
+template<typename T>
+static void  __llvm_intrinsic__abs_impl(MemPtr const  dst_ptr, MemBlock const&  block1, bool const  ret_poison)
+{
+    T const  value{ block1.read<T>() };
+    if (value == std::numeric_limits<T>::min())
+    {
+        if (ret_poison == false)
+            *(T*)dst_ptr = std::numeric_limits<T>::min();
+        else
+            *(T*)dst_ptr = std::numeric_limits<T>::max(); // Here should be returned LLVM's "poison" value.
+    }
+    else
+        *(T*)dst_ptr = std::abs(value);
+}
+
+
+template<typename T>
+void __llvm_intrinsic__ptrmask_impl(MemPtr const  dst_ptr, MemPtr const&  src_ptr, T const  mask)
+{
+    // TODO!
+}
+
+
 enum OP_WITH_OVERFLOW { OWO_ADD, OWO_SUB, OWO_MUL };
 template<typename T>
-void __llvm_intrinsic__operation_with_overflow(std::vector<MemBlock> const& parameters, OP_WITH_OVERFLOW const owo)
+static void __llvm_intrinsic__operation_with_overflow(std::vector<MemBlock> const& parameters, OP_WITH_OVERFLOW const owo)
 {
     T const a{ parameters.at(1).read<T>() };
     T const b{ parameters.at(2).read<T>() };
@@ -142,6 +165,10 @@ ExternCode::ExternCode(ExecState* const state)
     REGISTER_EXTERN_CODE(__llvm_intrinsic__round_64, this->__llvm_intrinsic__round_64() );
     REGISTER_EXTERN_CODE(__llvm_intrinsic__rint_32, this->__llvm_intrinsic__rint_32() );
     REGISTER_EXTERN_CODE(__llvm_intrinsic__rint_64, this->__llvm_intrinsic__rint_64() );
+    REGISTER_EXTERN_CODE(__llvm_intrinsic__abs_8, this->__llvm_intrinsic__abs_8() );
+    REGISTER_EXTERN_CODE(__llvm_intrinsic__abs_16, this->__llvm_intrinsic__abs_16() );
+    REGISTER_EXTERN_CODE(__llvm_intrinsic__abs_32, this->__llvm_intrinsic__abs_32() );
+    REGISTER_EXTERN_CODE(__llvm_intrinsic__abs_64, this->__llvm_intrinsic__abs_64() );
     REGISTER_EXTERN_CODE(__llvm_intrinsic__maxnum_32, this->__llvm_intrinsic__maxnum_32() );
     REGISTER_EXTERN_CODE(__llvm_intrinsic__maxnum_64, this->__llvm_intrinsic__maxnum_64() );
     REGISTER_EXTERN_CODE(__llvm_intrinsic__minnum_32, this->__llvm_intrinsic__minnum_32() );
@@ -150,6 +177,8 @@ ExternCode::ExternCode(ExecState* const state)
     REGISTER_EXTERN_CODE(__llvm_intrinsic__copysign_64, this->__llvm_intrinsic__copysign_64() );
     REGISTER_EXTERN_CODE(__llvm_intrinsic__is_fpclass_32, this->__llvm_intrinsic__is_fpclass_32() );
     REGISTER_EXTERN_CODE(__llvm_intrinsic__is_fpclass_64, this->__llvm_intrinsic__is_fpclass_64() );
+    REGISTER_EXTERN_CODE(__llvm_intrinsic__ptrmask_32, this->__llvm_intrinsic__ptrmask_32() );
+    REGISTER_EXTERN_CODE(__llvm_intrinsic__ptrmask_64, this->__llvm_intrinsic__ptrmask_64() );
     REGISTER_EXTERN_CODE(__llvm_intrinsic__sadd_with_overflow_16, __llvm_intrinsic__operation_with_overflow<std::int16_t>(this->parameters(), OWO_ADD));
     REGISTER_EXTERN_CODE(__llvm_intrinsic__sadd_with_overflow_32, __llvm_intrinsic__operation_with_overflow<std::int32_t>(this->parameters(), OWO_ADD));
     REGISTER_EXTERN_CODE(__llvm_intrinsic__sadd_with_overflow_64, __llvm_intrinsic__operation_with_overflow<std::int64_t>(this->parameters(), OWO_ADD));
@@ -385,6 +414,30 @@ void ExternCode::__llvm_intrinsic__rint_64()
 }
 
 
+void ExternCode::__llvm_intrinsic__abs_8()
+{
+    __llvm_intrinsic__abs_impl<std::int8_t>(parameters().front().read<MemPtr>(), parameters().at(1), parameters().at(2).read<std::uint8_t>() != 0U);
+}
+
+
+void ExternCode::__llvm_intrinsic__abs_16()
+{
+    __llvm_intrinsic__abs_impl<std::int16_t>(parameters().front().read<MemPtr>(), parameters().at(1), parameters().at(2).read<std::uint8_t>() != 0U);
+}
+
+
+void ExternCode::__llvm_intrinsic__abs_32()
+{
+    __llvm_intrinsic__abs_impl<std::int32_t>(parameters().front().read<MemPtr>(), parameters().at(1), parameters().at(2).read<std::uint8_t>() != 0U);
+}
+
+
+void ExternCode::__llvm_intrinsic__abs_64()
+{
+    __llvm_intrinsic__abs_impl<std::int64_t>(parameters().front().read<MemPtr>(), parameters().at(1), parameters().at(2).read<std::uint8_t>() != 0U);
+}
+
+
 void ExternCode::__llvm_intrinsic__maxnum_32()
 {
     auto const dst_ptr{ parameters().front().read<MemPtr>() };
@@ -440,6 +493,26 @@ void ExternCode::__llvm_intrinsic__is_fpclass_64()
     bool const result{ __llvm_intrinsic__is_fpclass(parameters().at(1).read<double>(), parameters().at(2).read<std::int32_t>()) };
     auto const dst_ptr{ parameters().front().read<MemPtr>() };
     *(std::uint8_t*)dst_ptr = result ? 1 : 0;
+}
+
+
+void ExternCode::__llvm_intrinsic__ptrmask_32()
+{
+    __llvm_intrinsic__ptrmask_impl<std::int32_t>(
+            parameters().front().read<MemPtr>(),
+            parameters().at(1).read<MemPtr>(),
+            parameters().at(2).read<std::uint32_t>()
+            );
+}
+
+
+void ExternCode::__llvm_intrinsic__ptrmask_64()
+{
+    __llvm_intrinsic__ptrmask_impl<std::int64_t>(
+            parameters().front().read<MemPtr>(),
+            parameters().at(1).read<MemPtr>(),
+            parameters().at(2).read<std::uint64_t>()
+            );
 }
 
 

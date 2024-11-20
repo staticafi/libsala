@@ -72,6 +72,8 @@ struct MemBlock final
 
     void write_shifted(MemPtr const from, std::int64_t const shift) const { data_->read_shift_and_write_pointer(from, shift); }
 
+    PointerModel const* pointer_model() const { return data_->pointer_model(); }
+
 private:
 
     std::shared_ptr<detail::MemBlockData> data_;

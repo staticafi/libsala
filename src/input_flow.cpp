@@ -1558,7 +1558,9 @@ void InputFlow::register_external_functions()
 {
     register_external_llvm_intrinsics();
     register_external_math_functions();
+    register_external_string_functions();
     register_external_fenv_functions();
+    register_external_linux_functions();
 }
 
 
@@ -1586,6 +1588,10 @@ void InputFlow::register_external_llvm_intrinsics()
     REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__round_64, this->pass_input_flow_from_parameters_to_return_value(sizeof(double)));
     REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__rint_32, this->pass_input_flow_from_parameters_to_return_value(sizeof(float)));
     REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__rint_64, this->pass_input_flow_from_parameters_to_return_value(sizeof(double)));
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__abs_8, this->pass_input_flow_from_parameters_to_return_value(sizeof(std::int8_t)));
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__abs_16, this->pass_input_flow_from_parameters_to_return_value(sizeof(std::int16_t)));
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__abs_32, this->pass_input_flow_from_parameters_to_return_value(sizeof(std::int32_t)));
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__abs_64, this->pass_input_flow_from_parameters_to_return_value(sizeof(std::int64_t)));
     REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__maxnum_32, this->pass_input_flow_from_parameters_to_return_value(sizeof(float)));
     REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__maxnum_64, this->pass_input_flow_from_parameters_to_return_value(sizeof(double)));
     REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__minnum_32, this->pass_input_flow_from_parameters_to_return_value(sizeof(float)));
@@ -1594,6 +1600,8 @@ void InputFlow::register_external_llvm_intrinsics()
     REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__copysign_64, this->pass_input_flow_from_parameters_to_return_value(sizeof(double)));
     REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__is_fpclass_32, this->pass_input_flow_from_parameters_to_return_value(1ULL));
     REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__is_fpclass_64, this->pass_input_flow_from_parameters_to_return_value(1ULL));
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__ptrmask_32, this->pass_input_flow_from_parameters_to_return_value(4ULL));
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__ptrmask_64, this->pass_input_flow_from_parameters_to_return_value(8ULL));
     REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__sadd_with_overflow_16(), this->pass_input_flow_from_parameters_to_return_value(2UL+1UL));
     REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__sadd_with_overflow_32(), this->pass_input_flow_from_parameters_to_return_value(4UL+1UL));
     REGISTER_EXTERN_FUNCTION_PROCESSOR(__llvm_intrinsic__sadd_with_overflow_64(), this->pass_input_flow_from_parameters_to_return_value(8UL+1UL));
@@ -1683,6 +1691,23 @@ void InputFlow::register_external_math_functions()
     REGISTER_EXTERN_FUNCTION_PROCESSOR(__iseqsig, this->pass_input_flow_from_parameters_to_return_value(sizeof(int)));
 }
 
+void InputFlow::register_external_string_functions()
+{
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(strlen, this->strlen_impl());
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(strchr, this->strchr_impl());
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(strrchr, this->strrchr_impl());
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(strspn, this->strspn_impl());
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(strcspn, this->strcspn_impl());
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(strpbrk, this->strpbrk_impl());
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(strstr, this->strstr_impl());
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(strtok, this->strtok_impl());
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(strcat, this->strcat_impl());
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(strncat, this->strncat_impl());
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(strcpy, this->strcpy_impl());
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(strncpy, this->strncpy_impl());
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(strcmp, this->strcmp_impl());
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(strncmp, this->strncmp_impl());
+}
 
 void InputFlow::register_external_fenv_functions()
 {
@@ -1690,6 +1715,11 @@ void InputFlow::register_external_fenv_functions()
     REGISTER_EXTERN_FUNCTION_PROCESSOR(fesetround, this->pass_input_flow_from_parameters_to_return_value(sizeof(int)));
 }
 
+void InputFlow::register_external_linux_functions()
+{
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(getopt, this->getopt_impl());
+    REGISTER_EXTERN_FUNCTION_PROCESSOR(getopt_long, this->getopt_long_impl());
+}
 
 void InputFlow::pass_input_flow_from_parameters_to_return_value(std::size_t const num_return_value_bytes)
 {
@@ -1719,6 +1749,102 @@ void InputFlow::__llvm_intrinsic__ctlz(std::size_t const num_bytes)
 void InputFlow::__llvm_intrinsic__ctpop(std::size_t const num_bytes)
 {
     join(parameters().front().read<MemPtr>(), num_bytes, parameters().front().start(), num_bytes);
+}
+
+
+void InputFlow::strlen_impl()
+{
+    // TODO!
+}
+
+
+void InputFlow::strchr_impl()
+{
+    // TODO!
+}
+
+
+void InputFlow::strrchr_impl()
+{
+    // TODO!
+}
+
+
+void InputFlow::strspn_impl()
+{
+    // TODO!
+}
+
+
+void InputFlow::strcspn_impl()
+{
+    // TODO!
+}
+
+
+void InputFlow::strpbrk_impl()
+{
+    // TODO!
+}
+
+
+void InputFlow::strstr_impl()
+{
+    // TODO!
+}
+
+
+void InputFlow::strtok_impl()
+{
+    // TODO!
+}
+
+
+void InputFlow::strcat_impl()
+{
+    // TODO!
+}
+
+
+void InputFlow::strncat_impl()
+{
+    // TODO!
+}
+
+
+void InputFlow::strcpy_impl()
+{
+    // TODO!
+}
+
+
+void InputFlow::strncpy_impl()
+{
+    // TODO!
+}
+
+
+void InputFlow::strcmp_impl()
+{
+    // TODO!
+}
+
+
+void InputFlow::strncmp_impl()
+{
+    // TODO!
+}
+
+
+void InputFlow::getopt_impl()
+{
+    // TODO!
+}
+
+
+void InputFlow::getopt_long_impl()
+{
+    // TODO!
 }
 
 

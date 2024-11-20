@@ -4,6 +4,8 @@
 #include <cstring>
 #include <cmath>
 #include <cfenv>
+#include <unistd.h>
+#include <getopt.h>
 
 #define REGISTER_CONST_FUNC(FN_NAME, TYPE) \
     REGISTER_EXTERN_CODE(FN_NAME, \
@@ -19,6 +21,28 @@
         RET_TYPE const result{ FN_NAME(parameters().at(1).read<PARAM1_TYPE>(), parameters().back().read<PARAM2_TYPE>()) }; \
         std::memcpy(parameters().front().read<sala::MemPtr>(), &result, sizeof(RET_TYPE)))
 #define REGISTER_BINARY_FUNC(FN_NAME, TYPE) REGISTER_BINARY_FUNC_IMPL(FN_NAME, FN_NAME, TYPE, TYPE, TYPE)
+#define REGISTER_TERNARY_FUNC_IMPL(LL_FN_NAME, FN_NAME, PARAM1_TYPE, PARAM2_TYPE, PARAM3_TYPE, RET_TYPE) \
+    REGISTER_EXTERN_CODE(LL_FN_NAME, \
+        RET_TYPE const result{ FN_NAME(parameters().at(1).read<PARAM1_TYPE>(), parameters().at(2).read<PARAM2_TYPE>(), \
+                                       parameters().at(3).read<PARAM3_TYPE>()) \
+                                       }; \
+        std::memcpy(parameters().front().read<sala::MemPtr>(), &result, sizeof(RET_TYPE)))
+#define REGISTER_TERNARY_FUNC(FN_NAME, TYPE) REGISTER_BINARY_FUNC_IMPL(FN_NAME, FN_NAME, TYPE, TYPE, TYPE, TYPE)
+#define REGISTER_4ARY_FUNC_IMPL(LL_FN_NAME, FN_NAME, PARAM1_TYPE, PARAM2_TYPE, PARAM3_TYPE, PARAM4_TYPE, RET_TYPE) \
+    REGISTER_EXTERN_CODE(LL_FN_NAME, \
+        RET_TYPE const result{ FN_NAME(parameters().at(1).read<PARAM1_TYPE>(), parameters().at(2).read<PARAM2_TYPE>(), \
+                                       parameters().at(3).read<PARAM3_TYPE>(), parameters().at(4).read<PARAM4_TYPE>()) \
+                                       }; \
+        std::memcpy(parameters().front().read<sala::MemPtr>(), &result, sizeof(RET_TYPE)))
+#define REGISTER_4ARY_FUNC(FN_NAME, TYPE) REGISTER_BINARY_FUNC_IMPL(FN_NAME, FN_NAME, TYPE, TYPE, TYPE, TYPE, TYPE)
+#define REGISTER_5ARY_FUNC_IMPL(LL_FN_NAME, FN_NAME, PARAM1_TYPE, PARAM2_TYPE, PARAM3_TYPE, PARAM4_TYPE, PARAM5_TYPE, RET_TYPE) \
+    REGISTER_EXTERN_CODE(LL_FN_NAME, \
+        RET_TYPE const result{ FN_NAME(parameters().at(1).read<PARAM1_TYPE>(), parameters().at(2).read<PARAM2_TYPE>(), \
+                                       parameters().at(3).read<PARAM3_TYPE>(), parameters().at(4).read<PARAM4_TYPE>(), \
+                                       parameters().at(5).read<PARAM5_TYPE>()) \
+                                       }; \
+        std::memcpy(parameters().front().read<sala::MemPtr>(), &result, sizeof(RET_TYPE)))
+#define REGISTER_5ARY_FUNC(FN_NAME, TYPE) REGISTER_BINARY_FUNC_IMPL(FN_NAME, FN_NAME, TYPE, TYPE, TYPE, TYPE, TYPE, TYPE)
 
 namespace sala {
 
@@ -27,7 +51,9 @@ ExternCodeCStd::ExternCodeCStd(ExecState* const state)
     : ExternCode{ state }
 {
     register_math_functions();
+    register_string_functions();
     register_fenv_functions();
+    register_linux_functions();
 }
 
 
@@ -102,10 +128,38 @@ void ExternCodeCStd::register_math_functions()
 }
 
 
+void ExternCodeCStd::register_string_functions()
+{
+    REGISTER_UNARY_FUNC_IMPL(strlen, strlen, char*, std::size_t);
+
+    REGISTER_BINARY_FUNC_IMPL(strchr, strchr, char*, int, char*);
+    REGISTER_BINARY_FUNC_IMPL(strrchr, strrchr, char*, int, char*);
+    REGISTER_BINARY_FUNC_IMPL(strspn, strspn, char*, char*, std::size_t);
+    REGISTER_BINARY_FUNC_IMPL(strcspn, strcspn, char*, char*, std::size_t);
+    REGISTER_BINARY_FUNC_IMPL(strpbrk, strpbrk, char*, char*, char*);
+    REGISTER_BINARY_FUNC(strstr, char*);
+    REGISTER_BINARY_FUNC(strtok, char*);
+    REGISTER_BINARY_FUNC(strcat, char*);
+    REGISTER_TERNARY_FUNC_IMPL(strncat, strncat, char*, char*, std::size_t, char*);
+    REGISTER_BINARY_FUNC(strcpy, char*);
+    REGISTER_BINARY_FUNC_IMPL(strcmp, strcmp, char*, char*, int);
+    REGISTER_TERNARY_FUNC_IMPL(strncmp, strncmp, char*, char*, std::size_t, int);
+
+    REGISTER_TERNARY_FUNC_IMPL(strncpy, strncpy, char*, char*, std::size_t, char*);
+}
+
+
 void ExternCodeCStd::register_fenv_functions()
 {
     REGISTER_CONST_FUNC(fegetround, int);
     REGISTER_UNARY_FUNC(fesetround, int);
+}
+
+
+void ExternCodeCStd::register_linux_functions()
+{
+    REGISTER_TERNARY_FUNC_IMPL(getopt, getopt, int, char**, char*, int);
+    REGISTER_5ARY_FUNC_IMPL(getopt_long, getopt_long, int, char**, char*, struct option *, int*, int);
 }
 
 

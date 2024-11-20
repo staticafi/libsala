@@ -79,7 +79,9 @@ private:
     void register_external_functions();
     void register_external_llvm_intrinsics();
     void register_external_math_functions();
+    void register_external_string_functions();
     void register_external_fenv_functions();
+    void register_external_linux_functions();
 
 protected:
 
@@ -336,6 +338,22 @@ protected:
     virtual void __llvm_intrinsic__bswap(std::size_t num_bytes);
     virtual void __llvm_intrinsic__ctlz(std::size_t num_bytes);
     virtual void __llvm_intrinsic__ctpop(std::size_t num_bytes);
+    virtual void strlen_impl();
+    virtual void strchr_impl();
+    virtual void strrchr_impl();
+    virtual void strspn_impl();
+    virtual void strcspn_impl();
+    virtual void strpbrk_impl();
+    virtual void strstr_impl();
+    virtual void strtok_impl();
+    virtual void strcat_impl();
+    virtual void strncat_impl();
+    virtual void strcpy_impl();
+    virtual void strncpy_impl();
+    virtual void strcmp_impl();
+    virtual void strncmp_impl();
+    virtual void getopt_impl();
+    virtual void getopt_long_impl();
 };
 
 
