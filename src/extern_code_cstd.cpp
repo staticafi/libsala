@@ -291,13 +291,13 @@ void ExternCodeCStd::strncmp_impl()
 {
     auto const count{ parameters().at(3).read<int>() };
     auto const lhs{ parameters().at(1).read<char const*>() };
-    if (!sanitizer()->is_c_string_valid((MemPtr)lhs), std::max(count, 0))
+    if (!sanitizer()->is_c_string_valid((MemPtr)lhs, std::max(count, 0)))
     {
         crash_execution("strncmp_impl: Argument 1 is not valid C string.");
         return;
     }
     auto const rhs{ parameters().at(2).read<char const*>() };
-    if (!sanitizer()->is_c_string_valid((MemPtr)lhs), std::max(count, 0))
+    if (!sanitizer()->is_c_string_valid((MemPtr)lhs, std::max(count, 0)))
     {
         crash_execution("strncmp_impl: Argument 2 is not valid C string.");
         return;
