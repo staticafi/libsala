@@ -36,6 +36,39 @@ bool Sanitizer::is_memory_valid(MemPtr const ptr, std::size_t const count) const
 }
 
 
+bool Sanitizer::is_c_string_valid(MemPtr str) const
+{
+    if (str == nullptr)
+        return false;
+    MemRegion const* const region{ locate(str) };
+    while (true)
+    {
+        if (!inside(region, str, 0UL))
+            return false;
+        if (*str == '\0')
+            return true;
+        ++str;
+    }
+}
+
+
+bool Sanitizer::is_c_string_valid(MemPtr str, std::size_t max_len) const
+{
+    if (str == nullptr)
+        return false;
+    MemRegion const* const region{ locate(str) };
+    while (true)
+    {
+        if (!inside(region, str, 0UL))
+            return false;
+        if (*str == '\0' || max_len == 0ULL)
+            return true;
+        ++str;
+        --max_len;
+    }
+}
+
+
 void Sanitizer::insert(MemPtr const ptr, std::size_t const count)
 {
     regions_.insert({ ptr, count });

@@ -136,9 +136,10 @@ static void __llvm_intrinsic__operation_with_overflow(std::vector<MemBlock> cons
 }
 
 
-ExternCode::ExternCode(ExecState* const state)
+ExternCode::ExternCode(ExecState* const state, Sanitizer* const sanitizer)
     : state_{ state }
     , code_{}
+    , sanitizer_{ sanitizer }
 {
     REGISTER_EXTERN_CODE(exit, this->std_exit() );
     REGISTER_EXTERN_CODE(atexit, this->std_atexit() );

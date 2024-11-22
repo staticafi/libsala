@@ -3,6 +3,7 @@
 
 #   include <sala/program.hpp>
 #   include <sala/exec_state.hpp>
+#   include <sala/sanitizer.hpp>
 #   include <unordered_map>
 #   include <functional>
 #   include <string>
@@ -15,7 +16,7 @@ namespace sala {
 
 struct ExternCode
 {
-    explicit ExternCode(ExecState* const state);
+    ExternCode(ExecState* const state, Sanitizer* const sanitizer);
     virtual ~ExternCode() {}
 
     Program const& program() const { return state().program(); }
@@ -30,6 +31,8 @@ struct ExternCode
     void call_code_of_current_function_if_registered_external();
 
     Instruction const* get_call_instruction() const;
+
+    Sanitizer* sanitizer() const { return sanitizer_; }
 
 private:
     void std_exit();
@@ -71,6 +74,7 @@ private:
 
     ExecState* state_;
     std::unordered_map<std::string, std::function<void()> > code_;
+    Sanitizer* sanitizer_;
 };
 
 

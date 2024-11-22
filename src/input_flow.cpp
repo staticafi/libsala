@@ -11,6 +11,8 @@
 #include <cstring>
 #include <cmath>
 #include <cfenv>
+#include <unistd.h>
+#include <getopt.h>
 
 namespace sala {
 
@@ -1721,6 +1723,19 @@ void InputFlow::register_external_linux_functions()
     REGISTER_EXTERN_FUNCTION_PROCESSOR(getopt_long, this->getopt_long_impl());
 }
 
+
+void InputFlow::__development__crash_execution(std::string const& message)
+{
+    state().set_stage(ExecState::Stage::FINISHED);
+    state().set_termination(
+        ExecState::Termination::CRASH,
+        "InputFlow[DEVELOPMENT]",
+        state().make_error_message(message)
+        );
+    state().set_exit_code(0);
+}
+
+
 void InputFlow::pass_input_flow_from_parameters_to_return_value(std::size_t const num_return_value_bytes)
 {
     std::vector<std::pair<MemPtr, std::size_t> > param_memory_regions;
@@ -1754,97 +1769,149 @@ void InputFlow::__llvm_intrinsic__ctpop(std::size_t const num_bytes)
 
 void InputFlow::strlen_impl()
 {
-    // TODO!
+    auto const dst_ptr{ parameters().front().read<MemPtr>() };
+    auto const src_ptr{ parameters().back().read<MemPtr>() };
+    std::size_t const  num_bytes{ std::strlen((char const*)src_ptr) };
+    join(dst_ptr, sizeof(std::size_t), src_ptr, num_bytes);
 }
 
 
 void InputFlow::strchr_impl()
 {
-    // TODO!
+    auto const dst_ptr{ parameters().front().read<MemPtr>() };
+    auto const src_ptr{ parameters().at(1).read<char const*>() };
+    auto const chr{ parameters().at(2).read<int>() };
+    auto chr_ptr{ std::strchr(src_ptr, chr) };
+    std::size_t  num_bytes{ chr_ptr != nullptr ? chr_ptr - src_ptr : std::strlen(src_ptr) };
+    join(dst_ptr, sizeof(char const*), (MemPtr)src_ptr, num_bytes);
+    join(dst_ptr, sizeof(char const*), parameters().at(2).start(), sizeof(int));
 }
 
 
 void InputFlow::strrchr_impl()
 {
-    // TODO!
+    auto const dst_ptr{ parameters().front().read<MemPtr>() };
+    auto const src_ptr{ parameters().at(1).read<char const*>() };
+    join(dst_ptr, sizeof(char const*), (MemPtr)src_ptr, std::strlen(src_ptr));
+    join(dst_ptr, sizeof(char const*), parameters().at(2).start(), sizeof(int));
 }
 
 
 void InputFlow::strspn_impl()
 {
-    // TODO!
+    __development__crash_execution("strspn_impl: NOT IMPLEMENTED YET.");
 }
 
 
 void InputFlow::strcspn_impl()
 {
-    // TODO!
+    __development__crash_execution("strcspn_impl: NOT IMPLEMENTED YET.");
 }
 
 
 void InputFlow::strpbrk_impl()
 {
-    // TODO!
+    __development__crash_execution("strpbrk_impl: NOT IMPLEMENTED YET.");
 }
 
 
 void InputFlow::strstr_impl()
 {
-    // TODO!
+    __development__crash_execution("strstr_impl: NOT IMPLEMENTED YET.");
 }
 
 
 void InputFlow::strtok_impl()
 {
-    // TODO!
+    __development__crash_execution("strtok_impl: NOT IMPLEMENTED YET.");
 }
 
 
 void InputFlow::strcat_impl()
 {
-    // TODO!
+    __development__crash_execution("strcat_impl: NOT IMPLEMENTED YET.");
 }
 
 
 void InputFlow::strncat_impl()
 {
-    // TODO!
+    __development__crash_execution("strncat_impl: NOT IMPLEMENTED YET.");
 }
 
 
 void InputFlow::strcpy_impl()
 {
-    // TODO!
+    __development__crash_execution("strcpy_impl: NOT IMPLEMENTED YET.");
 }
 
 
 void InputFlow::strncpy_impl()
 {
-    // TODO!
+    __development__crash_execution("strncpy_impl: NOT IMPLEMENTED YET.");
 }
 
 
 void InputFlow::strcmp_impl()
 {
-    // TODO!
+    auto const dst_ptr{ parameters().front().read<MemPtr>() };
+    auto const lhs{ parameters().at(1).read<char const*>() };
+    join(dst_ptr, sizeof(int), (MemPtr)lhs, std::strlen(lhs));
+    auto const rhs{ parameters().at(2).read<char const*>() };
+    join(dst_ptr, sizeof(int), (MemPtr)rhs, std::strlen(rhs));
 }
 
 
 void InputFlow::strncmp_impl()
 {
-    // TODO!
+    auto const dst_ptr{ parameters().front().read<MemPtr>() };
+    auto const count{ parameters().at(3).read<int>() };
+    auto const lhs{ parameters().at(1).read<char const*>() };
+    join(dst_ptr, sizeof(int), (MemPtr)lhs, strnlen(lhs, count));
+    auto const rhs{ parameters().at(2).read<char const*>() };
+    join(dst_ptr, sizeof(int), (MemPtr)rhs, strnlen(rhs, count));
+    join(dst_ptr, sizeof(int), parameters().at(3).start(), sizeof(int));
 }
 
 
 void InputFlow::getopt_impl()
 {
-    // TODO!
+    auto const dst_ptr{ parameters().front().read<MemPtr>() };
+    auto const argc{ parameters().at(1).read<int>() };
+    join(dst_ptr, sizeof(int), parameters().at(1).start(), sizeof(int));
+    auto const argv{ parameters().at(2).read<char**>() };
+    for (int i = 0; i != argc; ++i)
+        join(dst_ptr, sizeof(int), (MemPtr)argv[i], std::strlen(argv[i]));
+    auto const opt_string{ parameters().at(3).read<char const*>() };
+    join(dst_ptr, sizeof(int), (MemPtr)opt_string, std::strlen(opt_string));
 }
 
 
 void InputFlow::getopt_long_impl()
 {
-    // TODO!
+    auto const dst_ptr{ parameters().front().read<MemPtr>() };
+    auto const longindex{ parameters().at(5).read<MemPtr>() };
+    auto const& pass_taint = [this, dst_ptr, longindex](MemPtr const ptr, std::size_t num_bytes) {
+        join(dst_ptr, sizeof(int), ptr, num_bytes);
+        if (longindex != nullptr)
+            join(longindex, sizeof(int), ptr, num_bytes);
+    };
+    auto const argc{ parameters().at(1).read<int>() };
+    pass_taint(parameters().at(1).start(), sizeof(int));
+    auto const argv{ parameters().at(2).read<char**>() };
+    for (int i = 0; i != argc; ++i)
+        pass_taint((MemPtr)argv[i], std::strlen(argv[i]));
+    auto const opt_string{ parameters().at(3).read<char const*>() };
+    pass_taint((MemPtr)opt_string, std::strlen(opt_string));
+    auto const longopts{ parameters().at(4).read<struct option const*>() };
+    for (int i = 0; longopts[i].name != nullptr || longopts[i].has_arg != 0 || longopts[i].flag != nullptr || longopts[i].val != 0; ++i)
+    {
+        if (longopts[i].name != nullptr)
+            pass_taint((MemPtr)longopts[i].name, std::strlen(longopts[i].name));
+        pass_taint((MemPtr)&longopts[i].has_arg, sizeof(int));
+        if (longopts[i].flag != nullptr)
+            pass_taint((MemPtr)longopts[i].flag, sizeof(int));
+        pass_taint((MemPtr)&longopts[i].val, sizeof(int));
+    }
 }
 
 

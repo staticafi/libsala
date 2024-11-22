@@ -31,6 +31,10 @@ template<typename T>
 struct MemBlockDataReader
 { static inline T read(MemBlockData* const data) { return *(T*)data->start(); } };
 
+template<typename T>
+struct MemBlockDataReader<T*>
+{ static inline T* read(MemBlockData* const data) { return (T*)data->read_pointer(); } };
+
 template<>
 struct MemBlockDataReader<MemPtr>
 { static inline MemPtr read(MemBlockData* const data) { return data->read_pointer(); } };

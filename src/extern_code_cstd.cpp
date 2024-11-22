@@ -47,8 +47,8 @@
 namespace sala {
 
 
-ExternCodeCStd::ExternCodeCStd(ExecState* const state)
-    : ExternCode{ state }
+ExternCodeCStd::ExternCodeCStd(ExecState* const state, Sanitizer* const sanitizer)
+    : ExternCode{ state, sanitizer }
 {
     register_math_functions();
     register_string_functions();
@@ -130,22 +130,20 @@ void ExternCodeCStd::register_math_functions()
 
 void ExternCodeCStd::register_string_functions()
 {
-    REGISTER_UNARY_FUNC_IMPL(strlen, strlen, char*, std::size_t);
-
-    REGISTER_BINARY_FUNC_IMPL(strchr, strchr, char*, int, char*);
-    REGISTER_BINARY_FUNC_IMPL(strrchr, strrchr, char*, int, char*);
-    REGISTER_BINARY_FUNC_IMPL(strspn, strspn, char*, char*, std::size_t);
-    REGISTER_BINARY_FUNC_IMPL(strcspn, strcspn, char*, char*, std::size_t);
-    REGISTER_BINARY_FUNC_IMPL(strpbrk, strpbrk, char*, char*, char*);
-    REGISTER_BINARY_FUNC(strstr, char*);
-    REGISTER_BINARY_FUNC(strtok, char*);
-    REGISTER_BINARY_FUNC(strcat, char*);
-    REGISTER_TERNARY_FUNC_IMPL(strncat, strncat, char*, char*, std::size_t, char*);
-    REGISTER_BINARY_FUNC(strcpy, char*);
-    REGISTER_BINARY_FUNC_IMPL(strcmp, strcmp, char*, char*, int);
-    REGISTER_TERNARY_FUNC_IMPL(strncmp, strncmp, char*, char*, std::size_t, int);
-
-    REGISTER_TERNARY_FUNC_IMPL(strncpy, strncpy, char*, char*, std::size_t, char*);
+    REGISTER_EXTERN_CODE(strlen, this->strlen_impl());
+    REGISTER_EXTERN_CODE(strchr, this->strchr_impl());
+    REGISTER_EXTERN_CODE(strrchr, this->strrchr_impl());
+    REGISTER_EXTERN_CODE(strspn, this->strspn_impl());
+    REGISTER_EXTERN_CODE(strcspn, this->strcspn_impl());
+    REGISTER_EXTERN_CODE(strpbrk, this->strpbrk_impl());
+    REGISTER_EXTERN_CODE(strstr, this->strstr_impl());
+    REGISTER_EXTERN_CODE(strtok, this->strtok_impl());
+    REGISTER_EXTERN_CODE(strcat, this->strcat_impl());
+    REGISTER_EXTERN_CODE(strncat, this->strncat_impl());
+    REGISTER_EXTERN_CODE(strcpy, this->strcpy_impl());
+    REGISTER_EXTERN_CODE(strncpy, this->strncpy_impl());
+    REGISTER_EXTERN_CODE(strcmp, this->strcmp_impl());
+    REGISTER_EXTERN_CODE(strncmp, this->strncmp_impl());
 }
 
 
@@ -158,8 +156,238 @@ void ExternCodeCStd::register_fenv_functions()
 
 void ExternCodeCStd::register_linux_functions()
 {
-    REGISTER_TERNARY_FUNC_IMPL(getopt, getopt, int, char**, char*, int);
-    REGISTER_5ARY_FUNC_IMPL(getopt_long, getopt_long, int, char**, char*, struct option *, int*, int);
+    REGISTER_EXTERN_CODE(getopt, this->getopt_impl());
+    REGISTER_EXTERN_CODE(getopt_long, this->getopt_long_impl());
+}
+
+
+void ExternCodeCStd::crash_execution(std::string const& message)
+{
+    state().set_stage(ExecState::Stage::FINISHED);
+    state().set_termination(
+        ExecState::Termination::CRASH,
+        "ExternCodeCStd",
+        state().make_error_message(message)
+        );
+    state().set_exit_code(0);
+}
+
+
+void ExternCodeCStd::strlen_impl()
+{
+    MemPtr const str{ parameters().at(1).read<MemPtr>() };
+    if (!sanitizer()->is_c_string_valid(str))
+    {
+        crash_execution("strlen_impl: Argument is not valid C string.");
+        return;
+    }
+    auto const dst_ptr{ parameters().front().read<std::size_t*>() };
+    *dst_ptr = std::strlen((char const*)str);
+}
+
+
+void ExternCodeCStd::strchr_impl()
+{
+    MemPtr const str{ parameters().at(1).read<MemPtr>() };
+    if (!sanitizer()->is_c_string_valid(str))
+    {
+        crash_execution("strchr_impl: Argument is not valid C string.");
+        return;
+    }
+    auto const chr{ parameters().at(2).read<int>() };
+    auto const dst_ptr{ parameters().front().read<char**>() };
+    *dst_ptr = std::strchr((char*)str, chr);
+}
+
+
+void ExternCodeCStd::strrchr_impl()
+{
+    MemPtr const str{ parameters().at(1).read<MemPtr>() };
+    if (!sanitizer()->is_c_string_valid(str))
+    {
+        crash_execution("strrchr_impl: Argument is not valid C string.");
+        return;
+    }
+    auto const chr{ parameters().at(2).read<int>() };
+    auto const dst_ptr{ parameters().front().read<char**>() };
+    *dst_ptr = std::strrchr((char*)str, chr);
+}
+
+
+void ExternCodeCStd::strspn_impl()
+{
+    crash_execution("strspn_impl: NOT IMPLEMENTED YET.");
+}
+
+
+void ExternCodeCStd::strcspn_impl()
+{
+    crash_execution("strcspn_impl: NOT IMPLEMENTED YET.");
+}
+
+
+void ExternCodeCStd::strpbrk_impl()
+{
+    crash_execution("strpbrk_impl: NOT IMPLEMENTED YET.");
+}
+
+
+void ExternCodeCStd::strstr_impl()
+{
+    crash_execution("strstr_impl: NOT IMPLEMENTED YET.");
+}
+
+
+void ExternCodeCStd::strtok_impl()
+{
+    crash_execution("strtok_impl: NOT IMPLEMENTED YET.");
+}
+
+
+void ExternCodeCStd::strcat_impl()
+{
+    crash_execution("strcat_impl: NOT IMPLEMENTED YET.");
+}
+
+
+void ExternCodeCStd::strncat_impl()
+{
+    crash_execution("strncat_impl: NOT IMPLEMENTED YET.");
+}
+
+
+void ExternCodeCStd::strcpy_impl()
+{
+    crash_execution("strcpy_impl: NOT IMPLEMENTED YET.");
+}
+
+
+void ExternCodeCStd::strncpy_impl()
+{
+    crash_execution("strncpy_impl: NOT IMPLEMENTED YET.");
+}
+
+
+void ExternCodeCStd::strcmp_impl()
+{
+    auto const lhs{ parameters().at(1).read<char const*>() };
+    if (!sanitizer()->is_c_string_valid((MemPtr)lhs))
+    {
+        crash_execution("strcmp_impl: Argument 1 is not valid C string.");
+        return;
+    }
+    auto const rhs{ parameters().at(2).read<char const*>() };
+    if (!sanitizer()->is_c_string_valid((MemPtr)rhs))
+    {
+        crash_execution("strcmp_impl: Argument 2 is not valid C string.");
+        return;
+    }
+    auto const dst_ptr{ parameters().front().read<int*>() };
+    *dst_ptr = std::strcmp(lhs, rhs);
+}
+
+
+void ExternCodeCStd::strncmp_impl()
+{
+    auto const count{ parameters().at(3).read<int>() };
+    auto const lhs{ parameters().at(1).read<char const*>() };
+    if (!sanitizer()->is_c_string_valid((MemPtr)lhs), std::max(count, 0))
+    {
+        crash_execution("strncmp_impl: Argument 1 is not valid C string.");
+        return;
+    }
+    auto const rhs{ parameters().at(2).read<char const*>() };
+    if (!sanitizer()->is_c_string_valid((MemPtr)lhs), std::max(count, 0))
+    {
+        crash_execution("strncmp_impl: Argument 2 is not valid C string.");
+        return;
+    }
+    auto const dst_ptr{ parameters().front().read<int*>() };
+    *dst_ptr = std::strncmp(lhs, rhs, count);
+}
+
+
+void ExternCodeCStd::getopt_impl()
+{
+    auto const argc{ parameters().at(1).read<int>() };
+    if (argc < 0)
+    {
+        crash_execution("getopt_impl: Argument 1 (argc) is negative.");
+        return;
+    }
+    auto const argv{ parameters().at(2).read<char**>() };
+    if (!sanitizer()->is_memory_valid((MemPtr)argv, argc * sizeof(char*)))
+    {
+        crash_execution("getopt_impl: Argument 2 does not points to valid memory.");
+        return;
+    }
+    for (int i = 0; i != argc; ++i)
+        if (!sanitizer()->is_c_string_valid((MemPtr)argv[i]))
+        {
+            crash_execution("getopt_impl: Argument 2 is not an array of valid C strings.");
+            return;
+        }
+    auto const opt_string{ parameters().at(3).read<char const*>() };
+    if (!sanitizer()->is_c_string_valid((MemPtr)opt_string))
+    {
+        crash_execution("getopt_impl: Argument 3 is not valid C string.");
+        return;
+    }
+    auto const dst_ptr{ parameters().front().read<int*>() };
+    *dst_ptr = getopt(argc, argv, opt_string);
+}
+
+
+void ExternCodeCStd::getopt_long_impl()
+{
+    auto const argc{ parameters().at(1).read<int>() };
+    if (argc < 0)
+    {
+        crash_execution("getopt_long_impl: Argument 1 (argc) is negative.");
+        return;
+    }
+    auto const argv{ parameters().at(2).read<char**>() };
+    if (!sanitizer()->is_memory_valid((MemPtr)argv, argc * sizeof(char*)))
+    {
+        crash_execution("getopt_long_impl: Argument 2 does not points to valid memory.");
+        return;
+    }
+    for (int i = 0; i != argc; ++i)
+        if (!sanitizer()->is_c_string_valid((MemPtr)argv[i]))
+        {
+            crash_execution("getopt_long_impl: Argument 2 is not an array of valid C strings.");
+            return;
+        }
+    auto const opt_string{ parameters().at(3).read<char const*>() };
+    if (!sanitizer()->is_c_string_valid((MemPtr)opt_string))
+    {
+        crash_execution("getopt_long_impl: Argument 3 is not valid C string.");
+        return;
+    }
+    auto const longopts{ parameters().at(4).read<struct option const*>() };
+    for (int i = 0; true; ++i)
+    {
+        if (!sanitizer()->is_memory_valid((MemPtr)(longopts + i), sizeof(struct option)))
+        {
+            crash_execution("getopt_long_impl: Argument 4 does not points to valid memory.");
+            return;
+        }
+        if (longopts[i].flag != nullptr && !sanitizer()->is_memory_valid((MemPtr)(longopts[i].flag), sizeof(int)))
+        {
+            crash_execution("getopt_long_impl: Argument 4 has invalid pointer in the 'flag' field.");
+            return;
+        }
+        if (longopts[i].name == nullptr && longopts[i].has_arg == 0 && longopts[i].flag == nullptr && longopts[i].val == 0)
+            break;
+    }
+    auto const longindex{ parameters().at(5).read<int*>() };
+    if (longindex != nullptr && !sanitizer()->is_memory_valid((MemPtr)longindex, sizeof(int)))
+    {
+        crash_execution("getopt_long_impl: Argument 5 does not points to valid memory.");
+        return;
+    }
+    auto const dst_ptr{ parameters().front().read<int*>() };
+    *dst_ptr = getopt_long(argc, argv, opt_string, longopts, longindex);
 }
 
 

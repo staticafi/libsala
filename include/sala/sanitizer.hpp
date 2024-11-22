@@ -16,6 +16,8 @@ struct Sanitizer : public Analyzer
 
     bool inside(MemRegion const* region, MemPtr ptr, std::size_t count) const;
     bool is_memory_valid(MemPtr ptr, std::size_t count) const;
+    bool is_c_string_valid(MemPtr str) const;
+    bool is_c_string_valid(MemPtr str, std::size_t max_len) const;
 
 private:
     mutable MemRegionsMap regions_;
