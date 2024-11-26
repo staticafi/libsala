@@ -3,6 +3,7 @@
 
 #   include <sala/pointer_model.hpp>
 #   include <unordered_map>
+#   include <map>
 #   include <vector>
 
 namespace sala {
@@ -57,6 +58,30 @@ private:
     };
 
     PtrMap32bit ptr_map_{};
+};
+
+
+struct PointerModelM32_SegmentOffset : public PointerModel
+{
+    std::size_t sizeof_pointer() override;
+    void on_memblock_allocated(MemPtr block_ptr) override;
+    void on_memblock_released(MemPtr block_ptr) override;
+    MemPtr read_pointer(MemPtr from) override;
+    void write_pointer(MemPtr to, MemPtr ptr) override;
+    void read_shift_and_write(MemPtr to, MemPtr from, std::int64_t shift) override;
+
+private:
+
+    using MemPtr32bit = std::uint32_t;
+    static MemPtr32bit constexpr nullptr_32bit = 0U;
+
+    using Segment = std::uint16_t;
+    using Offset = std::uint16_t;
+
+    std::map<MemPtr, Segment> ptr2seg{};
+    std::unordered_map<Segment, MemPtr> seg2ptr{};
+    std::vector<Segment> released_segments{};
+    Segment fresh_segment{ 0U };
 };
 
 
