@@ -54,4 +54,17 @@ std::size_t MemBlock::as_size() const
 }
 
 
+std::int64_t MemBlock::as_shift() const
+{
+    switch (count())
+    {
+    case 1ULL: return (std::int64_t)*start();
+    case 2ULL: return (std::int64_t)*(std::int16_t*)start();
+    case 4ULL: return (std::int64_t)*(std::int32_t*)start();
+    case 8ULL: return (std::int64_t)*(std::int64_t*)start();
+    default: UNREACHABLE(); return 0ULL;
+    }
+}
+
+
 }

@@ -20,6 +20,14 @@ struct MemBlockData final
     MemPtr read_pointer() const { return pointer_model()->read_pointer(start()); }
     void write_pointer(MemPtr const ptr) const { pointer_model()->write_pointer(start(), ptr); }
     void read_shift_and_write_pointer(MemPtr const from, std::int64_t const shift) const { pointer_model()->read_shift_and_write(start(), from, shift); }
+    void write_uint8_as_pointer(std::uint8_t const int_ptr) const { pointer_model()->write_uint8_as_pointer(start(), int_ptr); }
+    void write_uint16_as_pointer(std::uint16_t const int_ptr) const { pointer_model()->write_uint16_as_pointer(start(), int_ptr); }
+    void write_uint32_as_pointer(std::uint32_t const int_ptr) const { pointer_model()->write_uint32_as_pointer(start(), int_ptr); }
+    void write_uint64_as_pointer(std::uint64_t const int_ptr) const { pointer_model()->write_uint64_as_pointer(start(), int_ptr); }
+    void write_pointer_as_uint8(MemPtr const ptr) const { pointer_model()->write_pointer_as_uint8(start(), ptr); }
+    void write_pointer_as_uint16(MemPtr const ptr) const { pointer_model()->write_pointer_as_uint16(start(), ptr); }
+    void write_pointer_as_uint32(MemPtr const ptr) const { pointer_model()->write_pointer_as_uint32(start(), ptr); }
+    void write_pointer_as_uint64(MemPtr const ptr) const { pointer_model()->write_pointer_as_uint64(start(), ptr); }
 private:
     PointerModel* pointer_model_;
     std::uint8_t* bytes;
@@ -67,6 +75,7 @@ struct MemBlock final
     std::size_t count() const { return data_->count(); }
 
     std::size_t as_size() const;
+    std::int64_t as_shift() const;
 
     template<typename T>
     T read() const { return detail::MemBlockDataReader<T>::read(data_.get()); }
@@ -75,6 +84,14 @@ struct MemBlock final
     void write(T const value) const { detail::MemBlockDataWriter<T>::write(data_.get(), value); }
 
     void write_shifted(MemPtr const from, std::int64_t const shift) const { data_->read_shift_and_write_pointer(from, shift); }
+    void write_uint8_as_pointer(std::uint8_t const int_ptr) const { data_->write_uint8_as_pointer(int_ptr); }
+    void write_uint16_as_pointer(std::uint16_t const int_ptr) const { data_->write_uint16_as_pointer(int_ptr); }
+    void write_uint32_as_pointer(std::uint32_t const int_ptr) const { data_->write_uint32_as_pointer(int_ptr); }
+    void write_uint64_as_pointer(std::uint64_t const int_ptr) const { data_->write_uint64_as_pointer(int_ptr); }
+    void write_pointer_as_uint8(MemPtr const ptr) const { data_->write_pointer_as_uint8(ptr); }
+    void write_pointer_as_uint16(MemPtr const ptr) const { data_->write_pointer_as_uint16(ptr); }
+    void write_pointer_as_uint32(MemPtr const ptr) const { data_->write_pointer_as_uint32(ptr); }
+    void write_pointer_as_uint64(MemPtr const ptr) const { data_->write_pointer_as_uint64(ptr); }
 
     PointerModel const* pointer_model() const { return data_->pointer_model(); }
 

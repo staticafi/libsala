@@ -44,6 +44,58 @@ void PointerModelM32::read_shift_and_write(MemPtr const to, MemPtr const from, s
 }
 
 
+void PointerModelM32::write_uint8_as_pointer(MemPtr const to, std::uint8_t const int_ptr)
+{
+    MemPtr32bit ptr32bit{ (MemPtr32bit)int_ptr };
+    write_pointer(to, read_pointer((MemPtr)&ptr32bit));
+}
+
+
+void PointerModelM32::write_uint16_as_pointer(MemPtr const to, std::uint16_t const int_ptr)
+{
+    MemPtr32bit ptr32bit{ (MemPtr32bit)int_ptr };
+    write_pointer(to, read_pointer((MemPtr)&ptr32bit));
+}
+
+
+void PointerModelM32::write_uint32_as_pointer(MemPtr const to, std::uint32_t const int_ptr)
+{
+    MemPtr32bit ptr32bit{ (MemPtr32bit)int_ptr };
+    write_pointer(to, read_pointer((MemPtr)&ptr32bit));
+}
+
+
+void PointerModelM32::write_uint64_as_pointer(MemPtr const to, std::uint64_t const int_ptr)
+{
+    MemPtr32bit ptr32bit{ (MemPtr32bit)int_ptr };
+    write_pointer(to, read_pointer((MemPtr)&ptr32bit));
+}
+
+
+void PointerModelM32::write_pointer_as_uint8(MemPtr const to, MemPtr const ptr)
+{
+    *(std::uint8_t*)to = (std::uint8_t)ptr_map_.insert(ptr, ptr);
+}
+
+
+void PointerModelM32::write_pointer_as_uint16(MemPtr const to, MemPtr const ptr)
+{
+    *(std::uint16_t*)to = (std::uint16_t)ptr_map_.insert(ptr, ptr);
+}
+
+
+void PointerModelM32::write_pointer_as_uint32(MemPtr const to, MemPtr const ptr)
+{
+    *(std::uint32_t*)to = (std::uint32_t)ptr_map_.insert(ptr, ptr);
+}
+
+
+void PointerModelM32::write_pointer_as_uint64(MemPtr const to, MemPtr const ptr)
+{
+    *(std::uint64_t*)to = (std::uint64_t)ptr_map_.insert(ptr, ptr);
+}
+
+
 PointerModelM32::MemPtr32bit PointerModelM32::hash_ptr64(MemPtr const ptr)
 {
     MemPtr32bit result{ *(MemPtr32bit*)&ptr };
@@ -178,6 +230,66 @@ void PointerModelM32_SegmentOffset::write_pointer(MemPtr const to, MemPtr const 
 void PointerModelM32_SegmentOffset::read_shift_and_write(MemPtr const to, MemPtr const from, std::int64_t const shift)
 {
     write_pointer(to, read_pointer(from) + shift);
+}
+
+
+void PointerModelM32_SegmentOffset::write_uint8_as_pointer(MemPtr const to, std::uint8_t const int_ptr)
+{
+    MemPtr32bit ptr32bit{ (MemPtr32bit)int_ptr };
+    write_pointer(to, read_pointer((MemPtr)&ptr32bit));
+}
+
+
+void PointerModelM32_SegmentOffset::write_uint16_as_pointer(MemPtr const to, std::uint16_t const int_ptr)
+{
+    MemPtr32bit ptr32bit{ (MemPtr32bit)int_ptr };
+    write_pointer(to, read_pointer((MemPtr)&ptr32bit));
+}
+
+
+void PointerModelM32_SegmentOffset::write_uint32_as_pointer(MemPtr const to, std::uint32_t const int_ptr)
+{
+    MemPtr32bit ptr32bit{ (MemPtr32bit)int_ptr };
+    write_pointer(to, read_pointer((MemPtr)&ptr32bit));
+}
+
+
+void PointerModelM32_SegmentOffset::write_uint64_as_pointer(MemPtr const to, std::uint64_t const int_ptr)
+{
+    MemPtr32bit ptr32bit{ (MemPtr32bit)int_ptr };
+    write_pointer(to, read_pointer((MemPtr)&ptr32bit));
+}
+
+
+void PointerModelM32_SegmentOffset::write_pointer_as_uint8(MemPtr const to, MemPtr const ptr)
+{
+    MemPtr32bit ptr32bit;
+    write_pointer((MemPtr)&ptr32bit, ptr);
+    *(std::uint8_t*)to = (std::uint8_t)ptr32bit;
+}
+
+
+void PointerModelM32_SegmentOffset::write_pointer_as_uint16(MemPtr const to, MemPtr const ptr)
+{
+    MemPtr32bit ptr32bit;
+    write_pointer((MemPtr)&ptr32bit, ptr);
+    *(std::uint16_t*)to = (std::uint16_t)ptr32bit;
+}
+
+
+void PointerModelM32_SegmentOffset::write_pointer_as_uint32(MemPtr const to, MemPtr const ptr)
+{
+    MemPtr32bit ptr32bit;
+    write_pointer((MemPtr)&ptr32bit, ptr);
+    *(std::uint32_t*)to = (std::uint32_t)ptr32bit;
+}
+
+
+void PointerModelM32_SegmentOffset::write_pointer_as_uint64(MemPtr const to, MemPtr const ptr)
+{
+    MemPtr32bit ptr32bit;
+    write_pointer((MemPtr)&ptr32bit, ptr);
+    *(std::uint64_t*)to = (std::uint64_t)ptr32bit;
 }
 
 

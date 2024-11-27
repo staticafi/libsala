@@ -74,7 +74,7 @@ ExecState::ExecState(Program const* const P, std::size_t const memory_size_in_by
     : program_{ P }
     , pointer_model_{
         program_->num_cpu_bits() == 32U ?
-            (PointerModel*)new PointerModelM32() : // Alternatively try PointerModelM32_SegmentOffset
+            (PointerModel*)new PointerModelM32_SegmentOffset() :
             (PointerModel*)new PointerModelDefault()
         }
     , memory_size_in_bytes_{ memory_size_in_bytes }

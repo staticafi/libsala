@@ -223,7 +223,7 @@ void Interpreter::do_memset()
 
 void Interpreter::do_moveptr()
 {
-    auto const shift = (std::int64_t)operands().at(2)->as_size() * (std::int64_t)operands().back()->as_size();
+    auto const shift = operands().at(2)->as_shift() * (std::int64_t)operands().back()->as_shift();
     operands().front()->write_shifted(operands().at(1)->start(), shift);
 }
 
@@ -1050,49 +1050,49 @@ void Interpreter::do_i2f_u64_f64()
 
 void Interpreter::do_p2i_8()
 {
-    operands().front()->write<std::uint8_t>((std::uint8_t)(std::size_t)operands().back()->read<MemPtr>());
+    operands().front()->write_pointer_as_uint8(operands().back()->read<MemPtr>());
 }
 
 
 void Interpreter::do_p2i_16()
 {
-    operands().front()->write<std::uint16_t>((std::uint16_t)(std::size_t)operands().back()->read<MemPtr>());
+    operands().front()->write_pointer_as_uint16(operands().back()->read<MemPtr>());
 }
 
 
 void Interpreter::do_p2i_32()
 {
-    operands().front()->write<std::uint32_t>((std::uint32_t)(std::size_t)operands().back()->read<MemPtr>());
+    operands().front()->write_pointer_as_uint32(operands().back()->read<MemPtr>());
 }
 
 
 void Interpreter::do_p2i_64()
 {
-    operands().front()->write<std::uint64_t>((std::uint64_t)operands().back()->read<MemPtr>());
+    operands().front()->write_pointer_as_uint64(operands().back()->read<MemPtr>());
 }
 
 
 void Interpreter::do_i2p_8()
 {
-    operands().front()->write<MemPtr>((MemPtr)(std::size_t)operands().back()->read<std::uint8_t>());
+    operands().front()->write_uint8_as_pointer(operands().back()->read<std::uint8_t>());
 }
 
 
 void Interpreter::do_i2p_16()
 {
-    operands().front()->write<MemPtr>((MemPtr)(std::size_t)operands().back()->read<std::uint16_t>());
+    operands().front()->write_uint16_as_pointer(operands().back()->read<std::uint16_t>());
 }
 
 
 void Interpreter::do_i2p_32()
 {
-    operands().front()->write<MemPtr>((MemPtr)(std::size_t)operands().back()->read<std::uint32_t>());
+    operands().front()->write_uint32_as_pointer(operands().back()->read<std::uint32_t>());
 }
 
 
 void Interpreter::do_i2p_64()
 {
-    operands().front()->write<MemPtr>((MemPtr)operands().back()->read<std::uint64_t>());
+    operands().front()->write_uint64_as_pointer(operands().back()->read<std::uint64_t>());
 }
 
 
