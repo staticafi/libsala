@@ -70,7 +70,7 @@ void StackRecord::pop_back_local_variable()
 }
 
 
-ExecState::ExecState(Program const* const P, std::size_t const memory_size_in_bytes)
+ExecState::ExecState(Program const* const P, int const argc, char* argv[], std::size_t const memory_size_in_bytes)
     : program_{ P }
     , pointer_model_{
         program_->num_cpu_bits() == 32U ?
@@ -85,6 +85,9 @@ ExecState::ExecState(Program const* const P, std::size_t const memory_size_in_by
     , error_message_{}
     , termination_instruction_{ nullptr }
     , exit_code_{ pointer_model_, sizeof(std::uint64_t) }
+    , argc_{ argc }
+    , argv_{ pointer_model_, std::max(1, argc) * pointer_model_->sizeof_pointer() }
+    , argv_c_strings_{}
     , warnings_{}
 
     , constant_segment_{}
@@ -103,6 +106,28 @@ ExecState::ExecState(Program const* const P, std::size_t const memory_size_in_by
     , current_instruction_{ nullptr }
     , current_operands_{}
 {
+    static_assert(sizeof(int) == sizeof(std::int32_t));
+    ASSUMPTION(argc_ >= 0 && (argc_ == 0 || argv != nullptr));
+
+    std::memset(argv_.start(), 0, argv_.count());
+    argv_c_strings_.reserve(argc_);
+    for (int i = 0; i < argc_; ++i)
+    {
+        std::size_t const len{ std::strlen(argv[i]) + 1ULL };
+        argv_c_strings_.push_back(MemBlock{ pointer_model(), len });
+        std::memcpy(argv_c_strings_.back().start(), argv[i], len);
+        argv_.write_pointer_from_offset(i * pointer_model_->sizeof_pointer(), argv_c_strings_.back().start());
+    }
+
+    ASSUMPTION((
+        [this]() -> std::size_t {
+            std::size_t arg_bytes{ sizeof(int) + argc_ * pointer_model_->sizeof_pointer() };
+            for (MemBlock const& block : argv_c_strings_)
+                arg_bytes += block.count();
+            return arg_bytes;
+        }() <= memory_size_in_bytes
+    ));
+
     for (auto const& constant : program().constants())
     {
         constant_segment_.push_back(MemBlock{ pointer_model(), constant.num_bytes() });

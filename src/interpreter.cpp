@@ -59,15 +59,36 @@ void Interpreter::step()
             state().stack_segment().push_back(StackRecord(state().pointer_model(), program().functions().at(program().entry_function())));
             auto const& params{ state().stack_top().parameters() };
 
-            // Currently we ignore parameters of the entry function (i.e., of "main").
-            // So let's clear them, if there are any.
-            for (auto const& param : params)
-                std::memset(param.start(), 0, param.count());
-
-            // The first parameter is actually the pointer to memory, where to write the return value.
-            // So, let's point to the "exit_code" memory block.
-            if (!params.empty() && params.front().count() == state().pointer_model()->sizeof_pointer())
+            if (params.empty())
+            {
+                // void main(void)
+                // => nothing to do.
+            }
+            else if (params.size() == 1ULL)
+            {
+                // int main(void)
+                ASSUMPTION(params.front().count() == state().pointer_model()->sizeof_pointer());
                 params.front().write(state().exit_code_memory_block().start());
+            }
+            else if (params.size() == 2ULL)
+            {
+                // void main(int argc, char* argv[])
+                ASSUMPTION(params.front().count() == sizeof(int));
+                ASSUMPTION(params.back().count() == state().pointer_model()->sizeof_pointer());
+                params.front().write(state().argc());
+                params.back().write(state().argv().start());
+            }
+            else
+            {
+                // int main(int argc, char* argv[])
+                ASSUMPTION(params.size() == 3ULL);
+                ASSUMPTION(params.front().count() == state().pointer_model()->sizeof_pointer());
+                ASSUMPTION(params.at(1ULL).count() == sizeof(int));
+                ASSUMPTION(params.back().count() == state().pointer_model()->sizeof_pointer());
+                params.front().write(state().exit_code_memory_block().start());
+                params.at(1ULL).write(state().argc());
+                params.back().write(state().argv().start());
+            }
 
             state().stack_top().ip().jump(0U);
         }

@@ -152,6 +152,12 @@ void Sanitizer::on_stack_initialized()
         for (auto& param : record.variadic_parameters())
             insert(&param);
     }
+    if (state().stage() == ExecState::Stage::EXECUTING)
+    {
+        insert(&state().argv());
+        for (MemBlock const& str : state().argv_c_strings())
+            insert(&str);
+    }
 }
 
 

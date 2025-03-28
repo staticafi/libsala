@@ -20,7 +20,7 @@ struct InputFlow : public Analyzer
     struct FlowSet
     {
         static FlowSetPtr create();
-        static FlowSetPtr create(InputDescriptor const& desc);
+        static FlowSetPtr create(InputDescriptor desc);
         FlowSet();
         explicit FlowSet(InputDescriptor desc);
         explicit FlowSet(FlowSet const& other);

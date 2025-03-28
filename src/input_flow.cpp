@@ -23,7 +23,7 @@ InputFlow::FlowSetPtr InputFlow::FlowSet::create()
 }
 
 
-InputFlow::FlowSetPtr InputFlow::FlowSet::create(InputDescriptor const& desc)
+InputFlow::FlowSetPtr InputFlow::FlowSet::create(InputDescriptor const desc)
 {
     return std::make_shared<FlowSet>(desc);
 }

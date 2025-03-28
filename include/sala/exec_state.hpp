@@ -75,7 +75,10 @@ struct ExecState final
         CRASH   = 2
     };
 
-    explicit ExecState(Program const* P, std::size_t memory_size_in_bytes = 0ULL);
+    ExecState(Program const* P, int argc, char* argv[], std::size_t memory_size_in_bytes);
+    ExecState(Program const* P, int argc, char* argv[]) : ExecState{ P, argc, argv, 0ULL } {}
+    ExecState(Program const* P, std::size_t memory_size_in_bytes) : ExecState{ P, 0, nullptr, memory_size_in_bytes } {}
+    explicit ExecState(Program const* P) : ExecState{ P, 0, nullptr, 0ULL } {}
     ~ExecState();
 
     Program const& program() const { return *program_; }
@@ -92,6 +95,9 @@ struct ExecState final
     Instruction const* termination_instruction() const { return termination_instruction_; }
     int exit_code() const { return exit_code_.read<int>(); }
     MemBlock const& exit_code_memory_block() const { return exit_code_; }
+    std::int32_t argc() const { return argc_; }
+    MemBlock const& argv() const { return argv_; }
+    std::vector<MemBlock> const& argv_c_strings() const { return argv_c_strings_; }
     std::unordered_set<std::string> const& warnings() const { return warnings_; }
 
     std::string  report(std::string const&  error_message_suffix = "") const;
@@ -143,6 +149,9 @@ private:
     std::string error_message_;
     Instruction const* termination_instruction_;
     MemBlock exit_code_;
+    std::int32_t argc_;
+    MemBlock argv_;
+    std::vector<MemBlock> argv_c_strings_;
     std::unordered_set<std::string> warnings_;
 
     std::vector<MemBlock> constant_segment_;
