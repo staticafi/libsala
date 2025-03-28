@@ -22,6 +22,7 @@ struct PointerModel
     void on_memblock_released(MemPtr block_ptr, std::size_t const num_bytes)
     { num_allocated_bytes_ -= num_bytes; on_memblock_released(block_ptr); }
 
+    virtual bool has_free_segments(std::size_t count) const { return true; }
     virtual std::size_t sizeof_pointer() = 0;
     virtual void on_memblock_allocated(MemPtr block_ptr) = 0;
     virtual void on_memblock_released(MemPtr block_ptr) = 0;

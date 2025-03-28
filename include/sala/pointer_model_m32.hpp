@@ -71,6 +71,7 @@ private:
 
 struct PointerModelM32_SegmentOffset : public PointerModel
 {
+    bool has_free_segments(std::size_t count) const override;
     std::size_t sizeof_pointer() override;
     void on_memblock_allocated(MemPtr block_ptr) override;
     void on_memblock_released(MemPtr block_ptr) override;

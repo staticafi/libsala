@@ -155,6 +155,12 @@ void PointerModelM32::PtrMap32bit::erase_block(MemPtr const block_ptr)
 }
 
 
+bool PointerModelM32_SegmentOffset::has_free_segments(std::size_t const count) const
+{
+    return count <= std::numeric_limits<Segment>::max() - fresh_segment + released_segments.size();
+}
+
+
 std::size_t PointerModelM32_SegmentOffset::sizeof_pointer()
 {
     return sizeof(Segment) + sizeof(Offset);

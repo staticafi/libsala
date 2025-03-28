@@ -1651,6 +1651,16 @@ void Interpreter::do_call()
             );
         return;
     }
+    if (!state().has_free_segments(func.parameters().size() + func.local_variables().size()))
+    {
+        state().set_stage(ExecState::Stage::FINISHED);
+        state().set_termination(
+            ExecState::Termination::ERROR,
+            "sala::Interpreter",
+            state().make_error_message("[OUT OF MEMORY] Not enough free segments for stack variables of called function.")
+            );
+        return;
+    }
 
     state().stack_top().ip().next();
 

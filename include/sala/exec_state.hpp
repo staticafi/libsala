@@ -83,6 +83,7 @@ struct ExecState final
     std::size_t memory_size_in_bytes() const { return memory_size_in_bytes_; }
     bool can_allocate(std::size_t const num_bytes) const
     { return memory_size_in_bytes() == 0ULL ? true : pointer_model()->num_allocated_bytes() + num_bytes <= memory_size_in_bytes(); }
+    bool has_free_segments(std::size_t const count) const { return pointer_model()->has_free_segments(count); }
 
     Stage stage() const { return stage_; }
     Termination termination() const { return termination_; }
