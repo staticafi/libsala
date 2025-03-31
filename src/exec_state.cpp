@@ -153,6 +153,8 @@ ExecState::ExecState(Program const* const P, int const argc, char* argv[], std::
 ExecState::~ExecState()
 {
     exit_code_ = {};
+    argv_ = {};
+    argv_c_strings_.clear();
 
     constant_segment_.clear();
     static_segment_.clear();
