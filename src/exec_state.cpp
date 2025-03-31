@@ -120,6 +120,7 @@ ExecState::ExecState(Program const* const P, int const argc, char* argv[], std::
     }
 
     ASSUMPTION((
+        memory_size_in_bytes == 0ULL ||
         [this]() -> std::size_t {
             std::size_t arg_bytes{ sizeof(int) + argc_ * pointer_model_->sizeof_pointer() };
             for (MemBlock const& block : argv_c_strings_)
