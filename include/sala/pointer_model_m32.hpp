@@ -98,7 +98,7 @@ private:
     std::map<MemPtr, Segment> ptr2seg{};
     std::unordered_map<Segment, MemPtr> seg2ptr{};
     std::vector<Segment> released_segments{};
-    Segment fresh_segment{ 0U };
+    Segment fresh_segment{ 1U };
 };
 
 
