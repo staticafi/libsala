@@ -13,7 +13,6 @@ Sanitizer::Sanitizer(ExecState* const exec_state)
     : Analyzer{ exec_state }
     , regions_{}
 {
-    insert(&state().exit_code_memory_block());
     for (auto const& constant : state().constant_segment())
         insert(&constant);
     for (auto const& var : state().static_segment())
@@ -154,6 +153,7 @@ void Sanitizer::on_stack_initialized()
     }
     if (state().stage() == ExecState::Stage::EXECUTING)
     {
+        insert(&state().exit_code_memory_block());
         insert(&state().argv());
         for (MemBlock const& str : state().argv_c_strings())
             insert(&str);
