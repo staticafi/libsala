@@ -3,6 +3,8 @@
 #include <utility/invariants.hpp>
 #include <cstring>
 #include <cmath>
+#include <unistd.h>
+#include <stdlib.h>
 
 namespace sala {
 
@@ -142,6 +144,8 @@ ExternCode::ExternCode(ExecState* const state, Sanitizer* const sanitizer)
     , sanitizer_{ sanitizer }
 {
     REGISTER_EXTERN_CODE(exit, this->std_exit() );
+    REGISTER_EXTERN_CODE(_exit, this->std_exit() );
+    REGISTER_EXTERN_CODE(_Exit, this->std_exit() );
     REGISTER_EXTERN_CODE(atexit, this->std_atexit() );
     REGISTER_EXTERN_CODE(abort, this->std_abort("abort") );
     REGISTER_EXTERN_CODE(__llvm_intrinsic__bswap_8, this->__llvm_intrinsic__bswap(8ULL) );
