@@ -86,7 +86,7 @@ ExecState::ExecState(Program const* const P, int const argc, char* argv[], std::
     , termination_instruction_{ nullptr }
     , exit_code_{ pointer_model_, sizeof(std::uint64_t) }
     , argc_{ argc }
-    , argv_{ pointer_model_, std::max(1, argc) * pointer_model_->sizeof_pointer() }
+    , argv_{ pointer_model_, std::max(1, argc + 1) * pointer_model_->sizeof_pointer() }
     , argv_c_strings_{}
     , warnings_{}
 
