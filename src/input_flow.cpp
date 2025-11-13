@@ -281,7 +281,9 @@ void InputFlow::do_moveptr()
 void InputFlow::do_free()
 {
     MemPtr ptr{ operands().front()->read<MemPtr>() };
-    clear(ptr, state().heap_segment().at(ptr).count());
+    auto const it = state().heap_segment().find(ptr);
+    if (it != state().heap_segment().end())
+        clear(ptr, it->second.count());
 }
 
 
