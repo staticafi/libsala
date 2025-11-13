@@ -1905,12 +1905,12 @@ void InputFlow::getopt_impl()
 {
     auto const dst_ptr{ parameters().front().read<MemPtr>() };
     auto const argc{ parameters().at(1).read<int>() };
-    join(dst_ptr, sizeof(int), parameters().at(1).start(), sizeof(int));
+    join_extend(dst_ptr, sizeof(int), parameters().at(1).start(), sizeof(int));
     auto const argv{ parameters().at(2).read<char**>() };
     for (int i = 0; i != argc; ++i)
-        join(dst_ptr, sizeof(int), (MemPtr)argv[i], std::strlen(argv[i]));
+        join_extend(dst_ptr, sizeof(int), (MemPtr)argv[i], std::strlen(argv[i]) + 1ULL);
     auto const opt_string{ parameters().at(3).read<char const*>() };
-    join(dst_ptr, sizeof(int), (MemPtr)opt_string, std::strlen(opt_string));
+    join_extend(dst_ptr, sizeof(int), (MemPtr)opt_string, std::strlen(opt_string) + 1ULL);
 }
 
 
@@ -1919,22 +1919,22 @@ void InputFlow::getopt_long_impl()
     auto const dst_ptr{ parameters().front().read<MemPtr>() };
     auto const longindex{ parameters().at(5).read<MemPtr>() };
     auto const& pass_taint = [this, dst_ptr, longindex](MemPtr const ptr, std::size_t num_bytes) {
-        join(dst_ptr, sizeof(int), ptr, num_bytes);
+        join_extend(dst_ptr, sizeof(int), ptr, num_bytes);
         if (longindex != nullptr)
-            join(longindex, sizeof(int), ptr, num_bytes);
+            join_extend(longindex, sizeof(int), ptr, num_bytes);
     };
     auto const argc{ parameters().at(1).read<int>() };
     pass_taint(parameters().at(1).start(), sizeof(int));
     auto const argv{ parameters().at(2).read<char**>() };
     for (int i = 0; i != argc; ++i)
-        pass_taint((MemPtr)argv[i], std::strlen(argv[i]));
+        pass_taint((MemPtr)argv[i], std::strlen(argv[i]) + 1ULL);
     auto const opt_string{ parameters().at(3).read<char const*>() };
     pass_taint((MemPtr)opt_string, std::strlen(opt_string));
     auto const longopts{ parameters().at(4).read<struct option const*>() };
     for (int i = 0; longopts[i].name != nullptr || longopts[i].has_arg != 0 || longopts[i].flag != nullptr || longopts[i].val != 0; ++i)
     {
         if (longopts[i].name != nullptr)
-            pass_taint((MemPtr)longopts[i].name, std::strlen(longopts[i].name));
+            pass_taint((MemPtr)longopts[i].name, std::strlen(longopts[i].name) + 1ULL);
         pass_taint((MemPtr)&longopts[i].has_arg, sizeof(int));
         if (longopts[i].flag != nullptr)
             pass_taint((MemPtr)longopts[i].flag, sizeof(int));
