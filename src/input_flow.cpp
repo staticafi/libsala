@@ -171,6 +171,32 @@ void InputFlow::join_per_byte(MemPtr const dst, MemPtr const src1, MemPtr const 
 }
 
 
+void InputFlow::join_extend(MemPtr const dst, std::size_t const dst_count, MemPtr const src, std::size_t const src_count)
+{
+    FlowSetPtr flow{ FlowSet::create() };
+    for (std::size_t i = 0ULL; i != src_count; ++i)
+        flow->join(*read(src + i));
+    if (flow->empty())
+        return;
+    for (std::size_t i = 0ULL; i != dst_count; ++i)
+    {
+        FlowSetPtr result_flow;
+        {
+            auto const it = flow_.find(dst + i);
+            if (it == flow_.end())
+                result_flow = flow;
+            else
+            {
+                result_flow = FlowSet::create();
+                result_flow->join(*it->second.pointer());
+                result_flow->join(*flow);
+            }
+        }
+        write_handle(dst + i, result_flow);
+    }
+}
+
+
 void InputFlow::extend_signed(MemPtr const dst, std::size_t const dst_count, MemPtr const src, std::size_t const src_count)
 {
     copy(dst, src, src_count);
