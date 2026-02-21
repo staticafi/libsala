@@ -34,7 +34,15 @@ struct InputFlow : public Analyzer
         std::vector<InputDescriptor> descriptors_;
     };
 
-    explicit InputFlow(ExecState* exec_state);
+    struct Config
+    {
+        Config()
+            : flow_from_predicates{ false }
+        {}
+        bool flow_from_predicates;
+    };
+
+    explicit InputFlow(ExecState* exec_state, Config const& cfg = {});
 
     void start(MemPtr ptr, InputDescriptor desc);
     void copy(MemPtr dst, MemPtr src, std::size_t count);
@@ -70,6 +78,7 @@ private:
 
     struct FlowSetHandleHasher { std::uint64_t operator()(FlowSetHandle const& handle) const { return handle.hash(); } };
 
+    Config cfg_;
     FlowSetHandle no_flow_;
     std::unordered_set<FlowSetHandle, FlowSetHandleHasher> handles_;
     std::unordered_map<MemPtr, FlowSetHandle> flow_;

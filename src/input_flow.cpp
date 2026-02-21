@@ -94,8 +94,9 @@ InputFlow::FlowSetHandle::FlowSetHandle(FlowSetPtr const flow)
 }
 
 
-InputFlow::InputFlow(ExecState* const exec_state)
+InputFlow::InputFlow(ExecState* const exec_state, Config const& cfg)
     : Analyzer{ exec_state }
+    , cfg_{ cfg }
     , no_flow_{ FlowSet::create() }
     , handles_{ no_flow_ }
     , flow_{}
@@ -1119,397 +1120,463 @@ void InputFlow::do_i2p_64()
 
 void InputFlow::do_less_s8()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_less_s16()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_less_s32()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_less_s64()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_less_u8()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_less_u16()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_less_u32()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_less_u64()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_less_f32()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_less_f64()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_less_w32()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_less_w64()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_less_equal_s8()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_less_equal_s16()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_less_equal_s32()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_less_equal_s64()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_less_equal_u8()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_less_equal_u16()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_less_equal_u32()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_less_equal_u64()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_less_equal_f32()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_less_equal_f64()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_less_equal_w32()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_less_equal_w64()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_greater_s8()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_greater_s16()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_greater_s32()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_greater_s64()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_greater_u8()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_greater_u16()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_greater_u32()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_greater_u64()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_greater_f32()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_greater_f64()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_greater_w32()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_greater_w64()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_greater_equal_s8()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_greater_equal_s16()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_greater_equal_s32()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_greater_equal_s64()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_greater_equal_u8()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_greater_equal_u16()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_greater_equal_u32()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_greater_equal_u64()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_greater_equal_f32()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_greater_equal_f64()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_greater_equal_w32()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_greater_equal_w64()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_equal_u8()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_equal_u16()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_equal_u32()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_equal_u64()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_equal_f32()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_equal_f64()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_equal_w32()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_equal_w64()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_unequal_u8()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_unequal_u16()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_unequal_u32()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_unequal_u64()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_unequal_f32()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_unequal_f64()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_unequal_w32()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_unequal_w64()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().at(1)->start(), operands().at(2)->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_isnan_w32()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().back()->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().back()->start(), operands().back()->count());
 }
 
 
 void InputFlow::do_isnan_w64()
 {
-    join(operands().front()->start(), operands().front()->count(), operands().back()->start(), operands().back()->count());
+    if (cfg_.flow_from_predicates)
+        join(operands().front()->start(), operands().front()->count(), operands().back()->start(), operands().back()->count());
 }
 
 
