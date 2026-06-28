@@ -1,78 +1,96 @@
 #include <sala/control_flow_graph.hpp>
-#include <utility/std_pair_hash.hpp>
+#include <utility/invariants.hpp>
 #include <unordered_map>
-#include <numeric>
+#include <algorithm>
 
 namespace sala {
 
 
-CFGraph  make_control_flow_graph(Program const&  program, CallGraph const&  cg)
+ControlFlowGraph::ControlFlowGraph(Program const&  program, CallGraph const&  cg)
+    : m_nodes{}
+    , m_lookups{}
 {
-    CFGraph  cfg;
-
-    std::unordered_map<std::uint32_t, std::size_t>  func_entries;
-    std::unordered_map<std::pair<std::uint32_t, std::uint32_t>, std::size_t>  bb_entries;
-
-    std::vector<std::uint32_t> func_indices(program.functions().size());
-    std::iota(func_indices.begin(), func_indices.end(), 1);
-    std::swap(func_indices[0], func_indices[program.entry_function() - 1U]);
-
-    for (std::uint32_t  func_index : func_indices)
+    for (Function const&  func : program.functions())
     {
-        bool is_func_entry = true;
-        for (BasicBlock const& bb : program.functions().at(func_index).basic_blocks())
+        m_lookups.push_back(FunctionLookup{
+            .begin = (std::uint32_t)m_nodes.size(),
+            .end = (std::uint32_t)m_nodes.size(),
+            .bbs{},
+            .calls{},
+            .rets{}
+        });
+        for (BasicBlock const&  bb : func.basic_blocks())
         {
-            bool is_bb_entry = true;
-            for (Instruction const& instr : bb.instructions())
+            m_lookups.back().bbs.push_back((std::uint32_t)m_nodes.size());
+            for (Instruction const&  instr : bb.instructions())
             {
-                bool  ends_in_call;
                 switch (instr.opcode())
                 {
                     case Instruction::Opcode::CALL:
-                        ends_in_call = true;
+                        m_lookups.back().calls.push_back((std::uint32_t)m_nodes.size());
                         break;
                     case Instruction::Opcode::RET:
+                        m_lookups.back().rets.push_back((std::uint32_t)m_nodes.size());
+                        break;
                     case Instruction::Opcode::JUMP:
                     case Instruction::Opcode::BRANCH:
-                        ends_in_call = false;
                         break;
                     default:
                         continue;
                 }
-                if (is_func_entry)
-                {
-                    func_entries.insert({ func_index, cfg.size() });
-                    is_func_entry = false;
-                }
-                if (is_bb_entry)
-                {
-                    bb_entries.insert({ { func_index, bb.index() }, cfg.size() });
-                    is_bb_entry = false;
-                }
-                cfg.push_back(CFNode{
-                    .function = func_index,
+                m_nodes.push_back(Node{
+                    .function = func.index(),
                     .basic_block = bb.index(),
                     .instruction = instr.index(),
-                    .ends_in_call = ends_in_call,
                     .successors{}
                 });
+                ++m_lookups.back().end;
             }
+            INVARIANT(m_lookups.back().end > m_lookups.back().begin);
         }
+        m_lookups.back().bbs.push_back((std::uint32_t)m_nodes.size());
+        INVARIANT(m_lookups.back().bbs.back() == m_lookups.back().end);
+        INVARIANT(m_lookups.back().bbs.size() == func.basic_blocks().size() + 1ULL);
     }
 
-    for (CFNode& n : cfg)
-        if (n.ends_in_call)
+    for (std::size_t  node_index = 0ULL; node_index != m_nodes.size(); ++node_index)
+    {
+        Node&  n = m_nodes.at(node_index);
+
+        if (is_call(node_index))
             for (std::uint32_t  func : cg.at(n.function)
                                          .at(n.basic_block)
                                          .at(n.instruction))
-                n.successors.push_back(func_entries.at(func));
+                n.successors.push_back(entry(func));
         else
             for (std::uint32_t  bb : program.functions().at(n.function)
                                             .basic_blocks().at(n.basic_block)
                                             .successors())
-                n.successors.push_back(bb_entries.at({ n.function, bb }));
+                n.successors.push_back(bb_entry(n.function, bb));
 
-    return cfg;
+        std::sort(n.successors.begin(), n.successors.end());
+    }
+}
+
+
+bool  ControlFlowGraph::is_successor(std::uint32_t const  node_index, std::uint32_t const  checked_node_index) const
+{
+    auto const&  succ = node(node_index).successors;
+    return  std::binary_search(succ.begin(), succ.begin(), checked_node_index);
+}
+
+
+bool  ControlFlowGraph::is_call(std::uint32_t const  node_index) const
+{
+    auto const&  calls = lookup(node(node_index).function).calls;
+    return  std::binary_search(calls.begin(), calls.begin(), node_index);
+}
+
+
+bool  ControlFlowGraph::is_ret(std::uint32_t const  node_index) const
+{
+    auto const&  rets = lookup(node(node_index).function).rets;
+    return  std::binary_search(rets.begin(), rets.begin(), node_index);
 }
 
 
