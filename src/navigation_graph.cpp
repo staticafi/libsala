@@ -1,0 +1,184 @@
+#include <sala/navigation_graph.hpp>
+#include <utility/invariants.hpp>
+#include <utility/assumptions.hpp>
+#include <unordered_map>
+#include <algorithm>
+
+namespace sala {
+
+
+NavigationGraph::NavigationGraph(Program const&  program, CallGraph const&  cg)
+    : ControlFlowGraph{ program, cg }
+    , m_func_avg_costs{}
+    , m_calls_avg_costs{}
+    , m_intra_costs{}
+{
+    compute_avg_costs(cg);
+    compute_intra_costs();
+}
+
+
+void  NavigationGraph::compute_avg_costs(CallGraph const&  cg)
+{
+    // Initialization of everything to zero.
+
+    m_func_avg_costs.resize(lookups().size(), 0U);
+    m_calls_avg_costs.reserve(lookups().size());
+    for (std::uint32_t  func_index = 0U; (std::size_t)func_index != lookups().size(); ++func_index)
+        m_calls_avg_costs.emplace_back(std::vector<Cost>(lookup(func_index).calls.size(), 0U));
+
+    // Computation of initial costs to m_func_avg_costs, i.e., counts of all instructions in each function.
+
+    for (std::uint32_t  func_index = 0U; (std::size_t)func_index != lookups().size(); ++func_index)
+    {
+        Cost& cost = m_func_avg_costs.at(func_index);
+        FunctionLookup const& l = lookup(func_index);
+        for (std::uint32_t  node_index = l.begin; node_index != l.end; ++node_index)
+            cost += num_instructions(node_index);
+    }
+
+    // Update of costs (both m_func_avg_costs and m_calls_avg_costs) recursively by propagating
+    // and accumulating costs of callees to callers.
+
+    std::unordered_set<std::uint32_t>  resolved_functions{};
+    for (std::uint32_t  func_index = 0U; (std::size_t)func_index != lookups().size(); ++func_index)
+        update_avg_costs_rec(func_index, resolved_functions, cg);
+}
+
+
+void  NavigationGraph::update_avg_costs_rec(
+        std::uint32_t  func_index,
+        std::unordered_set<std::uint32_t>&  resolved_functions,
+        CallGraph const&  cg
+        )
+{
+    if (resolved_functions.contains(func_index))
+        return;
+    resolved_functions.insert(func_index);
+
+    Cost&  func_cost = m_func_avg_costs.at(func_index);
+    std::vector<Cost>&  calls_costs = m_calls_avg_costs.at(func_index);
+    FunctionLookup const& l = lookup(func_index);
+    for (std::uint32_t  call_index = 0U; (std::size_t)call_index != l.calls.size(); ++call_index)
+    {
+        Node const&  call = node(l.calls.at(call_index));
+        Cost  sum{ 0U };
+        for (std::uint32_t const  succ_node_index : call.successors)
+        {
+            Node const&  succ = node(succ_node_index);
+            update_avg_costs_rec(succ.function, resolved_functions, cg);
+            sum += m_func_avg_costs.at(succ.function);
+        }
+        Cost cost = std::max(1U, (std::uint32_t)(sum / call.successors.size()));
+        calls_costs.at(call_index) = cost;
+        func_cost += cost;
+    }
+}
+
+
+void  NavigationGraph::compute_intra_costs()
+{
+    m_intra_costs.reserve(lookups().size());
+    for (std::uint32_t  func_index = 0U; (std::size_t)func_index != lookups().size(); ++func_index)
+        compute_intra_costs(func_index);
+}
+
+
+void  NavigationGraph::compute_intra_costs(std::uint32_t const  func_index)
+{
+    FunctionLookup const& l = lookup(func_index);
+
+    m_intra_costs.push_back({});
+    CostTable&  table = m_intra_costs.back();
+
+    // Initialization of costs table for the Floyd-Warshall algorithm.
+    // Zeros are at diagonal, instruction counts for successors
+    // and INFINITY_COST everywhere else.
+    // NOTE: We do NOT keep mappings to INFINITY_COST cost.
+
+    for (std::uint32_t  u = l.begin; u != l.end; ++u)
+    {
+        table.insert({ { u, u } , 0U });
+        if (is_call(u))
+        {
+            std::uint32_t const  v = bb_next(u);
+            table.insert({ { u, v }, sum_costs((Cost)num_instructions(u), call_avg_cost(u)) });
+        }
+        else
+            for (std::uint32_t const  v : successors(u))
+                table[{u, v}] = (Cost)num_instructions(u);
+    }
+
+    // Actual computation of costs using the Floyd-Warshall algorithm.
+
+    for (std::uint32_t  x = l.begin; x != l.end; ++x)
+    {
+        CostTable  new_table;
+        for (std::uint32_t  u = l.begin; u != l.end; ++u)
+            for (std::uint32_t  v = l.begin; v != l.end; ++v)
+            {
+                Cost const  cost = intra_cost(u, v);
+                Cost const  other_cost = sum_costs(intra_cost(u, x), intra_cost(x, v));
+                if (other_cost < cost)
+                    table[{u, v}] = other_cost;
+                if (cost != INFINITY_COST)
+                    table[{u, v}] = cost;
+
+            }
+        table.swap(new_table);
+    }
+
+    // We must further update costs for diagonal elements.
+    // They are currently zero. They should represent
+    // costs of shortest path from that node back to
+    // it (i.e., leaving the node and returning back).
+
+    for (std::uint32_t  u = l.begin; u != l.end; ++u)
+    {
+        std::vector<std::uint32_t>  succ;
+        if (is_call(u))
+            succ = { bb_next(u) };
+        else
+            succ = successors(u);
+
+        if (std::find(succ.begin(), succ.end(), u) != succ.end())
+            table[{u, u}] = num_instructions(u);
+        else
+        {
+            table.erase({ u, u });
+            Cost cost = INFINITY_COST;
+            for (std::uint32_t const  v : succ)
+            {
+                Cost const  other_cost = sum_costs(intra_cost(u, v), intra_cost(v, u));
+                if (other_cost < cost)
+                {
+                    table[{u, u}] = other_cost;
+                    cost = other_cost;
+                }
+            }
+        }
+    }
+}
+
+
+NavigationGraph::Cost  NavigationGraph::call_avg_cost(std::uint32_t const  call_node_index) const
+{
+    std::uint32_t const  func = node(call_node_index).function;
+    auto const&  calls = lookup(func).calls;
+    auto const  it = std::lower_bound(calls.begin(), calls.begin(), call_node_index);
+    ASSUMPTION(it != calls.end() && *it == call_node_index);
+    std::size_t const  index = it - calls.begin();
+    return  m_calls_avg_costs.at(func).at(index);
+}
+
+
+NavigationGraph::Cost  NavigationGraph::intra_cost(std::uint32_t const  from_node_index, std::uint32_t const  to_node_index) const
+{
+    ASSUMPTION(node(from_node_index).function == node(to_node_index).function);
+    auto const&  table = m_intra_costs.at(node(from_node_index).function);
+    auto const  it = table.find({ from_node_index, to_node_index });
+    return  it == table.end() ? INFINITY_COST : it->second;
+}
+
+
+}
