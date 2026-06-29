@@ -1,5 +1,6 @@
 #include <sala/control_flow_graph.hpp>
 #include <utility/invariants.hpp>
+#include <utility/assumptions.hpp>
 #include <unordered_map>
 #include <algorithm>
 
@@ -58,10 +59,13 @@ ControlFlowGraph::ControlFlowGraph(Program const&  program, CallGraph const&  cg
         Node&  n = m_nodes.at(node_index);
 
         if (is_call(node_index))
+        {
             for (std::uint32_t  func : cg.at(n.function)
                                          .at(n.basic_block)
                                          .at(n.instruction))
                 n.successors.push_back(entry(func));
+            INVARIANT(!n.successors.empty());
+        }
         else
             for (std::uint32_t  bb : program.functions().at(n.function)
                                             .basic_blocks().at(n.basic_block)
@@ -101,6 +105,13 @@ std::uint32_t  ControlFlowGraph::num_instructions(std::uint32_t const  node_inde
     if (node_index == entry_node_index)
         return  n.instruction;
     return  n.instruction - node(entry_node_index).instruction;
+}
+
+
+std::uint32_t  ControlFlowGraph::bb_next(std::uint32_t const  node_index) const
+{
+    ASSUMPTION(is_call(node_index));
+    return  node_index + 1U;
 }
 
 

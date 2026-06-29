@@ -76,6 +76,9 @@ struct ControlFlowGraph
     std::uint32_t  entry(std::uint32_t const  function_index) const { return begin(function_index); }
     std::uint32_t  bb_entry(std::uint32_t const  function_index, std::uint32_t const  bb_index) const
     { return bbs(function_index).at(bb_index); }
+    std::uint32_t  bb_end(std::uint32_t const  function_index, std::uint32_t const  bb_index) const
+    { return bbs(function_index).at(bb_index + 1U); }
+    std::uint32_t  bb_next(std::uint32_t const  node_index) const;
     std::pair<std::uint32_t, std::uint32_t>  bb_range(std::uint32_t const  function_index, std::uint32_t const  bb_index) const
     { auto const&  vec = bbs(function_index); return { vec.at(bb_index), vec.at(bb_index + 1U) }; }
     std::vector<std::uint32_t> const&  bbs(std::uint32_t const  function_index) const { return lookup(function_index).bbs; }
