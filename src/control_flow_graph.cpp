@@ -94,4 +94,14 @@ bool  ControlFlowGraph::is_ret(std::uint32_t const  node_index) const
 }
 
 
+std::uint32_t  ControlFlowGraph::num_instructions(std::uint32_t const  node_index) const
+{
+    Node const&  n = node(node_index);
+    std::uint32_t const entry_node_index = bb_entry(n.function, n.basic_block);
+    if (node_index == entry_node_index)
+        return  n.instruction;
+    return  n.instruction - node(entry_node_index).instruction;
+}
+
+
 }

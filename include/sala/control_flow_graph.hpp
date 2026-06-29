@@ -65,6 +65,7 @@ struct ControlFlowGraph
     bool  is_call(std::uint32_t  node_index) const;
     bool  is_ret(std::uint32_t  node_index) const;
     bool  is_successor(std::uint32_t  node_index, std::uint32_t  checked_node_index) const;
+    std::uint32_t  num_instructions(std::uint32_t  node_index) const;
 
     // Working with function lookups (their/function indices):
 
