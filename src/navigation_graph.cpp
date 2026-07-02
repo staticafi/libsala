@@ -104,11 +104,17 @@ void  NavigationGraph::compute_intra_costs(std::uint32_t const  func_index)
         if (is_call(u))
         {
             std::uint32_t const  v = bb_next(u);
-            table.insert({ { u, v }, sum_costs((Cost)num_instructions(u), call_avg_cost(u)) });
+            Cost  cost = sum_costs((Cost)num_instructions(u), call_avg_cost(u));
+            if (is_ret(v))
+                cost = sum_costs((Cost)num_instructions(v), cost);
+            table.insert({ { u, v }, cost });
         }
         else
+        {
+            Cost const  cost_u = (Cost)num_instructions(u);
             for (std::uint32_t const  v : successors(u))
-                table[{u, v}] = (Cost)num_instructions(u);
+                table[{u, v}] = cost_u + (is_ret(v) ? (Cost)num_instructions(v) : 0U);
+        }
     }
 
     // Actual computation of costs using the Floyd-Warshall algorithm.
@@ -122,9 +128,9 @@ void  NavigationGraph::compute_intra_costs(std::uint32_t const  func_index)
                 Cost const  cost = intra_cost(u, v);
                 Cost const  other_cost = sum_costs(intra_cost(u, x), intra_cost(x, v));
                 if (other_cost < cost)
-                    table[{u, v}] = other_cost;
+                    new_table[{u, v}] = other_cost;
                 if (cost != INFINITY_COST)
-                    table[{u, v}] = cost;
+                    new_table[{u, v}] = cost;
 
             }
         table.swap(new_table);
@@ -165,7 +171,7 @@ void  NavigationGraph::compute_intra_costs(std::uint32_t const  func_index)
 
 void  NavigationGraph::compute_inter_costs(CallGraph const&  cg)
 {
-    m_inter_costs.reserve(lookups().size());
+    m_inter_costs.resize(lookups().size());
     for (std::uint32_t  func_index = 0U; (std::size_t)func_index != lookups().size(); ++func_index)
         m_inter_costs.at(func_index).from_calls.resize(calls(func_index).size());
     
@@ -209,13 +215,15 @@ void  NavigationGraph::update_inter_costs_rec(
             }
         }
 
+        Cost const  local_cost = sum_costs(
+            is_entry(call_node_index) ? 0U : intra_cost(entry(func_index), call_node_index),
+            num_instructions(call_node_index)
+        );
         for (auto [ func, cost ] : call_costs)
         {
+            Cost const  new_cost = sum_costs(local_cost, cost);
             auto const  it = costs.from_entry.find(func);
-            costs.from_entry[func] = sum_costs(
-                intra_cost(entry(func_index), call_node_index),
-                (it == costs.from_entry.end()) ? cost : std::min(cost, it->second)
-                );
+            costs.from_entry[func] = (it == costs.from_entry.end()) ? new_cost : std::min(new_cost, it->second);
         }
     }
 }
@@ -225,7 +233,7 @@ NavigationGraph::Cost  NavigationGraph::call_avg_cost(std::uint32_t const  call_
 {
     std::uint32_t const  func = node(call_node_index).function;
     auto const&  calls = lookup(func).calls;
-    auto const  it = std::lower_bound(calls.begin(), calls.begin(), call_node_index);
+    auto const  it = std::lower_bound(calls.begin(), calls.end(), call_node_index);
     ASSUMPTION(it != calls.end() && *it == call_node_index);
     std::size_t const  index = it - calls.begin();
     return  m_calls_avg_costs.at(func).at(index);
@@ -253,7 +261,7 @@ NavigationGraph::Cost  NavigationGraph::inter_cost_from_call(std::uint32_t const
 {
     std::uint32_t const  func = node(call_node_index).function;
     auto const&  calls = lookup(func).calls;
-    auto const  cit = std::lower_bound(calls.begin(), calls.begin(), call_node_index);
+    auto const  cit = std::lower_bound(calls.begin(), calls.end(), call_node_index);
     ASSUMPTION(cit != calls.end() && *cit == call_node_index);
     std::size_t const  index = cit - calls.begin();
     auto const&  costs = m_inter_costs.at(node(call_node_index).function).from_calls.at(index);
