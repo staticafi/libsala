@@ -80,21 +80,21 @@ ControlFlowGraph::ControlFlowGraph(Program const&  program, CallGraph const&  cg
 bool  ControlFlowGraph::is_successor(std::uint32_t const  node_index, std::uint32_t const  checked_node_index) const
 {
     auto const&  succ = node(node_index).successors;
-    return  std::binary_search(succ.begin(), succ.begin(), checked_node_index);
+    return  std::binary_search(succ.begin(), succ.end(), checked_node_index);
 }
 
 
 bool  ControlFlowGraph::is_call(std::uint32_t const  node_index) const
 {
     auto const&  calls = lookup(node(node_index).function).calls;
-    return  std::binary_search(calls.begin(), calls.begin(), node_index);
+    return  std::binary_search(calls.begin(), calls.end(), node_index);
 }
 
 
 bool  ControlFlowGraph::is_ret(std::uint32_t const  node_index) const
 {
     auto const&  rets = lookup(node(node_index).function).rets;
-    return  std::binary_search(rets.begin(), rets.begin(), node_index);
+    return  std::binary_search(rets.begin(), rets.end(), node_index);
 }
 
 
@@ -103,7 +103,7 @@ std::uint32_t  ControlFlowGraph::num_instructions(std::uint32_t const  node_inde
     Node const&  n = node(node_index);
     std::uint32_t const entry_node_index = bb_entry(n.function, n.basic_block);
     if (node_index == entry_node_index)
-        return  n.instruction;
+        return  n.instruction + 1U;
     return  n.instruction - node(entry_node_index).instruction;
 }
 
