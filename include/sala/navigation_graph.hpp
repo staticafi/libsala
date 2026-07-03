@@ -73,6 +73,10 @@ struct  NavigationGraph : public ControlFlowGraph
     // Both nodes are assumed to be in the same function. Otherwise the
     // the result is undefined.
     Cost  intra_cost(std::uint32_t  from_node_index, std::uint32_t  to_node_index) const;
+    // Same as function above, but does not expect leaving from_node_index.
+    // That is, the cost is 0 if from_node_index == to_node_index.
+    Cost  intra_cost_stationary(std::uint32_t  from_node_index, std::uint32_t  to_node_index) const
+    { return from_node_index == to_node_index ? 0U : intra_cost(from_node_index, to_node_index); }
 
     // Costs for transitions between functions:
 
