@@ -166,6 +166,16 @@ void  NavigationGraph::compute_intra_costs(std::uint32_t const  func_index)
             }
         }
     }
+
+    // Lastly we add costs for successors of CALL nodes.
+    // These successor nodes are typically from other
+    // function, so they formally should not be here.
+    // But including these costs here simplifies the usage.
+
+    for (std::uint32_t  u = l.begin; u != l.end; ++u)
+        if (is_call(u))
+            for (std::uint32_t const  v : successors(u))
+                table[{u, v}] = (Cost)num_instructions(u);
 }
 
 
@@ -242,7 +252,6 @@ NavigationGraph::Cost  NavigationGraph::call_avg_cost(std::uint32_t const  call_
 
 NavigationGraph::Cost  NavigationGraph::intra_cost(std::uint32_t const  from_node_index, std::uint32_t const  to_node_index) const
 {
-    ASSUMPTION(node(from_node_index).function == node(to_node_index).function);
     auto const&  table = m_intra_costs.at(node(from_node_index).function);
     auto const  it = table.find({ from_node_index, to_node_index });
     return  it == table.end() ? INFINITY_COST : it->second;
