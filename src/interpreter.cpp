@@ -131,12 +131,6 @@ void Interpreter::run()
 void Interpreter::run(double const max_seconds)
 {
     std::chrono::system_clock::time_point const  start_time = std::chrono::system_clock::now();
-    run(start_time, max_seconds);
-}
-
-
-void Interpreter::run(std::chrono::system_clock::time_point const start_time, double const max_seconds)
-{
     run([start_time, max_seconds](std::string& error_message) {
         double const num_seconds = std::chrono::duration<double>(std::chrono::system_clock::now() - start_time).count();
         if (num_seconds >= max_seconds)

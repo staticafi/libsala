@@ -7,7 +7,6 @@
 #   include <sala/analyzer.hpp>
 #   include <vector>
 #   include <functional>
-#   include <chrono>
 
 namespace sala {
 
@@ -38,7 +37,6 @@ struct Interpreter : public InstrSwitch
 
     void run();
     void run(double max_seconds);
-    void run(std::chrono::system_clock::time_point start_time, double max_seconds);
     void run(std::function<bool(std::string&)> const&  terminator);
 
 protected:
