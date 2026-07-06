@@ -21,7 +21,7 @@ struct ExternCode
 
     Program const& program() const { return state().program(); }
     Function const& function() const { return state().current_function(); }
-    std::vector<MemBlock> const& parameters() { return state().stack_top().parameters(); }
+    std::vector<MemBlock> const& parameters() const { return state().stack_top().parameters(); }
 
     ExecState const& state() const { return *state_; }
     ExecState& state() { return *state_; }
