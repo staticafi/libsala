@@ -85,6 +85,10 @@ struct ControlFlowGraph
     std::vector<std::uint32_t> const&  calls(std::uint32_t const  function_index) const { return lookup(function_index).calls; }
     std::vector<std::uint32_t> const&  rets(std::uint32_t const  function_index) const { return lookup(function_index).rets; }
 
+    // Miscellaneous functions:
+
+    std::uint32_t  bb_of_instruction(std::uint32_t  function_index, std::uint32_t  bb_index, std::uint32_t  instr_index) const;
+
 private:
 
     std::vector<Node>  m_nodes;

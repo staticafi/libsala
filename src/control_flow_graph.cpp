@@ -115,4 +115,17 @@ std::uint32_t  ControlFlowGraph::bb_next(std::uint32_t const  node_index) const
 }
 
 
+std::uint32_t  ControlFlowGraph::bb_of_instruction(
+        std::uint32_t const  function_index,
+        std::uint32_t const  bb_index,
+        std::uint32_t const  instr_index
+        ) const
+{
+    for (auto [i, e] = bb_range(function_index, bb_index); i != e; ++i)
+        if (instr_index <= node(i).instruction)
+            return i;
+    UNREACHABLE();
+}
+
+
 }
