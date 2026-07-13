@@ -110,7 +110,22 @@ void InputFlow::start(MemPtr const ptr, InputDescriptor const desc)
 }
 
 
+void InputFlow::start(MemPtr const ptr, std::size_t const count, InputDescriptor const desc)
+{
+    FlowSetHandle const handle{ FlowSet::create(desc) };
+    for (std::size_t i = 0ULL; i != count; ++i)
+        write_handle(ptr + i, handle);
+}
+
+
 void InputFlow::copy(MemPtr const dst, MemPtr const src, std::size_t const count)
+{
+    for (std::size_t i = 0ULL; i != count; ++i)
+        write_handle(dst + i, read_handle(src + i));
+}
+
+
+void InputFlow::slice(MemPtr const dst, MemPtr const src, std::size_t const count)
 {
     for (std::size_t i = 0ULL; i != count; ++i)
         write_handle(dst + i, read_handle(src + i));
@@ -837,37 +852,37 @@ void InputFlow::do_extend_f32_f64()
 
 void InputFlow::do_truncate_u64_u32()
 {
-    copy(operands().front()->start(), operands().back()->start(), operands().front()->count());
+    slice(operands().front()->start(), operands().back()->start(), operands().front()->count());
 }
 
 
 void InputFlow::do_truncate_u64_u16()
 {
-    copy(operands().front()->start(), operands().back()->start(), operands().front()->count());
+    slice(operands().front()->start(), operands().back()->start(), operands().front()->count());
 }
 
 
 void InputFlow::do_truncate_u64_u8()
 {
-    copy(operands().front()->start(), operands().back()->start(), operands().front()->count());
+    slice(operands().front()->start(), operands().back()->start(), operands().front()->count());
 }
 
 
 void InputFlow::do_truncate_u32_u16()
 {
-    copy(operands().front()->start(), operands().back()->start(), operands().front()->count());
+    slice(operands().front()->start(), operands().back()->start(), operands().front()->count());
 }
 
 
 void InputFlow::do_truncate_u32_u8()
 {
-    copy(operands().front()->start(), operands().back()->start(), operands().front()->count());
+    slice(operands().front()->start(), operands().back()->start(), operands().front()->count());
 }
 
 
 void InputFlow::do_truncate_u16_u8()
 {
-    copy(operands().front()->start(), operands().back()->start(), operands().front()->count());
+    slice(operands().front()->start(), operands().back()->start(), operands().front()->count());
 }
 
 
@@ -1779,7 +1794,7 @@ void InputFlow::__llvm_intrinsic__bswap(std::size_t const num_bytes)
     auto const dst_ptr{ parameters().front().read<MemPtr>() };
     auto const src_ptr{ parameters().back().start() };
     for (std::size_t i = 0ULL; i != num_bytes; ++i)
-        copy(dst_ptr + num_bytes - (i + 1ULL), src_ptr + i, 1ULL);
+        slice(dst_ptr + num_bytes - (i + 1ULL), src_ptr + i, 1ULL);
 }
 
 

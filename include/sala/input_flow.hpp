@@ -36,20 +36,22 @@ struct InputFlow : public Analyzer
 
     explicit InputFlow(ExecState* exec_state);
 
-    void start(MemPtr ptr, InputDescriptor desc);
-    void copy(MemPtr dst, MemPtr src, std::size_t count);
-    void set(MemPtr dst, MemPtr ptr, std::size_t count);
-    void move(MemPtr dst, MemPtr ptr, std::size_t count);
-    void clear(MemPtr dst, std::size_t count);
-    void join(MemPtr dst, std::size_t count, std::vector<std::pair<MemPtr, std::size_t> > const& memory);
+    virtual void start(MemPtr ptr, InputDescriptor desc);
+    virtual void start(MemPtr ptr, std::size_t count, InputDescriptor desc);
+    virtual void copy(MemPtr dst, MemPtr src, std::size_t count);
+    virtual void slice(MemPtr dst, MemPtr src, std::size_t count);
+    virtual void set(MemPtr dst, MemPtr ptr, std::size_t count);
+    virtual void move(MemPtr dst, MemPtr ptr, std::size_t count);
+    virtual void clear(MemPtr dst, std::size_t count);
+    virtual void join(MemPtr dst, std::size_t count, std::vector<std::pair<MemPtr, std::size_t> > const& memory);
     void join(MemPtr dst, MemPtr src, std::size_t count) { join(dst, count, { { src, count } }); }
     void join(MemPtr dst, MemPtr src1, MemPtr src2, std::size_t count) { join(dst, count, { { src1, count}, { src2, count} }); }
     void join(MemPtr dst, std::size_t dst_count, MemPtr src, std::size_t src_count) { join(dst, dst_count, { { src, src_count} }); }
     void join(MemPtr dst, std::size_t dst_count, MemPtr src1, MemPtr src2, std::size_t src_count) { join(dst, dst_count, { { src1, src_count}, { src2, src_count} }); }
-    void join_per_byte(MemPtr dst, MemPtr src1, MemPtr src2, std::size_t count);
-    void join_extend(MemPtr dst, std::size_t dst_count, MemPtr src, std::size_t src_count);
-    void extend_signed(MemPtr dst, std::size_t dst_count, MemPtr src, std::size_t src_count);
-    void extend_unsigned(MemPtr dst, std::size_t dst_count, MemPtr src, std::size_t src_count);
+    virtual void join_per_byte(MemPtr dst, MemPtr src1, MemPtr src2, std::size_t count);
+    virtual void join_extend(MemPtr dst, std::size_t dst_count, MemPtr src, std::size_t src_count);
+    virtual void extend_signed(MemPtr dst, std::size_t dst_count, MemPtr src, std::size_t src_count);
+    virtual void extend_unsigned(MemPtr dst, std::size_t dst_count, MemPtr src, std::size_t src_count);
     FlowSetPtr read(MemPtr ptr) const;
 
 private:
