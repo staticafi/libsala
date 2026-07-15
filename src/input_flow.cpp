@@ -118,6 +118,25 @@ void InputFlow::start(MemPtr const ptr, std::size_t const count, InputDescriptor
 }
 
 
+void InputFlow::start_extend(MemPtr const ptr, InputDescriptor const desc)
+{
+    FlowSetPtr flow{ FlowSet::create(desc) };
+    flow->join(*read(ptr));
+    write_handle(ptr, flow);
+}
+
+
+void InputFlow::start_extend(MemPtr const ptr, std::size_t const count, InputDescriptor const desc)
+{
+    for (std::size_t i = 0ULL; i != count; ++i)
+    {
+        FlowSetPtr flow{ FlowSet::create(desc) };
+        flow->join(*read(ptr + i));
+        write_handle(ptr + i, flow);
+    }
+}
+
+
 void InputFlow::copy(MemPtr const dst, MemPtr const src, std::size_t const count)
 {
     for (std::size_t i = 0ULL; i != count; ++i)

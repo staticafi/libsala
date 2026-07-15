@@ -39,6 +39,23 @@ void InputFlowWithUpdates::start(MemPtr const ptr, std::size_t const count, Inpu
 }
 
 
+void InputFlowWithUpdates::start_extend(MemPtr const ptr, InputDescriptor const desc)
+{
+    InputFlow::start_extend(ptr, desc);
+    merge_updates(ptr, std::make_shared<UpdatesHitCounts>());
+
+}
+
+
+void InputFlowWithUpdates::start_extend(MemPtr const ptr, std::size_t const count, InputDescriptor const desc)
+{
+    InputFlow::start_extend(ptr, count, desc);
+    UpdatesHitCountsPtr const updates{ std::make_shared<UpdatesHitCounts>() };
+    for (std::size_t i = 0ULL; i != count; ++i)
+        merge_updates(ptr + i, updates);
+}
+
+
 void InputFlowWithUpdates::copy(MemPtr const dst, MemPtr const src, std::size_t const count)
 {
     InputFlow::copy(dst, src, count);

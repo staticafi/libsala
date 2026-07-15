@@ -38,6 +38,8 @@ struct InputFlow : public Analyzer
 
     virtual void start(MemPtr ptr, InputDescriptor desc);
     virtual void start(MemPtr ptr, std::size_t count, InputDescriptor desc);
+    virtual void start_extend(MemPtr ptr, InputDescriptor desc);
+    virtual void start_extend(MemPtr ptr, std::size_t count, InputDescriptor desc);
     virtual void copy(MemPtr dst, MemPtr src, std::size_t count);
     virtual void slice(MemPtr dst, MemPtr src, std::size_t count);
     virtual void set(MemPtr dst, MemPtr ptr, std::size_t count);

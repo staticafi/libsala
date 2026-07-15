@@ -34,6 +34,8 @@ struct InputFlowWithUpdates : public InputFlow
 
     void start(MemPtr ptr, InputDescriptor desc) override;
     void start(MemPtr ptr, std::size_t count, InputDescriptor desc) override;
+    void start_extend(MemPtr ptr, InputDescriptor desc) override;
+    void start_extend(MemPtr ptr, std::size_t count, InputDescriptor desc) override;
     void copy(MemPtr dst, MemPtr src, std::size_t count) override;
     void slice(MemPtr dst, MemPtr src, std::size_t count) override;
     void set(MemPtr dst, MemPtr ptr, std::size_t count) override;
