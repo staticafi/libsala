@@ -17,23 +17,25 @@
 namespace sala {
 
 
-InputFlowWithUpdates::InputFlowWithUpdates(ExecState* const exec_state)
+InputFlowWithUpdates::InputFlowWithUpdates(ExecState* const exec_state, bool const is_predicate_update)
     : InputFlow{ exec_state }
     , m_updates{}
+    , m_is_predicate_update{ is_predicate_update }
+    , m_basic_block_counter{ 0U }
 {}
 
 
 void InputFlowWithUpdates::start(MemPtr const ptr, InputDescriptor const desc)
 {
     InputFlow::start(ptr, desc);
-    write_updates(ptr, std::make_shared<UpdatesHitCounts>());
+    write_updates(ptr, std::make_shared<UpdatesHits>());
 }
 
 
 void InputFlowWithUpdates::start(MemPtr const ptr, std::size_t const count, InputDescriptor const desc)
 {
     InputFlow::start(ptr, count, desc);
-    UpdatesHitCountsPtr const updates{ std::make_shared<UpdatesHitCounts>() };
+    UpdatesHitsPtr const updates{ std::make_shared<UpdatesHits>() };
     for (std::size_t i = 0ULL; i != count; ++i)
         write_updates(ptr + i, updates);
 }
@@ -42,7 +44,7 @@ void InputFlowWithUpdates::start(MemPtr const ptr, std::size_t const count, Inpu
 void InputFlowWithUpdates::start_extend(MemPtr const ptr, InputDescriptor const desc)
 {
     InputFlow::start_extend(ptr, desc);
-    merge_updates(ptr, std::make_shared<UpdatesHitCounts>());
+    merge_updates(ptr, std::make_shared<UpdatesHits>());
 
 }
 
@@ -50,7 +52,7 @@ void InputFlowWithUpdates::start_extend(MemPtr const ptr, InputDescriptor const 
 void InputFlowWithUpdates::start_extend(MemPtr const ptr, std::size_t const count, InputDescriptor const desc)
 {
     InputFlow::start_extend(ptr, count, desc);
-    UpdatesHitCountsPtr const updates{ std::make_shared<UpdatesHitCounts>() };
+    UpdatesHitsPtr const updates{ std::make_shared<UpdatesHits>() };
     for (std::size_t i = 0ULL; i != count; ++i)
         merge_updates(ptr + i, updates);
 }
@@ -72,16 +74,22 @@ void InputFlowWithUpdates::slice(MemPtr const dst, MemPtr const src, std::size_t
         .block = ip().block(),
         .instr = ip().instr()
     };
+    bool const is_update{ is_current_instruction_update() };
     for (std::size_t i = 0ULL; i != count; ++i)
     {
-        UpdatesHitCountsPtr const src_updates{ read_updates(src + i) };
-        UpdatesHitCountsPtr dst_updates{ nullptr };
-        if (src_updates != nullptr)
+        UpdatesHitsPtr const src_updates{ read_updates(src + i) };
+        if (is_update)
         {
-            dst_updates = std::make_shared<UpdatesHitCounts>(*src_updates);
-            (*dst_updates)[id] += 1U;
+            UpdatesHitsPtr dst_updates{ nullptr };
+            if (src_updates != nullptr)
+            {
+                dst_updates = std::make_shared<UpdatesHits>(*src_updates);
+                (*dst_updates)[id].insert(m_basic_block_counter);
+            }
+            write_updates(dst + i, dst_updates);
         }
-        write_updates(dst + i, dst_updates);
+        else
+            write_updates(dst + i, src_updates);
     }
 }
 
@@ -89,7 +97,7 @@ void InputFlowWithUpdates::slice(MemPtr const dst, MemPtr const src, std::size_t
 void InputFlowWithUpdates::set(MemPtr const dst, MemPtr const ptr, std::size_t const count)
 {
     InputFlow::set(dst, ptr, count);
-    UpdatesHitCountsPtr const updates{ read_updates(ptr) };
+    UpdatesHitsPtr const updates{ read_updates(ptr) };
     for (std::size_t i = 0ULL; i != count; ++i)
         write_updates(dst + i, updates);
 }
@@ -98,7 +106,7 @@ void InputFlowWithUpdates::set(MemPtr const dst, MemPtr const ptr, std::size_t c
 void InputFlowWithUpdates::move(MemPtr const dst, MemPtr const src, std::size_t const count)
 {
     InputFlow::move(dst, src, count);
-    std::vector<UpdatesHitCountsPtr> sources;
+    std::vector<UpdatesHitsPtr> sources;
     for (std::size_t i = 0ULL; i != count; ++i)
         sources.push_back(read_updates(src + i));
     for (std::size_t i = 0ULL; i != count; ++i)
@@ -117,27 +125,27 @@ void InputFlowWithUpdates::clear(MemPtr const dst, std::size_t const count)
 void InputFlowWithUpdates::join(MemPtr const dst, std::size_t const count, std::vector<std::pair<MemPtr, std::size_t> > const& memory)
 {
     InputFlow::join(dst, count, memory);
-    UpdatesHitCountsPtr updates{ nullptr };
+    UpdatesHitsPtr updates{ nullptr };
     for (auto const& ptr_and_count : memory)
         for (std::size_t i = 0ULL; i != ptr_and_count.second; ++i)
         {
-            UpdatesHitCountsPtr const u{ read_updates(ptr_and_count.first + i) };
+            UpdatesHitsPtr const u{ read_updates(ptr_and_count.first + i) };
             if (u != nullptr)
             {
                 if (updates == nullptr)
-                    updates = std::make_shared<UpdatesHitCounts>(*u);
+                    updates = std::make_shared<UpdatesHits>(*u);
                 else
                     merge_updates(*updates, *u);
             }
         }
-    if (updates != nullptr)
+    if (updates != nullptr && is_current_instruction_update())
     {
         InstructionID const id{
             .func = stack_top().function_index(),
             .block = ip().block(),
             .instr = ip().instr()
         };
-        (*updates)[id] += 1U;
+        (*updates)[id].insert(m_basic_block_counter);
     }
     for (std::size_t i = 0ULL; i != count; ++i)
         write_updates(dst + i, updates);
@@ -155,26 +163,29 @@ void InputFlowWithUpdates::join_per_byte(MemPtr const dst, MemPtr const src1, Me
 void InputFlowWithUpdates::join_extend(MemPtr const dst, std::size_t const dst_count, MemPtr const src, std::size_t const src_count)
 {
     InputFlow::join_extend(dst, dst_count, src, src_count);
-    UpdatesHitCountsPtr updates{ nullptr };
+    UpdatesHitsPtr updates{ nullptr };
     for (std::size_t i = 0ULL; i != src_count; ++i)
     {
-        UpdatesHitCountsPtr const u{ read_updates(src + i) };
+        UpdatesHitsPtr const u{ read_updates(src + i) };
         if (u != nullptr)
         {
             if (updates == nullptr)
-                updates = std::make_shared<UpdatesHitCounts>(*u);
+                updates = std::make_shared<UpdatesHits>(*u);
             else
                 merge_updates(*updates, *u);
         }
     }
     if (updates == nullptr)
         return;
-    InstructionID const id{
-        .func = stack_top().function_index(),
-        .block = ip().block(),
-        .instr = ip().instr()
-    };
-    (*updates)[id] += 1U;
+    if (is_current_instruction_update())
+    {
+        InstructionID const id{
+            .func = stack_top().function_index(),
+            .block = ip().block(),
+            .instr = ip().instr()
+        };
+        (*updates)[id].insert(m_basic_block_counter);
+    }
     for (std::size_t i = 0ULL; i != dst_count; ++i)
         merge_updates(dst + i, updates);
 }
@@ -185,7 +196,7 @@ void InputFlowWithUpdates::extend_signed(MemPtr const dst, std::size_t const dst
     InputFlow::extend_signed(dst, dst_count, src, src_count);
     for (std::size_t i = 0ULL; i != src_count; ++i)
          write_updates(dst + i, read_updates(src + i));
-    UpdatesHitCountsPtr const ext = read_updates(src + (src_count - 1ULL));
+    UpdatesHitsPtr const ext = read_updates(src + (src_count - 1ULL));
     for (std::size_t i = src_count; i < dst_count; ++i)
         write_updates(dst + i, ext);
 }
@@ -201,14 +212,14 @@ void InputFlowWithUpdates::extend_unsigned(MemPtr const dst, std::size_t const d
 }
 
 
-InputFlowWithUpdates::UpdatesHitCountsPtr  InputFlowWithUpdates::read_updates(MemPtr const ptr) const
+InputFlowWithUpdates::UpdatesHitsPtr  InputFlowWithUpdates::read_updates(MemPtr const ptr) const
 {
     auto const it = m_updates.find(ptr);
     return it == m_updates.end() ? nullptr : it->second;
 }
 
 
-void InputFlowWithUpdates::write_updates(MemPtr const ptr, UpdatesHitCountsPtr const updates)
+void InputFlowWithUpdates::write_updates(MemPtr const ptr, UpdatesHitsPtr const updates)
 {
     if (updates == nullptr)
         m_updates.erase(ptr);
@@ -217,18 +228,71 @@ void InputFlowWithUpdates::write_updates(MemPtr const ptr, UpdatesHitCountsPtr c
 }
 
 
-void InputFlowWithUpdates::merge_updates(MemPtr const ptr, UpdatesHitCountsPtr const updates)
+void InputFlowWithUpdates::merge_updates(MemPtr const ptr, UpdatesHitsPtr const updates)
 {
     if (updates != nullptr)
         merge_updates(*m_updates[ptr], *updates);
 }
 
 
-void InputFlowWithUpdates::merge_updates(UpdatesHitCounts& dest, UpdatesHitCounts const& updates)
+void InputFlowWithUpdates::merge_updates(UpdatesHits& dest, UpdatesHits const& updates)
 {
     if (&dest != &updates)
         for (auto const& kv : updates)
-            dest[kv.first] += kv.second;
+            dest[kv.first].insert(kv.second.begin(), kv.second.end());
+}
+
+
+bool InputFlowWithUpdates::is_current_instruction_update() const
+{
+    if (!m_is_predicate_update)
+        switch (state().current_instruction().opcode())
+        {
+            case Instruction::Opcode::LESS:
+            case Instruction::Opcode::LESS_EQUAL:
+            case Instruction::Opcode::GREATER:
+            case Instruction::Opcode::GREATER_EQUAL:
+            case Instruction::Opcode::EQUAL:
+            case Instruction::Opcode::UNEQUAL:
+            case Instruction::Opcode::ISNAN:
+                return false;
+            default: break;
+        }
+    return true;
+}
+
+
+void InputFlowWithUpdates::on_basic_block_changed()
+{
+    ++m_basic_block_counter;
+}
+
+
+void InputFlowWithUpdates::do_jump()
+{
+    InputFlow::do_jump();
+    on_basic_block_changed();
+}
+
+
+void InputFlowWithUpdates::do_branch()
+{
+    InputFlow::do_branch();
+    on_basic_block_changed();
+}
+
+
+void InputFlowWithUpdates::do_call()
+{
+    InputFlow::do_call();
+    on_basic_block_changed();
+}
+
+
+void InputFlowWithUpdates::do_ret()
+{
+    InputFlow::do_ret();
+    on_basic_block_changed();
 }
 
 

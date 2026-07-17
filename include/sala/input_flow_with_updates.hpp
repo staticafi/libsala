@@ -3,6 +3,7 @@
 
 #   include <sala/input_flow.hpp>
 #   include <unordered_map>
+#   include <unordered_set>
 #   include <memory>
 #   include <cstdint>
 
@@ -27,10 +28,13 @@ struct InputFlowWithUpdates : public InputFlow
         { return 31ULL * (31ULL * id.func + id.block) + id.instr; }
     };
 
-    using  UpdatesHitCounts = std::unordered_map<InstructionID, std::uint32_t, InstructionIDHasher>;
-    using  UpdatesHitCountsPtr = std::shared_ptr<UpdatesHitCounts>;
+    // An 'update' is an instruction modifying tracked value (e.g., ADD instruction).
+    // A 'hit' is the index of step in which the 'update' instruction executed (see method
+    // Analyzer::get_num_steps()). So, for each 'update' we track a set of its 'hits'.
+    using  UpdatesHits = std::unordered_map<InstructionID, std::unordered_set<std::uint64_t>, InstructionIDHasher>;
+    using  UpdatesHitsPtr = std::shared_ptr<UpdatesHits>;
 
-    explicit InputFlowWithUpdates(ExecState* exec_state);
+    InputFlowWithUpdates(ExecState* exec_state, bool is_predicate_update);
 
     void start(MemPtr ptr, InputDescriptor desc) override;
     void start(MemPtr ptr, std::size_t count, InputDescriptor desc) override;
@@ -47,18 +51,31 @@ struct InputFlowWithUpdates : public InputFlow
     void extend_signed(MemPtr dst, std::size_t dst_count, MemPtr src, std::size_t src_count) override;
     void extend_unsigned(MemPtr dst, std::size_t dst_count, MemPtr src, std::size_t src_count) override;
 
-    UpdatesHitCountsPtr  read_updates(MemPtr ptr) const;
+    UpdatesHitsPtr  read_updates(MemPtr ptr) const;
+
+protected:
+
+    void on_basic_block_changed();
+
+    void do_jump() override;
+    void do_branch() override;
+    void do_call() override;
+    void do_ret() override;
 
 private:
 
-    void write_updates(MemPtr ptr, UpdatesHitCountsPtr updates);
-    void merge_updates(MemPtr ptr, UpdatesHitCountsPtr updates);
-    void merge_updates(UpdatesHitCounts& dest, UpdatesHitCounts const& updates);
+    void write_updates(MemPtr ptr, UpdatesHitsPtr updates);
+    void merge_updates(MemPtr ptr, UpdatesHitsPtr updates);
+    void merge_updates(UpdatesHits& dest, UpdatesHits const& updates);
+
+    bool is_current_instruction_update() const;
 
     // We track hit-counts for memory locations directly. That could be
     // memory expensive. If that shows to be a problem, then we can introduce
     // and track handles to hit-counts (similar to InputFlow::FlowSetHandle).
-    std::unordered_map<MemPtr, UpdatesHitCountsPtr> m_updates;
+    std::unordered_map<MemPtr, UpdatesHitsPtr> m_updates;
+    bool m_is_predicate_update;
+    std::uint32_t m_basic_block_counter;
 };
 
 
