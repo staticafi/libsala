@@ -22,7 +22,7 @@ struct ControlFlowGraph
     
         // Nodes ending by CALL, RET, JUMP, BRANCH
         // instruction have any number, 0, 1, 2 indices
-        // this vector, respectively.
+        // in this vector, respectively.
         // Successors of nodes ending by CALL are entry
         // blocks of called functions (there can be more
         // than one callee in case of call via pointer.) 

@@ -41,6 +41,8 @@ struct Interpreter : public InstrSwitch
 
 protected:
 
+    virtual void on_stack_initialized() {}
+
     void do_halt() override;
 
     void do_address() override;

@@ -113,6 +113,8 @@ void Interpreter::step()
 
         state().update_current_values();
 
+        on_stack_initialized();
+
         for (auto& analyzer : analyzers())
             analyzer->on_stack_initialized();
     }
