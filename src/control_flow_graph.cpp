@@ -65,14 +65,13 @@ ControlFlowGraph::ControlFlowGraph(Program const&  program, CallGraph const&  cg
                                          .at(n.instruction))
                 n.successors.push_back(entry(func));
             INVARIANT(!n.successors.empty());
+            std::sort(n.successors.begin(), n.successors.end());
         }
         else
             for (std::uint32_t  bb : program.functions().at(n.function)
                                             .basic_blocks().at(n.basic_block)
                                             .successors())
                 n.successors.push_back(bb_entry(n.function, bb));
-
-        std::sort(n.successors.begin(), n.successors.end());
     }
 }
 
@@ -80,7 +79,13 @@ ControlFlowGraph::ControlFlowGraph(Program const&  program, CallGraph const&  cg
 bool  ControlFlowGraph::is_successor(std::uint32_t const  node_index, std::uint32_t const  checked_node_index) const
 {
     auto const&  succ = node(node_index).successors;
-    return  std::binary_search(succ.begin(), succ.end(), checked_node_index);
+    switch (succ.size())
+    {
+        case 0ULL: return false;
+        case 1ULL: return succ.front() == checked_node_index;
+        case 2ULL: return succ.front() == checked_node_index || succ.back() == checked_node_index;
+        default: return std::binary_search(succ.begin(), succ.end(), checked_node_index);
+    }
 }
 
 

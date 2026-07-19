@@ -26,7 +26,12 @@ struct ControlFlowGraph
         // Successors of nodes ending by CALL are entry
         // blocks of called functions (there can be more
         // than one callee in case of call via pointer.) 
-        // The vector is sorted - ascending order.
+        // If the node is CALL, then this vector is sorted
+        // (ascending order). Otherwise, the order is the
+        // same as in the program. Importantly, for BRANCH
+        // node the successors are in the same order as
+        // in the program (false/true successor is at the
+        // front/back position in the vector).
         std::vector<std::uint32_t>  successors;
     };
 
