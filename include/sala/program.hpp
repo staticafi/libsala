@@ -702,7 +702,7 @@ struct Program
     std::vector<Variable> const& static_variables() const { return variables_; }
     std::vector<Constant> const& constants() const { return constants_; }
     std::vector<std::pair<std::uint32_t, std::string> > const& external_variables() const { return external_variables_; }
-    std::vector<std::uint32_t> external_functions() const { return external_functions_; }
+    std::vector<std::uint32_t> const& external_functions() const { return external_functions_; }
 
     static std::uint32_t static_initializer();
     static std::string static_initializer_name();
