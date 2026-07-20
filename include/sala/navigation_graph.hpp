@@ -41,7 +41,7 @@ struct  NavigationGraph : public ControlFlowGraph
     {
         // Keys are functions reachable (transitively) via calls
         // from the current function. Values are costs to move
-        // from the current function to theother functions (keys).
+        // from the current function to the other functions (keys).
         using  Table = std::unordered_map<uint32_t, Cost>;
 
         // Costs to move from the entry node to the other functions.
