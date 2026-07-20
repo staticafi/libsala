@@ -211,7 +211,7 @@ void  NavigationGraph::update_inter_costs_rec(
         Cost const  instr_count_to_call = num_instructions(call_node_index);
 
         for (std::uint32_t const  succ_node_index : call.successors)
-            call_costs[succ_node_index] = instr_count_to_call;
+            call_costs[node(succ_node_index).function] = instr_count_to_call;
 
         for (std::uint32_t const  succ_node_index : call.successors)
         {
@@ -226,9 +226,9 @@ void  NavigationGraph::update_inter_costs_rec(
             }
         }
 
-        Cost const  local_cost = is_entry(call_node_index) ?
-            instr_count_to_call :
-            intra_cost(entry(func_index), call_node_index);
+        Cost const  local_cost =
+                instr_count_to_call +
+                (is_entry(call_node_index) ? 0U : intra_cost(entry(func_index), call_node_index));
         for (auto [ func, cost ] : call_costs)
         {
             Cost const  new_cost = sum_costs(local_cost, cost);
