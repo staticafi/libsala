@@ -44,7 +44,9 @@ struct  NavigationGraph : public ControlFlowGraph
         // from the current function to the other functions (keys).
         using  Table = std::unordered_map<uint32_t, Cost>;
 
-        // Costs to move from the entry node to the other functions.
+        // Costs to move from the entry node of this function to
+        // other functions. So, keys are indices of other functions
+        // and values are the costs.
         Table  from_entry;
 
         // For each CALL node there is one table of costs to move
