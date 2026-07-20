@@ -83,6 +83,7 @@ struct  NavigationGraph : public ControlFlowGraph
     std::vector<InterCosts> const&  inter_costs() const { return m_inter_costs; }
     InterCosts const&  inter_costs(std::uint32_t const  function_index) const { return m_inter_costs.at(function_index); }
     Cost  inter_cost_from_entry(std::uint32_t  from_function_index, std::uint32_t  to_function_index) const;
+    InterCosts::Table const&  inter_cost_from_call(std::uint32_t  call_node_index) const;
     Cost  inter_cost_from_call(std::uint32_t  call_node_index, std::uint32_t  to_function_index) const;
 
 private:

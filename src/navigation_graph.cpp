@@ -266,14 +266,20 @@ NavigationGraph::Cost  NavigationGraph::inter_cost_from_entry(std::uint32_t cons
 }
 
 
-NavigationGraph::Cost  NavigationGraph::inter_cost_from_call(std::uint32_t const  call_node_index, std::uint32_t const  to_function_index) const
+NavigationGraph::InterCosts::Table const&  NavigationGraph::inter_cost_from_call(std::uint32_t  call_node_index) const
 {
     std::uint32_t const  func = node(call_node_index).function;
     auto const&  calls = lookup(func).calls;
     auto const  cit = std::lower_bound(calls.begin(), calls.end(), call_node_index);
     ASSUMPTION(cit != calls.end() && *cit == call_node_index);
     std::size_t const  index = cit - calls.begin();
-    auto const&  costs = m_inter_costs.at(node(call_node_index).function).from_calls.at(index);
+    return m_inter_costs.at(func).from_calls.at(index);
+}
+
+
+NavigationGraph::Cost  NavigationGraph::inter_cost_from_call(std::uint32_t const  call_node_index, std::uint32_t const  to_function_index) const
+{
+    auto const&  costs = inter_cost_from_call(call_node_index);
     auto const  it = costs.find(to_function_index);
     return  it == costs.end() ? INFINITY_COST : it->second;
 }
