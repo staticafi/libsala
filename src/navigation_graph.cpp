@@ -221,14 +221,13 @@ void  NavigationGraph::update_inter_costs_rec(
             InterCosts::Table&  callee_costs = m_inter_costs.at(succ.function).from_entry;
             for (auto [ func, cost ] : callee_costs)
             {
+                Cost const  new_cost = sum_costs(instr_count_to_call, cost);
                 auto const  it = call_costs.find(func);
-                call_costs[func] = (it == call_costs.end()) ? cost : std::min(cost, it->second);
+                call_costs[func] = (it == call_costs.end()) ? new_cost : std::min(new_cost, it->second);
             }
         }
 
-        Cost const  local_cost =
-                instr_count_to_call +
-                (is_entry(call_node_index) ? 0U : intra_cost(entry(func_index), call_node_index));
+        Cost const  local_cost = intra_cost_stationary(entry(func_index), call_node_index);
         for (auto [ func, cost ] : call_costs)
         {
             Cost const  new_cost = sum_costs(local_cost, cost);
