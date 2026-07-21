@@ -1,6 +1,6 @@
 #include <sala/streaming.hpp>
 #include <sala/program.hpp>
-#include <sala/opcode_to_string.hpp>
+#include <sala/streaming_utils.hpp>
 #include <utility/invariants.hpp>
 #include <iostream>
 #include <iomanip>
@@ -30,34 +30,6 @@ std::ostream& operator<<(std::ostream& ostr, DbgLine const& line)
 }
 
 
-static std::string instruction_modifier_to_string(Instruction::Modifier const modifier)
-{
-    switch (modifier)
-    {
-        case Instruction::Modifier::NONE: return "n"; break;
-        case Instruction::Modifier::SIGNED: return "s"; break;
-        case Instruction::Modifier::UNSIGNED: return "u"; break;
-        case Instruction::Modifier::FLOATING: return "f"; break;
-        case Instruction::Modifier::FLOATING_UNORDERED: return "w"; break;
-        default: UNREACHABLE(); break;
-    }
-}
-
-
-static std::string instruction_descriptor_to_string(Instruction::Descriptor const descriptor)
-{
-    switch (descriptor)
-    {
-        case Instruction::Descriptor::STATIC: return "s"; break;
-        case Instruction::Descriptor::LOCAL: return "l"; break;
-        case Instruction::Descriptor::PARAMETER: return "p"; break;
-        case Instruction::Descriptor::CONSTANT: return "c"; break;
-        case Instruction::Descriptor::FUNCTION: return "f"; break;
-        default: UNREACHABLE(); break;
-    }
-}
-
-
 static bool save_constants(std::ostream& ostr, std::vector<Constant> const& constants)
 {
     for (std::size_t i = 0U; i < constants.size(); ++i)
@@ -69,10 +41,7 @@ static bool save_constants(std::ostream& ostr, std::vector<Constant> const& cons
                 ostr << ", #" << constants.at(i - 1ULL).bytes().size();
             ostr << '\n';
         }
-        ostr << "  \"";
-        for (auto byte : constants.at(i).bytes())
-            ostr << std::setfill('0') << std::setw(2) << std::hex << (std::uint32_t)byte;
-        ostr << "\"" << std::dec;
+        ostr << "  \"" << bytes_to_hex_string(constants.at(i).bytes()) << "\"";
     }
     if (!constants.empty())
     {
@@ -91,9 +60,7 @@ static bool save_variables(std::ostream& ostr, std::vector<Variable> const& vari
         if (i != 0U)
             ostr << ',' << DbgLine{i - 1ULL} << '\n';
         auto const& variable = variables.at(i);
-        ostr << shift << "[ " << variable.num_bytes() << ", ["
-                              << variable.source_back_mapping().line << ","
-                              << variable.source_back_mapping().column << "] ]";
+        ostr << shift << "[ " << variable.num_bytes() << ", " << source_back_mapping_to_string(variable.source_back_mapping()) << " ]";
     }
     if (!variables.empty())
         ostr << DbgLine{variables.size() - 1ULL};
@@ -115,8 +82,7 @@ std::ostream& operator<<(std::ostream& ostr, Instruction const& instruction)
     }
     for (auto operand : instruction.operands())
         ostr << ", " << operand;
-    ostr << ", [" << instruction.source_back_mapping().line << ","
-                    << instruction.source_back_mapping().column << "]";
+    ostr << ", " << source_back_mapping_to_string(instruction.source_back_mapping());
     ostr << " ]";
     return ostr;
 }
@@ -177,8 +143,9 @@ static bool save_functions(std::ostream& ostr, std::vector<Function> const& func
             ostr << ",\n";
         auto const& function = functions.at(i);
         ostr << "  {" << DbgLine{i} << '\n'
-             << "    \"name\": [ \"" << function.name() << "\", [" << function.source_back_mapping().line << ","
-                                                                 << function.source_back_mapping().column << "] ],\n"
+             << "    \"name\": [ \"" << function.name() << "\", " 
+                                     << source_back_mapping_to_string(function.source_back_mapping())
+                                     << " ],\n"
              << "    \"parameters\": [\n";
         if (save_variables(ostr, function.parameters(), "      ")) ostr << '\n';
         ostr << "    ],\n"
