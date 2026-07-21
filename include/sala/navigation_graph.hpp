@@ -18,7 +18,7 @@ struct  NavigationGraph : public ControlFlowGraph
 {
     // Term 'cost' in this graph means 'the count of instructions'.
     // A cost is always a positive integer.
-    using Cost = std::uint32_t;
+    using Cost = std::uint32_t; static_assert(sizeof(Cost) < sizeof(std::uint64_t));
 
     static constexpr Cost  INFINITY_COST = std::numeric_limits<Cost>::max();
 
