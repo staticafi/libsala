@@ -127,10 +127,9 @@ void  NavigationGraph::compute_intra_costs(std::uint32_t const  func_index)
             {
                 Cost const  cost = intra_cost(u, v);
                 Cost const  other_cost = sum_costs(intra_cost(u, x), intra_cost(x, v));
-                if (other_cost < cost)
-                    new_table[{u, v}] = other_cost;
-                if (cost != INFINITY_COST)
-                    new_table[{u, v}] = cost;
+                Cost const  best_cost = std::min(cost, other_cost);
+                if (best_cost != INFINITY_COST)
+                    new_table[{u, v}] = best_cost;
 
             }
         table.swap(new_table);
