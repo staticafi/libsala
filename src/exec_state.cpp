@@ -6,6 +6,49 @@
 #include <cstring>
 #include <sstream>
 
+namespace sala::detail {
+
+
+template<typename T>
+std::size_t count_segment_bytes(std::vector<T> const& items)
+{
+    std::size_t sum{ 0ULL };
+    for (auto const& item : items)
+        sum += item.num_bytes();
+    return sum;
+}
+
+
+template<typename T>
+MemBlock allocate_segment(PointerModel* const pointer_model, std::vector<T> const& items)
+{
+    std::size_t const num_bytes{ count_segment_bytes(items) };
+    return MemBlock{ pointer_model, new std::uint8_t[num_bytes], num_bytes, 0U };
+}
+
+
+template<typename T>
+void map_items_to_allocated_segment(
+    PointerModel* const pointer_model,
+    MemBlock const& block,
+    std::vector<T> const& items,
+    std::vector<MemBlock>& blocks_for_items
+    )
+{
+    ASSUMPTION(blocks_for_items.empty());
+    MemPtr ptr{ block.start() };
+    for (auto const& item : items)
+    {
+        ASSUMPTION(ptr + item.num_bytes() <= block.start() + block.count());
+        blocks_for_items.push_back(MemBlock{ pointer_model, ptr, item.num_bytes() });
+        ptr += item.num_bytes();
+    }
+    INVARIANT(ptr == block.start() + block.count());
+}
+
+
+}
+
 namespace sala {
 
 
@@ -90,6 +133,10 @@ ExecState::ExecState(Program const* const P, int const argc, char* argv[], std::
     , argv_c_strings_{}
     , warnings_{}
 
+    , constant_segment_memory_block_{ detail::allocate_segment(pointer_model_, program().constants()) }
+    , static_segment_memory_block_{ detail::allocate_segment(pointer_model_, program().static_variables()) }
+    , function_segment_memory_block_{ detail::allocate_segment(pointer_model_, program().functions()) }
+
     , constant_segment_{}
     , static_segment_{}
     , function_segment_{}
@@ -129,20 +176,22 @@ ExecState::ExecState(Program const* const P, int const argc, char* argv[], std::
         }() <= memory_size_in_bytes
     ));
 
-    for (auto const& constant : program().constants())
+    detail::map_items_to_allocated_segment(pointer_model(), constant_segment_memory_block(), program().constants(), constant_segment_);
+    detail::map_items_to_allocated_segment(pointer_model(), static_segment_memory_block(), program().static_variables(), static_segment_);
+    detail::map_items_to_allocated_segment(pointer_model(), function_segment_memory_block(), program().functions(), function_segment_);
+
+    for (std::size_t i = 0ULL; i < program().constants().size(); ++i)
     {
-        constant_segment_.push_back(MemBlock{ pointer_model(), constant.num_bytes() });
-        std::memcpy(constant_segment_.back().start(), constant.bytes().data(), constant.num_bytes());
+        auto const& constant{ program().constants().at(i) };
+        INVARIANT(constant_segment().at(i).count() == constant.num_bytes());
+        std::memcpy(constant_segment().at(i).start(), constant.bytes().data(), constant.num_bytes());
     }
 
-    for (auto const& var : program().static_variables())
-        static_segment_.push_back(MemBlock{ pointer_model(), var.num_bytes(), 0 });
-
-    for (auto const& func : program().functions())
+    for (std::size_t i = 0ULL; i < program().functions().size(); ++i)
     {
-        ASSUMPTION((std::uint32_t)function_segment_.size() == func.index());
-        function_segment_.push_back(MemBlock{ pointer_model(), 1ULL });
-        functions_at_addresses_.insert({ function_segment_.back().start(), func.index() });
+        auto const& func{ program().functions().at(i) };
+        INVARIANT(function_segment().at(i).count() == func.num_bytes());
+        functions_at_addresses_.insert({ function_segment().at(i).start(), func.index() });
     }
 
     stack_segment_.push_back(StackRecord(pointer_model(), program().functions().at(Program::static_initializer())));

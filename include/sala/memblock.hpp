@@ -12,7 +12,7 @@ namespace sala::detail {
 
 struct MemBlockData final
 {
-    MemBlockData(PointerModel* pointer_model, std::size_t num_bytes, std::uint8_t init_value);
+    MemBlockData(PointerModel* pointer_model, MemPtr start_addr, std::size_t num_bytes, std::uint8_t init_value);
     ~MemBlockData();
     PointerModel* pointer_model() const { return pointer_model_; }
     MemPtr start() const { return bytes; }
@@ -33,6 +33,7 @@ private:
     PointerModel* pointer_model_;
     std::uint8_t* bytes;
     std::size_t count_;
+    bool is_memory_owner;
 };
 
 
@@ -70,7 +71,10 @@ namespace sala {
 struct MemBlock final
 {
     MemBlock();
-    MemBlock(PointerModel* pointer_model, std::size_t num_bytes, std::uint8_t init_value = 0xcd);
+    MemBlock(PointerModel* pointer_model, MemPtr start_addr, std::size_t num_bytes, std::uint8_t init_value = 0xcd);
+    MemBlock(PointerModel* pointer_model, std::size_t num_bytes, std::uint8_t init_value = 0xcd)
+        : MemBlock{ pointer_model, nullptr, num_bytes, init_value }
+    {}
 
     MemPtr start() const { return data_->start(); }
     std::size_t count() const { return data_->count(); }

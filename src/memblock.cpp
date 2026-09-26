@@ -9,18 +9,24 @@
 namespace sala::detail {
 
 
-MemBlockData::MemBlockData(PointerModel* const pointer_model, std::size_t const num_bytes, std::uint8_t const init_value)
+MemBlockData::MemBlockData(PointerModel* const pointer_model, MemPtr const start_addr, std::size_t const num_bytes, std::uint8_t const init_value)
     : pointer_model_{ pointer_model }
-    , bytes{ new std::uint8_t[num_bytes] }
+    , bytes{ start_addr == nullptr ? new std::uint8_t[num_bytes] : start_addr }
     , count_{ num_bytes }
+    , is_memory_owner{ start_addr == nullptr }
 {
-    pointer_model_->on_memblock_allocated(bytes, count_);
+    if (is_memory_owner)
+        pointer_model_->on_memblock_allocated(bytes, count_);
 }
 
 
 MemBlockData::~MemBlockData()
 {
-    pointer_model_->on_memblock_released(bytes, count_);
+    if (is_memory_owner)
+    {
+        pointer_model_->on_memblock_released(bytes, count_);
+        delete [] bytes;
+    }
 }
 
 
@@ -34,8 +40,8 @@ MemBlock::MemBlock()
 {}
 
 
-MemBlock::MemBlock(PointerModel* const pointer_model, std::size_t const num_bytes, std::uint8_t const init_value)
-    : data_{ std::make_shared<detail::MemBlockData>(pointer_model, num_bytes, init_value) }
+MemBlock::MemBlock(PointerModel* const pointer_model, MemPtr const start_addr, std::size_t const num_bytes, std::uint8_t const init_value)
+    : data_{ std::make_shared<detail::MemBlockData>(pointer_model, start_addr, num_bytes, init_value) }
 {
     std::memset(start(), init_value, count());
 }

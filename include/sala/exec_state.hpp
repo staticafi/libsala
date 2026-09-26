@@ -102,6 +102,9 @@ struct ExecState final
 
     std::string  report(std::string const&  error_message_suffix = "") const;
 
+    MemBlock const& constant_segment_memory_block() const { return constant_segment_memory_block_; }
+    MemBlock const& static_segment_memory_block() const { return static_segment_memory_block_; }
+    MemBlock const& function_segment_memory_block() const { return function_segment_memory_block_; }
     std::vector<MemBlock> const& constant_segment() const { return constant_segment_; }
     std::vector<MemBlock> const& static_segment() const { return static_segment_; }
     std::vector<MemBlock> const& function_segment() const { return function_segment_; }
@@ -154,9 +157,13 @@ private:
     std::vector<MemBlock> argv_c_strings_;
     std::unordered_set<std::string> warnings_;
 
-    std::vector<MemBlock> constant_segment_;
-    std::vector<MemBlock> static_segment_;
-    std::vector<MemBlock> function_segment_;
+    MemBlock constant_segment_memory_block_; // In this single block of memory there are stored all constants.
+    MemBlock static_segment_memory_block_; // In this single block of memory there are stored all static variables.
+    MemBlock function_segment_memory_block_; // In this single block of memory there are stored all functions.
+
+    std::vector<MemBlock> constant_segment_; // All constants lie one after another in the single memory block constant_segment_memory_block_. 
+    std::vector<MemBlock> static_segment_; // All static vars lie one after another in the single memory block static_segment_memory_block_. 
+    std::vector<MemBlock> function_segment_; // All functions lie one after another in the single memory block function_segment_memory_block_. 
     std::unordered_map<MemPtr, std::uint32_t> functions_at_addresses_;
     std::vector<StackRecord> stack_segment_;
     std::unordered_map<MemPtr, MemBlock> heap_segment_;
