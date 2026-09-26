@@ -2,6 +2,7 @@
 #   define SALA_EXPRESSION_FLOW_HPP_INCLUDED
 
 #   include <sala/analyzer.hpp>
+#   include <vector>
 #   include <memory>
 #   include <cstdint>
 
@@ -21,37 +22,40 @@ struct InstructionHandle
 
 struct Expression
 {
-    explicit Expression(InstructionHandle const& h)
-        : m_handle{ h }
-    {}
-    virtual ~Expression() {}
+    enum Kind
+    {
+        INPUT,
+        CONSTANT,
+        OPERATOR
+    };
+
+    Expression(
+        InstructionHandle const& handle_,
+        Kind kind_,
+        ExpressionPtr guard_,
+        std::vector<ExpressionPtr> const& children_ = {}
+        );
+ 
     InstructionHandle handle() const { return m_handle; }
-    virtual bool is_input_source() const { return false; }
-    virtual bool is_constant_source() const { return false; }
-    virtual std::uint32_t num_children() const { return 0U; }
-    virtual ExpressionPtr child(std::uint32_t const idx) const { return nullptr; }
+    Kind kind() const { return m_kind; }
+    ExpressionPtr guard() const { return m_guard; }
+
+    bool is_input() const { return kind() == INPUT; }
+    bool is_constant() const { return kind() == CONSTANT; }
+    bool is_operator() const { return kind() == OPERATOR; }
+
+    std::uint32_t num_children() const { return (std::uint32_t)m_children.size(); }
+    ExpressionPtr child(std::uint32_t const idx) const { return m_children.at(idx); }
+    std::vector<ExpressionPtr> const& children() const { return m_children; }
+
+    void push_back_child(ExpressionPtr const child_) { m_children.push_back(child_); }
+
 private:
+
     InstructionHandle m_handle;
-};
-
-
-struct ExpressionInput : public Expression
-{
-    explicit ExpressionInput(InstructionHandle const& h)
-        : Expression{ h }
-    {}
-
-    bool is_input_source() const override { return true; }
-};
-
-
-struct ExpressionConstant : public Expression
-{
-    explicit ExpressionConstant(InstructionHandle const& h, std::uint32_t const idx)
-        : Expression{ h }
-    {}
-
-    bool is_input_source() const override { return true; }
+    Kind m_kind;
+    ExpressionPtr m_guard;
+    std::vector<ExpressionPtr> m_children;
 };
 
 

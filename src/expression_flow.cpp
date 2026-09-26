@@ -8,6 +8,17 @@
 namespace sala {
 
 
+Expression::Expression(
+        InstructionHandle const& handle_,
+        Kind const kind_,
+        ExpressionPtr const guard_,
+        std::vector<ExpressionPtr> const& children_
+        )
+    : m_handle{ handle_ }
+    , m_kind{ kind_ }
+    , m_guard{ guard_ }
+    , m_children{ children_ }
+{}
 
 
 }
