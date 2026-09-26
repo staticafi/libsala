@@ -662,6 +662,7 @@ struct Function
     std::vector<Variable> const& parameters() const { return parameters_; }
     std::vector<Variable> const& local_variables() const { return locals_; }
     bool is_external() const { return is_external_; }
+    std::size_t num_bytes() const { return 1ULL; } // The number of bytes occupied in the function segment.
     std::size_t initial_stack_bytes() const;
     SourceBackMapping const& source_back_mapping() const { return back_mapping_; }
 
