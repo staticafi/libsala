@@ -23,7 +23,7 @@ template<typename T>
 MemBlock allocate_segment(PointerModel* const pointer_model, std::vector<T> const& items)
 {
     std::size_t const num_bytes{ count_segment_bytes(items) };
-    return MemBlock{ pointer_model, new std::uint8_t[num_bytes], num_bytes, 0U };
+    return MemBlock{ pointer_model, num_bytes, 0U };
 }
 
 
@@ -214,6 +214,10 @@ ExecState::~ExecState()
     heap_segment_.clear();
 
     current_operands_.clear();
+
+    constant_segment_memory_block_ = {};
+    static_segment_memory_block_ = {};
+    function_segment_memory_block_ = {};
 
     delete pointer_model_;
 }
