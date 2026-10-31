@@ -133,18 +133,18 @@ struct Instruction
         // Assumptions: vN.num_bytes() == sizeof(void*).
         ADDRESS,
 
-        // LOAD n vN vM
-        // Corresponds to a C expression: vN = *vM
+        // LOAD n vN nM
+        // Corresponds to a C expression: vN = *nM
         // Copies vN.num_bytes() bytes at the address
-        // stored in bytes in vM to bytes in vN.
-        // Assumptions: vM.num_bytes() == sizeof(void*).
+        // stored in variable or constant nM to bytes in vN.
+        // Assumptions: nM.num_bytes() == sizeof(void*).
         LOAD,
 
-        // STORE n vN vM
-        // Corresponds to a C expression: *vN = vM
-        // Copies vM.num_bytes() bytes in vM to bytes 
-        // at the address stored in vN.
-        // Assumptions: vN.num_bytes() == sizeof(void*).
+        // STORE n nN nM
+        // Corresponds to a C expression: *nN = nM
+        // Copies nM.num_bytes() bytes in nM to bytes
+        // at the address stored in variable or constant nN.
+        // Assumptions: nN.num_bytes() == sizeof(void*).
         STORE,
 
         // COPY n vN xM
@@ -153,52 +153,52 @@ struct Instruction
         // Assumptions: vN.num_bytes() == xM.num_bytes().
         COPY,
 
-        // MEMCPY n vN vM nH
-        // Corresponds to a C expression: memcpy(vN, vM, nH)
+        // MEMCPY n nN nM nH
+        // Corresponds to a C expression: memcpy(nN, nM, nH)
         // Let 'm' be the integer of type size_t stored in
         // bytes of nH, 's' be the address (pointer) stored
-        // in bytes of vM, and 'd' be the address (pointer)
-        // stored in bytes of vN. The instruction copies m bytes
+        // in bytes of nM, and 'd' be the address (pointer)
+        // stored in bytes of nN. The instruction copies m bytes
         // at addresses [s,s+m) to bytes at addresses [d,d+m).
-        // Assumptions: vN.num_bytes() == sizeof(void*).
+        // Assumptions: nN.num_bytes() == nM.num_bytes() == sizeof(void*).
         //              The memory regions [s,s+m) and [d,d+m) may NOT overlap.
         MEMCPY,
 
-        // MEMMOVE n vN vM nH
-        // Corresponds to a C expression: memcpy(vN, vM, nH)
+        // MEMMOVE n nN nM nH
+        // Corresponds to a C expression: memmove(nN, nM, nH)
         // Let 'm' be the integer of type size_t stored in
         // bytes of nH, 's' be the address (pointer) stored
-        // in bytes of vM, and 'd' be the address (pointer)
-        // stored in bytes of vN. The instruction copies m bytes
+        // in bytes of nM, and 'd' be the address (pointer)
+        // stored in bytes of nN. The instruction copies m bytes
         // at addresses [s,s+m) to bytes at addresses [d,d+m).
         // The memory regions [s,s+m) and [d,d+m) MAY overlap.
         // NOTE: MEMMOVE differs from MEMCPY only in the fact
         //       that the memory regions may overlap.
-        // Assumptions: vN.num_bytes() == sizeof(void*).
+        // Assumptions: nN.num_bytes() == nM.num_bytes() == sizeof(void*).
         MEMMOVE,
 
-        // MEMSET n vN nM nH
-        // Corresponds to a C expression: memset(vN, nM, nH)
+        // MEMSET n nN nM nH
+        // Corresponds to a C expression: memset(nN, nM, nH)
         // Let 'v' be the integer of type std::uint8_t stored in
         // the byte of nM, 'n' be the unsigned integer stored in
         // bytes of nH, and 'p' be the address (pointer) stored
-        // in bytes of vN. The instruction sets n bytes
+        // in bytes of nN. The instruction sets n bytes
         // at addresses [p,p+n) to the value 'v'.
-        // Assumptions: vN.num_bytes() == sizeof(void*), nM.num_bytes() == 1.
+        // Assumptions: nN.num_bytes() == sizeof(void*), nM.num_bytes() == 1.
         MEMSET,
 
-        // MOVEPTR n vN vM nH cG
-        // Corresponds to a C expression: void* vN = (void*)((char*)vM + (nH * cG))
+        // MOVEPTR n vN nM nH nG
+        // Corresponds to a C expression: void* vN = (void*)((char*)nM + (nH * nG))
         // Let 'n' be the integer stored in bytes of nH,
-        // 'm' be the integer stored in bytes of cG, and
-        // 'p' be the address (pointer) stored in bytes of vM.
+        // 'm' be the integer stored in bytes of variable or constant nG, and
+        // 'p' be the address (pointer) stored in bytes of variable or constant nM.
         // The instruction computes the address (pointer)
         // p + (n * m) and stores it to bytes in vN.
-        // Assumptions: vN.num_bytes() == vM.num_bytes() == sizeof(void*),
+        // Assumptions: vN.num_bytes() == nM.num_bytes() == sizeof(void*),
         //              m > 0.
         // NOTE: The number m represents 'sizeof' of an element
         //       and the number n the count of elements to 'move'
-        //       the pointer vM over.
+        //       the pointer nM over.
         MOVEPTR,
 
         // ALLOCA n vN nM cH
@@ -263,13 +263,12 @@ struct Instruction
         // Assumptions: m > 0, vN.num_bytes() == sizeof(void*).
         MALLOC,
 
-        // FREE n vN
-        // Let p by the address (pointer) stored in bytes of vN. The instruction
-        // frees (releases) the sequence of bytes, where p points to the first
-        // byte of the sequence.
-        // Assumptions: The address p must be exactly the address returned by some preceding
-        //              MALLOC instruction and the current instruction is the first FREE
-        //              instruction executed for that address since that MALLOC.
+        // FREE n nN
+        // Let p be the address (pointer) stored in bytes of nN. A NULL pointer
+        // is a no-op. Otherwise, release the heap allocation whose base is p.
+        // The pointer value may be variable or constant; its cell is unchanged.
+        // Assumptions: p is NULL or exactly the address returned by a preceding
+        //              MALLOC, with no intervening FREE of that allocation.
         FREE,
 
         // ADD x vN nM nH
@@ -418,17 +417,17 @@ struct Instruction
         // signed/unsigned integer (based on the descriptor x).
         I2F,
 
-        // P2I u vN vM
-        // Corresponds to a C expression: unsigned int vN = (unsigned int)vM
-        //     where unsigned int* is the type of vM.
+        // P2I u vN nM
+        // Corresponds to a C expression: unsigned int vN = (unsigned int)nM
+        //     where unsigned int* is the type of nM.
         // The value of the pointer type stored in bytes of nM is
         // casted to a value of the unsigned integer type and the casted
         // value is then stored to bytes of vN.
         P2I,
 
-        // I2P u vN vM
-        // Corresponds to a C expression: unsigned int* vN = (unsigned int*)vM
-        //     where unsigned int is the type of vM.
+        // I2P u vN nM
+        // Corresponds to a C expression: unsigned int* vN = (unsigned int*)nM
+        //     where unsigned int is the type of nM.
         // The value of the unsigned integer type stored in bytes of nM is
         // casted to a value of a pointer type and the casted
         // value is then stored to bytes of vN.
@@ -507,15 +506,12 @@ struct Instruction
         // Transfers the execution to the first instruction of the successor basic block.
         JUMP,
 
-        // BRANCH n vN
+        // BRANCH n nN
         // The last instruction of a basic block with exactly 2 successors.
-        // Transfers the execution to the first instruction of one of the two successor
-        // basic blocks. The choice is made according to the value in the byte vN.bytes().front().
-        // If the byte is 0, then the execution is transferred to the first successor
-        // basic bock (i.e., to vN.successors().at(0)), otherwise it is transferred
-        // to the second successor basic block (i.e., to vN.successors().at(1))
-        // Assumptions: vN.num_bytes() == 1,
-        //              vN.bytes().front() is either 0 or 1.
+        // The condition is a variable or constant containing one byte.
+        // A zero byte transfers execution to the first successor basic block;
+        // any nonzero byte transfers execution to the second successor.
+        // Assumptions: nN.num_bytes() == 1.
         BRANCH,
 
         // CALL n rN [p0 xH1 ... xHm]
