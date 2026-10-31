@@ -160,12 +160,12 @@ struct Instruction
         // in bytes of nM, and 'd' be the address (pointer)
         // stored in bytes of nN. The instruction copies m bytes
         // at addresses [s,s+m) to bytes at addresses [d,d+m).
-        // Assumptions: nN.num_bytes() == sizeof(void*).
+        // Assumptions: nN.num_bytes() == nM.num_bytes() == sizeof(void*).
         //              The memory regions [s,s+m) and [d,d+m) may NOT overlap.
         MEMCPY,
 
         // MEMMOVE n nN nM nH
-        // Corresponds to a C expression: memcpy(nN, nM, nH)
+        // Corresponds to a C expression: memmove(nN, nM, nH)
         // Let 'm' be the integer of type size_t stored in
         // bytes of nH, 's' be the address (pointer) stored
         // in bytes of nM, and 'd' be the address (pointer)
@@ -174,7 +174,7 @@ struct Instruction
         // The memory regions [s,s+m) and [d,d+m) MAY overlap.
         // NOTE: MEMMOVE differs from MEMCPY only in the fact
         //       that the memory regions may overlap.
-        // Assumptions: nN.num_bytes() == sizeof(void*).
+        // Assumptions: nN.num_bytes() == nM.num_bytes() == sizeof(void*).
         MEMMOVE,
 
         // MEMSET n nN nM nH
@@ -264,7 +264,7 @@ struct Instruction
         MALLOC,
 
         // FREE n nN
-        // Let p by the address (pointer) stored in bytes of nN. The instruction
+        // Let p be the address (pointer) stored in bytes of nN. The instruction
         // frees (releases) the sequence of bytes, where p points to the first
         // byte of the sequence.
         // Assumptions: The address p must be exactly the address returned by some preceding
@@ -509,11 +509,9 @@ struct Instruction
 
         // BRANCH n nN
         // The last instruction of a basic block with exactly 2 successors.
-        // Transfers the execution to the first instruction of one of the two successor
-        // basic blocks. The choice is made according to the value in the byte nN.bytes().front().
-        // If the byte is 0, then the execution is transferred to the first successor
-        // basic bock (i.e., to nN.successors().at(0)), otherwise it is transferred
-        // to the second successor basic block (i.e., to nN.successors().at(1))
+        // The condition is a variable or constant containing one byte.
+        // A zero byte transfers execution to the first successor basic block;
+        // a byte equal to 1 transfers execution to the second successor.
         // Assumptions: nN.num_bytes() == 1,
         //              nN.bytes().front() is either 0 or 1.
         BRANCH,
