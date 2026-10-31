@@ -187,10 +187,10 @@ struct Instruction
         // Assumptions: nN.num_bytes() == sizeof(void*), nM.num_bytes() == 1.
         MEMSET,
 
-        // MOVEPTR n vN nM nH cG
-        // Corresponds to a C expression: void* vN = (void*)((char*)nM + (nH * cG))
+        // MOVEPTR n vN nM nH nG
+        // Corresponds to a C expression: void* vN = (void*)((char*)nM + (nH * nG))
         // Let 'n' be the integer stored in bytes of nH,
-        // 'm' be the integer stored in bytes of cG, and
+        // 'm' be the integer stored in bytes of variable or constant nG, and
         // 'p' be the address (pointer) stored in bytes of variable or constant nM.
         // The instruction computes the address (pointer)
         // p + (n * m) and stores it to bytes in vN.
@@ -264,12 +264,11 @@ struct Instruction
         MALLOC,
 
         // FREE n nN
-        // Let p be the address (pointer) stored in bytes of nN. The instruction
-        // frees (releases) the sequence of bytes, where p points to the first
-        // byte of the sequence.
-        // Assumptions: The address p must be exactly the address returned by some preceding
-        //              MALLOC instruction and the current instruction is the first FREE
-        //              instruction executed for that address since that MALLOC.
+        // Let p be the address (pointer) stored in bytes of nN. A NULL pointer
+        // is a no-op. Otherwise, release the heap allocation whose base is p.
+        // The pointer value may be variable or constant; its cell is unchanged.
+        // Assumptions: p is NULL or exactly the address returned by a preceding
+        //              MALLOC, with no intervening FREE of that allocation.
         FREE,
 
         // ADD x vN nM nH
@@ -511,9 +510,8 @@ struct Instruction
         // The last instruction of a basic block with exactly 2 successors.
         // The condition is a variable or constant containing one byte.
         // A zero byte transfers execution to the first successor basic block;
-        // a byte equal to 1 transfers execution to the second successor.
-        // Assumptions: nN.num_bytes() == 1,
-        //              nN.bytes().front() is either 0 or 1.
+        // any nonzero byte transfers execution to the second successor.
+        // Assumptions: nN.num_bytes() == 1.
         BRANCH,
 
         // CALL n rN [p0 xH1 ... xHm]
