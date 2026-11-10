@@ -659,6 +659,12 @@ void InputFlow::do_and_64()
 }
 
 
+void InputFlow::do_and_bytes()
+{
+    join_per_byte(operands().front()->start(), operands().at(1)->start(), operands().at(2)->start(), operands().front()->count());
+}
+
+
 void InputFlow::do_or_8()
 {
     join_per_byte(operands().front()->start(), operands().at(1)->start(), operands().at(2)->start(), 1ULL);

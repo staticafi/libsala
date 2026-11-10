@@ -163,6 +163,7 @@ protected:
     void do_and_16() override;
     void do_and_32() override;
     void do_and_64() override;
+    void do_and_bytes() override;
 
     void do_or_8() override;
     void do_or_16() override;

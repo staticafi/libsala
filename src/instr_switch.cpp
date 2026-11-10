@@ -196,6 +196,10 @@ bool InstrSwitch::do_instruction_switch()
                 case 2ULL: do_and_16(); return false;
                 case 4ULL: do_and_32(); return false;
                 case 8ULL: do_and_64(); return false;
+                case 3ULL:
+                case 5ULL:
+                case 6ULL:
+                case 7ULL: do_and_bytes(); return false;
                 default: UNREACHABLE(); return false;
                 }
             default: UNREACHABLE(); return false;

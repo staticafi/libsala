@@ -102,6 +102,7 @@ struct InstrSwitch
     virtual void do_and_16() {}
     virtual void do_and_32() {}
     virtual void do_and_64() {}
+    virtual void do_and_bytes() {}
 
     virtual void do_or_8() {}
     virtual void do_or_16() {}

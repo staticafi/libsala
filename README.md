@@ -16,8 +16,9 @@ a serious defect in the program.
 
 On little-endian Linux, integer `EXTEND` and `TRUNCATE` support byte widths
 from one through eight, including three-byte memory accesses; floating-point
-conversions retain their existing supported widths. `InputFlow` propagates
-dependencies through the same integer conversions.
+conversions retain their existing supported widths. Bytewise `AND` also supports
+these widths for masks emitted with odd-width conversions. `InputFlow` propagates
+dependencies through the same integer conversions and masks.
 
 Linux i386 variadic calls use a four-byte pointer `va_list` and four-byte-rounded
 argument slots. The argument area belongs to the variadic function's stack

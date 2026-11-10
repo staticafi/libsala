@@ -627,6 +627,17 @@ void Interpreter::do_and_64()
 }
 
 
+void Interpreter::do_and_bytes()
+{
+    auto const dst = operands().front()->start();
+    auto const lhs = operands().at(1)->start();
+    auto const rhs = operands().at(2)->start();
+    auto const count = operands().front()->count();
+    for (std::size_t i = 0ULL; i < count; ++i)
+        dst[i] = lhs[i] & rhs[i];
+}
+
+
 void Interpreter::do_or_8()
 {
     operands().front()->write<std::uint8_t>(operands().at(1)->read<std::uint8_t>() | operands().at(2)->read<std::uint8_t>());
