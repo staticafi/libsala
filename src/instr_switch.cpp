@@ -284,6 +284,21 @@ bool InstrSwitch::do_instruction_switch()
             }
 
         case Instruction::Opcode::EXTEND:
+            if (instruction().modifier() == Instruction::Modifier::SIGNED ||
+                instruction().modifier() == Instruction::Modifier::UNSIGNED)
+            {
+                auto const src_size = operands().back()->count();
+                auto const dst_size = operands().front()->count();
+                if (src_size > 0ULL && src_size < dst_size && dst_size <= 8ULL &&
+                    ((src_size & (src_size - 1ULL)) || (dst_size & (dst_size - 1ULL))))
+                {
+                    if (instruction().modifier() == Instruction::Modifier::SIGNED)
+                        do_extend_signed_bytes();
+                    else
+                        do_extend_unsigned_bytes();
+                    return false;
+                }
+            }
             switch (instruction().modifier())
             {
             case Instruction::Modifier::SIGNED:
@@ -353,6 +368,17 @@ bool InstrSwitch::do_instruction_switch()
             }
 
         case Instruction::Opcode::TRUNCATE:
+            if (instruction().modifier() == Instruction::Modifier::UNSIGNED)
+            {
+                auto const src_size = operands().back()->count();
+                auto const dst_size = operands().front()->count();
+                if (dst_size > 0ULL && dst_size < src_size && src_size <= 8ULL &&
+                    ((src_size & (src_size - 1ULL)) || (dst_size & (dst_size - 1ULL))))
+                {
+                    do_truncate_bytes();
+                    return false;
+                }
+            }
             switch (instruction().modifier())
             {
             case Instruction::Modifier::UNSIGNED:

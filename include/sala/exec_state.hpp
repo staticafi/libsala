@@ -8,6 +8,7 @@
 #   include <unordered_map>
 #   include <unordered_set>
 #   include <memory>
+#   include <optional>
 #   include <cstdint>
 
 namespace sala {
@@ -41,6 +42,10 @@ struct StackRecord final
     std::vector<MemBlock> const& parameters() const { return parameters_; }
     std::vector<MemBlock> const& locals() const { return locals_; }
     std::vector<MemBlock> const& variadic_parameters() const { return variadic_parameters_; }
+    // i386 va_list cursors share their caller-owned argument area until return.
+    std::optional<MemBlock> const& variadic_area() const { return variadic_area_; }
+    MemBlock const& allocate_variadic_area(std::size_t const num_bytes)
+    { return variadic_area_.emplace(pointer_model_, num_bytes); }
 
     void push_back_variadic_parameter(std::size_t num_bytes);
 
@@ -54,6 +59,7 @@ private:
     std::vector<MemBlock> parameters_;
     std::vector<MemBlock> locals_;
     std::vector<MemBlock> variadic_parameters_;
+    std::optional<MemBlock> variadic_area_;
 };
 
 

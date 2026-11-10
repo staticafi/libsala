@@ -130,6 +130,11 @@ struct InstrSwitch
     virtual void do_neg_f32() {}
     virtual void do_neg_f64() {}
 
+    // Byte-width integer conversions not covered by the scalar fast paths.
+    virtual void do_extend_signed_bytes() {}
+    virtual void do_extend_unsigned_bytes() {}
+    virtual void do_truncate_bytes() {}
+
     virtual void do_extend_s8_s16() {}
     virtual void do_extend_s8_s32() {}
     virtual void do_extend_s8_s64() {}

@@ -791,6 +791,24 @@ void InputFlow::do_neg_f64()
 }
 
 
+void InputFlow::do_extend_signed_bytes()
+{
+    extend_signed(operands().front()->start(), operands().front()->count(), operands().back()->start(), operands().back()->count());
+}
+
+
+void InputFlow::do_extend_unsigned_bytes()
+{
+    extend_unsigned(operands().front()->start(), operands().front()->count(), operands().back()->start(), operands().back()->count());
+}
+
+
+void InputFlow::do_truncate_bytes()
+{
+    copy(operands().front()->start(), operands().back()->start(), operands().front()->count());
+}
+
+
 void InputFlow::do_extend_s8_s16()
 {
     extend_signed(operands().front()->start(), operands().front()->count(), operands().back()->start(), operands().back()->count());
@@ -1549,9 +1567,20 @@ void InputFlow::do_isnan_w64()
 
 void InputFlow::do_va_start()
 {
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    // IMPORTANT: This implementation is valid only for programs targeted to Linux 64-bit platform.
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    if (state().pointer_model()->sizeof_pointer() == 4ULL)
+    {
+        auto const list = operands().front()->read<MemPtr>();
+        set_post_operation([this, list]() {
+            clear(list, 4ULL);
+            auto array = stack_top().variadic_area()->start();
+            for (auto const& param : stack_top().variadic_parameters())
+            {
+                copy(array, param.start(), param.count());
+                array += (param.count() + 3ULL) & ~3ULL;
+            }
+        });
+        return;
+    }
 
     platform_linux_64_bit::va_list* const va_list_ptr{ (platform_linux_64_bit::va_list*)operands().front()->read<MemPtr>() };
     set_post_operation([this, va_list_ptr]() {
@@ -1568,9 +1597,8 @@ void InputFlow::do_va_start()
 
 void InputFlow::do_va_end()
 {
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    // IMPORTANT: This implementation is valid only for programs targeted to Linux 64-bit platform.
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    if (state().pointer_model()->sizeof_pointer() == 4ULL)
+        return;
 
     platform_linux_64_bit::va_list* const va_list_ptr{ (platform_linux_64_bit::va_list*)operands().front()->read<MemPtr>() };
     clear((MemPtr)va_list_ptr->reg_save_area, va_list_ptr->gp_offset - 256U);
@@ -1579,9 +1607,11 @@ void InputFlow::do_va_end()
 
 void InputFlow::do_va_copy()
 {
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    // IMPORTANT: This implementation is valid only for programs targeted to Linux 64-bit platform.
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    if (state().pointer_model()->sizeof_pointer() == 4ULL)
+    {
+        copy(operands().front()->read<MemPtr>(), operands().back()->read<MemPtr>(), 4ULL);
+        return;
+    }
 
     NOT_IMPLEMENTED_YET();
 }
@@ -1612,6 +1642,8 @@ void InputFlow::do_ret()
         clear(block.start(), block.count());
     for (auto const& block : stack_top().variadic_parameters())
         clear(block.start(), block.count());
+    if (stack_top().variadic_area())
+        clear(stack_top().variadic_area()->start(), stack_top().variadic_area()->count());
 }
 
 

@@ -777,6 +777,31 @@ void Interpreter::do_extend_s8_s64()
 }
 
 
+void Interpreter::do_extend_signed_bytes()
+{
+    auto const& dst = *operands().front();
+    auto const& src = *operands().back();
+    std::uint8_t const fill = (src.start()[src.count() - 1ULL] & 0x80U) ? 0xffU : 0U;
+    std::memmove(dst.start(), src.start(), src.count());
+    std::memset(dst.start() + src.count(), fill, dst.count() - src.count());
+}
+
+
+void Interpreter::do_extend_unsigned_bytes()
+{
+    auto const& dst = *operands().front();
+    auto const& src = *operands().back();
+    std::memmove(dst.start(), src.start(), src.count());
+    std::memset(dst.start() + src.count(), 0, dst.count() - src.count());
+}
+
+
+void Interpreter::do_truncate_bytes()
+{
+    std::memmove(operands().front()->start(), operands().back()->start(), operands().front()->count());
+}
+
+
 void Interpreter::do_extend_s16_s32()
 {
     operands().front()->write<std::int32_t>((std::int32_t)operands().back()->read<std::int16_t>());
@@ -1553,9 +1578,56 @@ void Interpreter::do_isnan_w64()
 
 void Interpreter::do_va_start()
 {
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    // IMPORTANT: This implementation is valid only for programs targeted to Linux 64-bit platform.
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    if (state().pointer_model()->sizeof_pointer() == 4ULL)
+    {
+        auto& frame = state().stack_top();
+        if (!frame.variadic_area())
+        {
+            std::size_t array_size = 0ULL;
+            // The current M32 model must also represent the one-past cursor.
+            for (auto const& param : frame.variadic_parameters())
+            {
+                if (param.count() > 65532ULL - array_size)
+                {
+                    state().set_stage(ExecState::Stage::FINISHED);
+                    state().set_termination(ExecState::Termination::ERROR, "sala::Interpreter",
+                        state().make_error_message("ILP32 variadic argument area exceeds the native segment-offset limit."));
+                    return;
+                }
+                array_size += (param.count() + 3ULL) & ~3ULL;
+            }
+            if (array_size == 0ULL)
+                array_size = 4ULL;
+            if (!state().can_allocate(array_size) || !state().has_free_segments(1ULL))
+            {
+                state().set_stage(ExecState::Stage::FINISHED);
+                state().set_termination(ExecState::Termination::ERROR, "sala::Interpreter",
+                    state().make_error_message("Cannot allocate ILP32 variadic argument area."));
+                return;
+            }
+            try
+            {
+                auto array = frame.allocate_variadic_area(array_size).start();
+                for (auto const& param : frame.variadic_parameters())
+                {
+                    std::memcpy(array, param.start(), param.count());
+                    array += (param.count() + 3ULL) & ~3ULL;
+                }
+            }
+            catch (std::exception const&)
+            {
+                state().set_stage(ExecState::Stage::FINISHED);
+                state().set_termination(ExecState::Termination::ERROR, "sala::Interpreter",
+                    state().make_error_message("Cannot allocate ILP32 variadic argument area."));
+                return;
+            }
+        }
+        state().pointer_model()->write_pointer(
+            operands().front()->read<MemPtr>(), frame.variadic_area()->start());
+        return;
+    }
+
+    // Linux LP64 va_list layout.
 
     std::size_t array_size{ 0ULL };
     for (auto const& param : state().stack_top().variadic_parameters())
@@ -1608,9 +1680,10 @@ void Interpreter::do_va_start()
 
 void Interpreter::do_va_end()
 {
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    // IMPORTANT: This implementation is valid only for programs targeted to Linux 64-bit platform.
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // i386 VA_END ends a cursor, not the caller-owned argument storage:
+    // va_copy and other active cursors may still refer to it.
+    if (state().pointer_model()->sizeof_pointer() == 4ULL)
+        return;
 
     platform_linux_64_bit::va_list* const va_list_ptr{ (platform_linux_64_bit::va_list*)operands().front()->read<MemPtr>() };
     state().heap_segment().erase( (MemPtr)va_list_ptr->reg_save_area );
@@ -1619,20 +1692,18 @@ void Interpreter::do_va_end()
 
 void Interpreter::do_va_arg()
 {
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    // IMPORTANT: This implementation is valid only for programs targeted to Linux 64-bit platform.
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-    // There is nothing to do. According to inspection of code produced by Clang the effect
-    // of the 'va_arg' macro is already encoded in the body of the variadic function.
+    // Clang lowers va_arg to target-specific loads and cursor progression
+    // for both Linux i386 and x86-64.
 }
 
 
 void Interpreter::do_va_copy()
 {
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    // IMPORTANT: This implementation is valid only for programs targeted to Linux 64-bit platform.
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    if (state().pointer_model()->sizeof_pointer() == 4ULL)
+    {
+        std::memmove(operands().front()->read<MemPtr>(), operands().back()->read<MemPtr>(), 4ULL);
+        return;
+    }
 
     NOT_IMPLEMENTED_YET();
 }

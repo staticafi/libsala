@@ -418,14 +418,25 @@ void Sanitizer::do_ret()
         erase(&local);
     for (auto& param : state().stack_top().variadic_parameters())
         erase(&param);
+    if (state().stack_top().variadic_area())
+        erase(&*state().stack_top().variadic_area());
 }
 
 
 void Sanitizer::do_va_start()
 {
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    // IMPORTANT: This implementation is valid only for programs targeted to Linux 64-bit platform.
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    if (state().pointer_model()->sizeof_pointer() == 4ULL)
+    {
+        if (!is_memory_valid(operands().front()->read<MemPtr>(), 4ULL))
+        {
+            crash_interpretation_due_to_memory_access();
+            return;
+        }
+        set_post_operation([this]() {
+            insert(&*state().stack_top().variadic_area());
+        });
+        return;
+    }
 
     platform_linux_64_bit::va_list* const va_list_ptr{ (platform_linux_64_bit::va_list*)operands().front()->read<MemPtr>() };
     if (!is_memory_valid((MemPtr)va_list_ptr, sizeof(*va_list_ptr)))
@@ -438,9 +449,8 @@ void Sanitizer::do_va_start()
 
 void Sanitizer::do_va_end()
 {
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    // IMPORTANT: This implementation is valid only for programs targeted to Linux 64-bit platform.
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    if (state().pointer_model()->sizeof_pointer() == 4ULL)
+        return;
 
     platform_linux_64_bit::va_list* const va_list_ptr{ (platform_linux_64_bit::va_list*)operands().front()->read<MemPtr>() };
     erase( (MemPtr)va_list_ptr->reg_save_area, (std::size_t)(va_list_ptr->gp_offset - 256U));
@@ -449,9 +459,13 @@ void Sanitizer::do_va_end()
 
 void Sanitizer::do_va_copy()
 {
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    // IMPORTANT: This implementation is valid only for programs targeted to Linux 64-bit platform.
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    if (state().pointer_model()->sizeof_pointer() == 4ULL)
+    {
+        if (!is_memory_valid(operands().front()->read<MemPtr>(), 4ULL) ||
+            !is_memory_valid(operands().back()->read<MemPtr>(), 4ULL))
+            crash_interpretation_due_to_memory_access();
+        return;
+    }
 
     NOT_IMPLEMENTED_YET();
 }
