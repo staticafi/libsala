@@ -129,7 +129,7 @@ static void parse_instruction(Instruction& sala_instruction, boost::json::value 
 std::istream& operator>>(std::istream& istr, Program& program)
 {
     boost::system::error_code error_code;
-    boost::json::value const json_program{ boost::json::parse(std::string(std::istreambuf_iterator<char>(istr), {}), error_code) };
+    boost::json::value const json_program = boost::json::parse(std::string(std::istreambuf_iterator<char>(istr), {}), error_code);
 
     boost::json::object const& root_obj = json_program.as_object();
     ASSUMPTION(root_obj.at("magic").as_string() == "sala");
